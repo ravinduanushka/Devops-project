@@ -20,7 +20,7 @@ mongoose.connect(MONGO_URI)
 
 // ==================== SCHEMAS & MODELS ====================
 
-// 1. Unified User Registration Schema (Admin, Doctor, Nurse, Receptionist)
+// 1. Unified User Schema (Admin, Doctor, Nurse, Receptionist)
 const User = mongoose.model('User', new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
@@ -60,7 +60,7 @@ const Patient = mongoose.model('Patient', new mongoose.Schema({
 const Appointment = mongoose.model('Appointment', new mongoose.Schema({
   patientName: { type: String, required: true },
   doctorName: { type: String, required: true },
-  dateTime: { type: Date, required: true },
+  dateTime: { type: Date, default: Date.now },
   tokenNumber: { type: Number, required: true }
 }));
 
@@ -69,7 +69,7 @@ const Appointment = mongoose.model('Appointment', new mongoose.Schema({
 // Health Probe for Kubernetes
 app.get('/health', (req, res) => res.status(200).send('OK'));
 
-// --- AUTH / REGISTRATION ROUTES ---
+// --- AUTH ROUTES ---
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { email, password, role, name, phone, doctorDetails, nurseDetails, receptionistDetails } = req.body;
@@ -104,7 +104,28 @@ app.post('/api/auth/login', async (req, res) => {
     if (!user) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
-    res.json({ message: 'Login successful', role: user.role, name: user.name });
+    res.json({
+      message: 'Login successful',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        doctorDetails: user.doctorDetails,
+        nurseDetails: user.nurseDetails,
+        receptionistDetails: user.receptionistDetails
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- DOCTORS LIST (For Receptionist Dropdown) ---
+app.get('/api/doctors', async (req, res) => {
+  try {
+    const doctors = await User.find({ role: 'Doctor' }, 'name doctorDetails phone');
+    res.json(doctors);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -113,7 +134,12 @@ app.post('/api/auth/login', async (req, res) => {
 // --- PATIENT ROUTES ---
 app.get('/api/patients', async (req, res) => {
   try {
-    const patients = await Patient.find();
+    const { doctor, ward } = req.query;
+    let filter = {};
+    if (doctor) filter.assignedDoctor = doctor;
+    if (ward) filter.assignedWard = ward;
+
+    const patients = await Patient.find(filter).sort({ admittedAt: -1 });
     res.json(patients);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -146,7 +172,11 @@ app.put('/api/patients/:id/discharge', async (req, res) => {
 // --- APPOINTMENT ROUTES ---
 app.get('/api/appointments', async (req, res) => {
   try {
-    const appointments = await Appointment.find();
+    const { doctor } = req.query;
+    let filter = {};
+    if (doctor) filter.doctorName = doctor;
+
+    const appointments = await Appointment.find(filter).sort({ tokenNumber: 1 });
     res.json(appointments);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -155,9 +185,14 @@ app.get('/api/appointments', async (req, res) => {
 
 app.post('/api/appointments', async (req, res) => {
   try {
-    const appointment = new Appointment(req.body);
-    await appointment.save();
-    res.status(201).json(appointment);
+    const appointmentCount = await Appointment.countDocuments();
+    const newAppointment = new Appointment({
+      patientName: req.body.patientName,
+      doctorName: req.body.doctorName,
+      tokenNumber: appointmentCount + 101
+    });
+    await newAppointment.save();
+    res.status(201).json(newAppointment);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -168,14 +203,18 @@ app.get('/api/admin/stats', async (req, res) => {
   try {
     const doctorCount = await User.countDocuments({ role: 'Doctor' });
     const nurseCount = await User.countDocuments({ role: 'Nurse' });
+    const receptionistCount = await User.countDocuments({ role: 'Receptionist' });
     const admittedPatients = await Patient.countDocuments({ status: 'Admitted' });
     const dischargedPatients = await Patient.countDocuments({ status: 'Discharged' });
+    const appointmentsToday = await Appointment.countDocuments();
 
     res.json({
       totalDoctors: doctorCount,
       totalNurses: nurseCount,
+      totalReceptionists: receptionistCount,
       activeAdmissions: admittedPatients,
       dischargedCount: dischargedPatients,
+      totalAppointments: appointmentsToday,
       availableBedsEstimate: Math.max(0, 50 - admittedPatients)
     });
   } catch (err) {
