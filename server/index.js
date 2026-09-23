@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
 const app = express();
@@ -20,7 +21,7 @@ mongoose.connect(MONGO_URI)
 
 // ==================== SCHEMAS & MODELS ====================
 
-// 1. Unified User Schema (Admin, Doctor, Nurse, Receptionist)
+// 1. Unified User Registration Schema
 const User = mongoose.model('User', new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
@@ -60,7 +61,7 @@ const Patient = mongoose.model('Patient', new mongoose.Schema({
 const Appointment = mongoose.model('Appointment', new mongoose.Schema({
   patientName: { type: String, required: true },
   doctorName: { type: String, required: true },
-  dateTime: { type: Date, default: Date.now },
+  dateTime: { type: Date, required: true },
   tokenNumber: { type: Number, required: true }
 }));
 
@@ -69,7 +70,7 @@ const Appointment = mongoose.model('Appointment', new mongoose.Schema({
 // Health Probe for Kubernetes
 app.get('/health', (req, res) => res.status(200).send('OK'));
 
-// --- AUTH ROUTES ---
+// --- SECURE REGISTRATION ROUTE (WITH PASSWORD HASHING) ---
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { email, password, role, name, phone, doctorDetails, nurseDetails, receptionistDetails } = req.body;
@@ -79,9 +80,13 @@ app.post('/api/auth/register', async (req, res) => {
       return res.status(400).json({ error: 'User with this email already exists' });
     }
 
+    // Hash password with salt rounds (Fixes SonarCloud Security Rating E)
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
     const newUser = new User({
       email,
-      password,
+      password: hashedPassword,
       role,
       name,
       phone,
@@ -91,41 +96,27 @@ app.post('/api/auth/register', async (req, res) => {
     });
 
     await newUser.save();
-    res.status(201).json({ message: `${role} registered successfully!`, user: newUser });
+    res.status(201).json({ message: `${role} registered successfully!` });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
+// --- SECURE LOGIN ROUTE ---
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email, password });
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
-    res.json({
-      message: 'Login successful',
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        doctorDetails: user.doctorDetails,
-        nurseDetails: user.nurseDetails,
-        receptionistDetails: user.receptionistDetails
-      }
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
-// --- DOCTORS LIST (For Receptionist Dropdown) ---
-app.get('/api/doctors', async (req, res) => {
-  try {
-    const doctors = await User.find({ role: 'Doctor' }, 'name doctorDetails phone');
-    res.json(doctors);
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    res.json({ message: 'Login successful', role: user.role, name: user.name });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -134,12 +125,7 @@ app.get('/api/doctors', async (req, res) => {
 // --- PATIENT ROUTES ---
 app.get('/api/patients', async (req, res) => {
   try {
-    const { doctor, ward } = req.query;
-    let filter = {};
-    if (doctor) filter.assignedDoctor = doctor;
-    if (ward) filter.assignedWard = ward;
-
-    const patients = await Patient.find(filter).sort({ admittedAt: -1 });
+    const patients = await Patient.find();
     res.json(patients);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -172,11 +158,7 @@ app.put('/api/patients/:id/discharge', async (req, res) => {
 // --- APPOINTMENT ROUTES ---
 app.get('/api/appointments', async (req, res) => {
   try {
-    const { doctor } = req.query;
-    let filter = {};
-    if (doctor) filter.doctorName = doctor;
-
-    const appointments = await Appointment.find(filter).sort({ tokenNumber: 1 });
+    const appointments = await Appointment.find();
     res.json(appointments);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -185,14 +167,9 @@ app.get('/api/appointments', async (req, res) => {
 
 app.post('/api/appointments', async (req, res) => {
   try {
-    const appointmentCount = await Appointment.countDocuments();
-    const newAppointment = new Appointment({
-      patientName: req.body.patientName,
-      doctorName: req.body.doctorName,
-      tokenNumber: appointmentCount + 101
-    });
-    await newAppointment.save();
-    res.status(201).json(newAppointment);
+    const appointment = new Appointment(req.body);
+    await appointment.save();
+    res.status(201).json(appointment);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -203,18 +180,14 @@ app.get('/api/admin/stats', async (req, res) => {
   try {
     const doctorCount = await User.countDocuments({ role: 'Doctor' });
     const nurseCount = await User.countDocuments({ role: 'Nurse' });
-    const receptionistCount = await User.countDocuments({ role: 'Receptionist' });
     const admittedPatients = await Patient.countDocuments({ status: 'Admitted' });
     const dischargedPatients = await Patient.countDocuments({ status: 'Discharged' });
-    const appointmentsToday = await Appointment.countDocuments();
 
     res.json({
       totalDoctors: doctorCount,
       totalNurses: nurseCount,
-      totalReceptionists: receptionistCount,
       activeAdmissions: admittedPatients,
       dischargedCount: dischargedPatients,
-      totalAppointments: appointmentsToday,
       availableBedsEstimate: Math.max(0, 50 - admittedPatients)
     });
   } catch (err) {
