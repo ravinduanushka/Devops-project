@@ -18,11 +18,12 @@ app.use(cors({
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/hospital';
 
-mongoose.connect(MONGO_URI)
-  .then(() => console.log('Successfully connected to MongoDB server'))
-  .catch(err => {
-    console.error('MongoDB connection error:', err);
-  });
+mongoose.connect(MONGO_URI).catch(() => {
+  process.exit(1);
+});
+
+// Helper function to sanitize string inputs and reduce cognitive complexity
+const cleanString = (value) => (typeof value === 'string' ? value.trim() : '');
 
 // ==================== SCHEMAS ====================
 
@@ -33,15 +34,15 @@ const User = mongoose.model('User', new mongoose.Schema({
   name: { type: String, required: true, trim: true },
   phone: { type: String, required: true, trim: true },
   doctorDetails: {
-    specialization: { type: String },
-    roomNo: { type: String }
+    specialization: { type: String, default: '' },
+    roomNo: { type: String, default: '' }
   },
   nurseDetails: {
-    assignedWard: { type: String },
-    shiftTime: { type: String, enum: ['Morning', 'Evening', 'Night'] }
+    assignedWard: { type: String, default: '' },
+    shiftTime: { type: String, enum: ['Morning', 'Evening', 'Night'], default: 'Morning' }
   },
   receptionistDetails: {
-    deskNumber: { type: String }
+    deskNumber: { type: String, default: '' }
   },
   createdAt: { type: Date, default: Date.now }
 }));
@@ -63,18 +64,20 @@ const Appointment = mongoose.model('Appointment', new mongoose.Schema({
   tokenNumber: { type: Number, required: true }
 }));
 
-// ==================== ROUTES ====================
+// ==================== ENDPOINTS ====================
 
-app.get('/health', (req, res) => res.status(200).send('OK'));
+app.get('/health', (_req, res) => {
+  res.status(200).send('OK');
+});
 
-// Secure Register (Sanitized inputs to prevent NoSQL Injection)
+// User Registration
 app.post('/api/auth/register', async (req, res) => {
   try {
-    const email = typeof req.body.email === 'string' ? req.body.email.trim().toLowerCase() : '';
+    const email = cleanString(req.body.email).toLowerCase();
     const password = typeof req.body.password === 'string' ? req.body.password : '';
-    const role = typeof req.body.role === 'string' ? req.body.role : '';
-    const name = typeof req.body.name === 'string' ? req.body.name.trim() : '';
-    const phone = typeof req.body.phone === 'string' ? req.body.phone.trim() : '';
+    const role = cleanString(req.body.role);
+    const name = cleanString(req.body.name);
+    const phone = cleanString(req.body.phone);
 
     if (!email || !password || !role || !name || !phone) {
       return res.status(400).json({ error: 'All fields are required' });
@@ -88,40 +91,46 @@ app.post('/api/auth/register', async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
+    const doctorDetails = role === 'Doctor' && req.body.doctorDetails ? {
+      specialization: cleanString(req.body.doctorDetails.specialization),
+      roomNo: cleanString(req.body.doctorDetails.roomNo)
+    } : undefined;
+
+    const nurseDetails = role === 'Nurse' && req.body.nurseDetails ? {
+      assignedWard: cleanString(req.body.nurseDetails.assignedWard),
+      shiftTime: req.body.nurseDetails.shiftTime || 'Morning'
+    } : undefined;
+
+    const receptionistDetails = role === 'Receptionist' && req.body.receptionistDetails ? {
+      deskNumber: cleanString(req.body.receptionistDetails.deskNumber)
+    } : undefined;
+
     const newUser = new User({
       email,
       password: hashedPassword,
       role,
       name,
       phone,
-      doctorDetails: role === 'Doctor' && req.body.doctorDetails ? {
-        specialization: String(req.body.doctorDetails.specialization || ''),
-        roomNo: String(req.body.doctorDetails.roomNo || '')
-      } : undefined,
-      nurseDetails: role === 'Nurse' && req.body.nurseDetails ? {
-        assignedWard: String(req.body.nurseDetails.assignedWard || ''),
-        shiftTime: req.body.nurseDetails.shiftTime
-      } : undefined,
-      receptionistDetails: role === 'Receptionist' && req.body.receptionistDetails ? {
-        deskNumber: String(req.body.receptionistDetails.deskNumber || '')
-      } : undefined
+      doctorDetails,
+      nurseDetails,
+      receptionistDetails
     });
 
     await newUser.save();
-    res.status(201).json({ message: 'Registration successful' });
-  } catch (err) {
-    res.status(500).json({ error: 'Registration failed' });
+    return res.status(201).json({ message: 'Registration successful' });
+  } catch (_err) {
+    return res.status(500).json({ error: 'Registration failed' });
   }
 });
 
-// Secure Login (Sanitized inputs)
+// User Login
 app.post('/api/auth/login', async (req, res) => {
   try {
-    const email = typeof req.body.email === 'string' ? req.body.email.trim().toLowerCase() : '';
+    const email = cleanString(req.body.email).toLowerCase();
     const password = typeof req.body.password === 'string' ? req.body.password : '';
 
     if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password required' });
+      return res.status(400).json({ error: 'Credentials required' });
     }
 
     const user = await User.findOne({ email: { $eq: email } });
@@ -134,100 +143,97 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    res.status(200).json({ message: 'Login successful', role: user.role, name: user.name });
-  } catch (err) {
-    res.status(500).json({ error: 'Login failed' });
+    return res.status(200).json({ message: 'Login successful', role: user.role, name: user.name });
+  } catch (_err) {
+    return res.status(500).json({ error: 'Login failed' });
   }
 });
 
-// Patients Routes (Explicit fields to prevent Mass Assignment)
-app.get('/api/patients', async (req, res) => {
+// Patients Endpoints
+app.get('/api/patients', async (_req, res) => {
   try {
     const patients = await Patient.find();
-    res.status(200).json(patients);
-  } catch (err) {
-    res.status(500).json({ error: 'Could not fetch patients' });
+    return res.status(200).json(patients);
+  } catch (_err) {
+    return res.status(500).json({ error: 'Fetch failed' });
   }
 });
 
 app.post('/api/patients', async (req, res) => {
   try {
     const patient = new Patient({
-      name: String(req.body.name || ''),
-      age: Number(req.body.age || 0),
-      disease: String(req.body.disease || ''),
-      assignedDoctor: String(req.body.assignedDoctor || ''),
-      assignedWard: String(req.body.assignedWard || '')
+      name: cleanString(req.body.name),
+      age: Number(req.body.age) || 0,
+      disease: cleanString(req.body.disease),
+      assignedDoctor: cleanString(req.body.assignedDoctor),
+      assignedWard: cleanString(req.body.assignedWard)
     });
     await patient.save();
-    res.status(201).json(patient);
-  } catch (err) {
-    res.status(400).json({ error: 'Failed to create patient' });
+    return res.status(201).json(patient);
+  } catch (_err) {
+    return res.status(400).json({ error: 'Creation failed' });
   }
 });
 
 app.put('/api/patients/:id/discharge', async (req, res) => {
   try {
-    const patientId = String(req.params.id);
     const patient = await Patient.findByIdAndUpdate(
-      patientId,
+      cleanString(req.params.id),
       { status: 'Discharged' },
       { new: true }
     );
     if (!patient) {
-      return res.status(404).json({ error: 'Patient not found' });
+      return res.status(404).json({ error: 'Not found' });
     }
-    res.status(200).json(patient);
-  } catch (err) {
-    res.status(400).json({ error: 'Failed to discharge patient' });
+    return res.status(200).json(patient);
+  } catch (_err) {
+    return res.status(400).json({ error: 'Update failed' });
   }
 });
 
-// Appointments Routes (Explicit fields to prevent Mass Assignment)
-app.get('/api/appointments', async (req, res) => {
+// Appointments Endpoints
+app.get('/api/appointments', async (_req, res) => {
   try {
     const appointments = await Appointment.find();
-    res.status(200).json(appointments);
-  } catch (err) {
-    res.status(500).json({ error: 'Could not fetch appointments' });
+    return res.status(200).json(appointments);
+  } catch (_err) {
+    return res.status(500).json({ error: 'Fetch failed' });
   }
 });
 
 app.post('/api/appointments', async (req, res) => {
   try {
     const appointment = new Appointment({
-      patientName: String(req.body.patientName || ''),
-      doctorName: String(req.body.doctorName || ''),
+      patientName: cleanString(req.body.patientName),
+      doctorName: cleanString(req.body.doctorName),
       dateTime: new Date(req.body.dateTime),
-      tokenNumber: Number(req.body.tokenNumber || 1)
+      tokenNumber: Number(req.body.tokenNumber) || 1
     });
     await appointment.save();
-    res.status(201).json(appointment);
-  } catch (err) {
-    res.status(400).json({ error: 'Failed to create appointment' });
+    return res.status(201).json(appointment);
+  } catch (_err) {
+    return res.status(400).json({ error: 'Creation failed' });
   }
 });
 
-// Admin Stats Route
-app.get('/api/admin/stats', async (req, res) => {
+// Admin Metrics Endpoint
+app.get('/api/admin/stats', async (_req, res) => {
   try {
     const doctorCount = await User.countDocuments({ role: 'Doctor' });
     const nurseCount = await User.countDocuments({ role: 'Nurse' });
     const admittedPatients = await Patient.countDocuments({ status: 'Admitted' });
     const dischargedPatients = await Patient.countDocuments({ status: 'Discharged' });
 
-    res.status(200).json({
+    return res.status(200).json({
       totalDoctors: doctorCount,
       totalNurses: nurseCount,
       activeAdmissions: admittedPatients,
       dischargedCount: dischargedPatients,
       availableBedsEstimate: Math.max(0, 50 - admittedPatients)
     });
-  } catch (err) {
-    res.status(500).json({ error: 'Could not retrieve stats' });
+  } catch (_err) {
+    return res.status(500).json({ error: 'Stats failed' });
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Hospital Server running on port ${PORT}`);
-});
+app.listen(PORT);
