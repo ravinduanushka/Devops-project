@@ -1,45 +1,17 @@
-import axios from "axios";
+import axios from 'axios';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const api = axios.create({
-  baseURL: "http://localhost:5000",
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json'
+  }
 });
 
-export const loginUser = (data) => {
-  return api.post("/api/auth/login", data);
-};
-
-export const registerUser = (data) => {
-  return api.post("/api/auth/register", data);
-};
-
-export const getDoctors = () => {
-  return api.get("/api/doctors");
-};
-
-export const getPatients = (params = {}) => {
-  return api.get("/api/patients", { params });
-};
-
-export const addPatient = (data) => {
-  return api.post("/api/patients", data);
-};
-
-export const dischargePatient = (id) => {
-  return api.put(`/api/patients/${id}/discharge`);
-};
-
-export const getAppointments = (doctor = "") => {
-  return api.get("/api/appointments", {
-    params: doctor ? { doctor } : {},
-  });
-};
-
-export const createAppointment = (data) => {
-  return api.post("/api/appointments", data);
-};
-
-export const getAdminStats = () => {
-  return api.get("/api/admin/stats");
-};
+export const loginUser = (credentials) => api.post('/api/auth/login', credentials);
+export const registerUser = (userData) => api.post('/api/auth/register', userData);
+export const getPatients = () => api.get('/api/patients');
+export const getAppointments = () => api.get('/api/appointments');
 
 export default api;
