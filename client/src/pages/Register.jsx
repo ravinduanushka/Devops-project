@@ -20,12 +20,10 @@ function Register() {
     e.preventDefault();
 
     try {
-      const response = await registerUser(formData);
+      await registerUser(formData);
 
-      console.log("Registration successful:", response.data);
       alert("Registration successful!");
     } catch (error) {
-      console.error(error);
       alert(error.response?.data?.message || "Registration failed");
     }
   };
