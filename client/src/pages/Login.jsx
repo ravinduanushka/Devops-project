@@ -9,15 +9,13 @@ function Login() {
     e.preventDefault();
 
     try {
-      const response = await loginUser({
+      await loginUser({
         email,
         password,
       });
 
-      console.log("Login successful:", response.data);
       alert("Login successful!");
     } catch (error) {
-      console.error(error);
       alert(error.response?.data?.message || "Login failed");
     }
   };
