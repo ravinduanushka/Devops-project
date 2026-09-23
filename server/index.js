@@ -18,11 +18,11 @@ app.use(cors({
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/hospital';
 
-mongoose.connect(MONGO_URI).catch(() => {
+mongoose.connect(MONGO_URI).catch((err) => {
+  process.stderr.write(`Database connection error: ${err.message}\n`);
   process.exit(1);
 });
 
-// Helper function to sanitize string inputs and reduce cognitive complexity
 const cleanString = (value) => (typeof value === 'string' ? value.trim() : '');
 
 // ==================== SCHEMAS ====================
@@ -64,14 +64,14 @@ const Appointment = mongoose.model('Appointment', new mongoose.Schema({
   tokenNumber: { type: Number, required: true }
 }));
 
-// ==================== ENDPOINTS ====================
+// ==================== ROUTES ====================
 
 app.get('/health', (_req, res) => {
   res.status(200).send('OK');
 });
 
 // User Registration
-app.post('/api/auth/register', async (req, res) => {
+app.post('/api/auth/register', async (req, res, next) => {
   try {
     const email = cleanString(req.body.email).toLowerCase();
     const password = typeof req.body.password === 'string' ? req.body.password : '';
@@ -118,13 +118,13 @@ app.post('/api/auth/register', async (req, res) => {
 
     await newUser.save();
     return res.status(201).json({ message: 'Registration successful' });
-  } catch (_err) {
-    return res.status(500).json({ error: 'Registration failed' });
+  } catch (err) {
+    return next(err);
   }
 });
 
 // User Login
-app.post('/api/auth/login', async (req, res) => {
+app.post('/api/auth/login', async (req, res, next) => {
   try {
     const email = cleanString(req.body.email).toLowerCase();
     const password = typeof req.body.password === 'string' ? req.body.password : '';
@@ -144,22 +144,22 @@ app.post('/api/auth/login', async (req, res) => {
     }
 
     return res.status(200).json({ message: 'Login successful', role: user.role, name: user.name });
-  } catch (_err) {
-    return res.status(500).json({ error: 'Login failed' });
+  } catch (err) {
+    return next(err);
   }
 });
 
 // Patients Endpoints
-app.get('/api/patients', async (_req, res) => {
+app.get('/api/patients', async (_req, res, next) => {
   try {
     const patients = await Patient.find();
     return res.status(200).json(patients);
-  } catch (_err) {
-    return res.status(500).json({ error: 'Fetch failed' });
+  } catch (err) {
+    return next(err);
   }
 });
 
-app.post('/api/patients', async (req, res) => {
+app.post('/api/patients', async (req, res, next) => {
   try {
     const patient = new Patient({
       name: cleanString(req.body.name),
@@ -170,15 +170,16 @@ app.post('/api/patients', async (req, res) => {
     });
     await patient.save();
     return res.status(201).json(patient);
-  } catch (_err) {
-    return res.status(400).json({ error: 'Creation failed' });
+  } catch (err) {
+    return next(err);
   }
 });
 
-app.put('/api/patients/:id/discharge', async (req, res) => {
+app.put('/api/patients/:id/discharge', async (req, res, next) => {
   try {
+    const patientId = cleanString(req.params.id);
     const patient = await Patient.findByIdAndUpdate(
-      cleanString(req.params.id),
+      patientId,
       { status: 'Discharged' },
       { new: true }
     );
@@ -186,22 +187,22 @@ app.put('/api/patients/:id/discharge', async (req, res) => {
       return res.status(404).json({ error: 'Not found' });
     }
     return res.status(200).json(patient);
-  } catch (_err) {
-    return res.status(400).json({ error: 'Update failed' });
+  } catch (err) {
+    return next(err);
   }
 });
 
 // Appointments Endpoints
-app.get('/api/appointments', async (_req, res) => {
+app.get('/api/appointments', async (_req, res, next) => {
   try {
     const appointments = await Appointment.find();
     return res.status(200).json(appointments);
-  } catch (_err) {
-    return res.status(500).json({ error: 'Fetch failed' });
+  } catch (err) {
+    return next(err);
   }
 });
 
-app.post('/api/appointments', async (req, res) => {
+app.post('/api/appointments', async (req, res, next) => {
   try {
     const appointment = new Appointment({
       patientName: cleanString(req.body.patientName),
@@ -211,13 +212,13 @@ app.post('/api/appointments', async (req, res) => {
     });
     await appointment.save();
     return res.status(201).json(appointment);
-  } catch (_err) {
-    return res.status(400).json({ error: 'Creation failed' });
+  } catch (err) {
+    return next(err);
   }
 });
 
-// Admin Metrics Endpoint
-app.get('/api/admin/stats', async (_req, res) => {
+// Admin Stats Endpoint
+app.get('/api/admin/stats', async (_req, res, next) => {
   try {
     const doctorCount = await User.countDocuments({ role: 'Doctor' });
     const nurseCount = await User.countDocuments({ role: 'Nurse' });
@@ -231,9 +232,15 @@ app.get('/api/admin/stats', async (_req, res) => {
       dischargedCount: dischargedPatients,
       availableBedsEstimate: Math.max(0, 50 - admittedPatients)
     });
-  } catch (_err) {
-    return res.status(500).json({ error: 'Stats failed' });
+  } catch (err) {
+    return next(err);
   }
+});
+
+// Centralized Express Error Handler
+app.use((err, _req, res, _next) => {
+  const statusCode = err.status || 500;
+  res.status(statusCode).json({ error: err.message || 'Internal server error' });
 });
 
 app.listen(PORT);
