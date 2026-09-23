@@ -1,16 +1,17 @@
-import { useState } from "react";
-import { registerUser } from "../services/api";
+import { useState } from 'react';
+import { registerUser } from '../services/api';
 
 function Register() {
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    password: "",
-    confirmPassword: "",
-    role: "Patient",
+    name: '',
+    email: '',
+    phone: '',
+    password: '',
+    confirmPassword: '',
+    role: 'Patient',
   });
-  const [errorMsg, setErrorMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
 
   const handleChange = (e) => {
     setFormData({
@@ -18,7 +19,7 @@ function Register() {
       [e.target.name]: e.target.value,
     });
     if (errorMsg) {
-      setErrorMsg("");
+      setErrorMsg('');
     }
   };
 
@@ -26,26 +27,29 @@ function Register() {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
-      setErrorMsg("Passwords do not match");
+      setErrorMsg('Passwords do not match');
       return;
     }
 
     try {
       await registerUser(formData);
-      alert("Registration successful! You can now log in.");
+      setSuccessMsg('Registration successful! Please login.');
+      setErrorMsg('');
     } catch (error) {
-      alert(error.response?.data?.error || "Registration failed");
+      setErrorMsg(error.response?.data?.error || 'Registration failed');
+      setSuccessMsg('');
     }
   };
 
   return (
-    <div>
-      <h1>Hospital Management System</h1>
-      <h2>Register</h2>
+    <div style={{ maxWidth: '400px', margin: '40px auto', padding: '20px' }}>
+      <h2>Hospital Management System</h2>
+      <h3>Register</h3>
 
-      {errorMsg && <p style={{ color: "red" }}>{errorMsg}</p>}
+      {errorMsg && <p style={{ color: 'red' }}>{errorMsg}</p>}
+      {successMsg && <p style={{ color: 'green' }}>{successMsg}</p>}
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         <input
           type="text"
           name="name"
