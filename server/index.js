@@ -6,32 +6,32 @@ require('dotenv').config();
 
 const app = express();
 
-// Middleware
 app.use(express.json());
-app.use(cors());
 
-// Configuration
+const allowedOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:3000';
+app.use(cors({
+  origin: allowedOrigin,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
+}));
+
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/hospital';
 
-// Database Connection
 mongoose.connect(MONGO_URI)
   .then(() => console.log('Successfully connected to MongoDB server'))
-  .catch(err => console.error('MongoDB connection error:', err));
+  .catch(err => {
+    console.error('MongoDB connection error:', err);
+  });
 
-// ==================== SCHEMAS & MODELS ====================
+// ==================== SCHEMAS ====================
 
-// 1. Unified User Registration Schema
 const User = mongoose.model('User', new mongoose.Schema({
-  email: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true, lowercase: true, trim: true },
   password: { type: String, required: true },
-  role: { 
-    type: String, 
-    enum: ['Admin', 'Doctor', 'Nurse', 'Receptionist'], 
-    required: true 
-  },
-  name: { type: String, required: true },
-  phone: { type: String, required: true },
+  role: { type: String, enum: ['Admin', 'Doctor', 'Nurse', 'Receptionist'], required: true },
+  name: { type: String, required: true, trim: true },
+  phone: { type: String, required: true, trim: true },
   doctorDetails: {
     specialization: { type: String },
     roomNo: { type: String }
@@ -46,7 +46,6 @@ const User = mongoose.model('User', new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 }));
 
-// 2. Patient Schema
 const Patient = mongoose.model('Patient', new mongoose.Schema({
   name: { type: String, required: true },
   age: { type: Number, required: true },
@@ -57,7 +56,6 @@ const Patient = mongoose.model('Patient', new mongoose.Schema({
   admittedAt: { type: Date, default: Date.now }
 }));
 
-// 3. Appointment Schema
 const Appointment = mongoose.model('Appointment', new mongoose.Schema({
   patientName: { type: String, required: true },
   doctorName: { type: String, required: true },
@@ -65,22 +63,28 @@ const Appointment = mongoose.model('Appointment', new mongoose.Schema({
   tokenNumber: { type: Number, required: true }
 }));
 
-// ==================== API ENDPOINTS ====================
+// ==================== ROUTES ====================
 
-// Health Probe for Kubernetes
 app.get('/health', (req, res) => res.status(200).send('OK'));
 
-// --- SECURE REGISTRATION ROUTE (WITH PASSWORD HASHING) ---
+// Secure Register (Sanitized inputs to prevent NoSQL Injection)
 app.post('/api/auth/register', async (req, res) => {
   try {
-    const { email, password, role, name, phone, doctorDetails, nurseDetails, receptionistDetails } = req.body;
+    const email = typeof req.body.email === 'string' ? req.body.email.trim().toLowerCase() : '';
+    const password = typeof req.body.password === 'string' ? req.body.password : '';
+    const role = typeof req.body.role === 'string' ? req.body.role : '';
+    const name = typeof req.body.name === 'string' ? req.body.name.trim() : '';
+    const phone = typeof req.body.phone === 'string' ? req.body.phone.trim() : '';
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ error: 'User with this email already exists' });
+    if (!email || !password || !role || !name || !phone) {
+      return res.status(400).json({ error: 'All fields are required' });
     }
 
-    // Hash password with salt rounds (Fixes SonarCloud Security Rating E)
+    const existingUser = await User.findOne({ email: { $eq: email } });
+    if (existingUser) {
+      return res.status(400).json({ error: 'User already exists' });
+    }
+
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -90,92 +94,121 @@ app.post('/api/auth/register', async (req, res) => {
       role,
       name,
       phone,
-      doctorDetails: role === 'Doctor' ? doctorDetails : undefined,
-      nurseDetails: role === 'Nurse' ? nurseDetails : undefined,
-      receptionistDetails: role === 'Receptionist' ? receptionistDetails : undefined
+      doctorDetails: role === 'Doctor' && req.body.doctorDetails ? {
+        specialization: String(req.body.doctorDetails.specialization || ''),
+        roomNo: String(req.body.doctorDetails.roomNo || '')
+      } : undefined,
+      nurseDetails: role === 'Nurse' && req.body.nurseDetails ? {
+        assignedWard: String(req.body.nurseDetails.assignedWard || ''),
+        shiftTime: req.body.nurseDetails.shiftTime
+      } : undefined,
+      receptionistDetails: role === 'Receptionist' && req.body.receptionistDetails ? {
+        deskNumber: String(req.body.receptionistDetails.deskNumber || '')
+      } : undefined
     });
 
     await newUser.save();
-    res.status(201).json({ message: `${role} registered successfully!` });
+    res.status(201).json({ message: 'Registration successful' });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Registration failed' });
   }
 });
 
-// --- SECURE LOGIN ROUTE ---
+// Secure Login (Sanitized inputs)
 app.post('/api/auth/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email });
+    const email = typeof req.body.email === 'string' ? req.body.email.trim().toLowerCase() : '';
+    const password = typeof req.body.password === 'string' ? req.body.password : '';
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password required' });
+    }
+
+    const user = await User.findOne({ email: { $eq: email } });
     if (!user) {
-      return res.status(401).json({ error: 'Invalid email or password' });
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ error: 'Invalid email or password' });
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    res.json({ message: 'Login successful', role: user.role, name: user.name });
+    res.status(200).json({ message: 'Login successful', role: user.role, name: user.name });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Login failed' });
   }
 });
 
-// --- PATIENT ROUTES ---
+// Patients Routes (Explicit fields to prevent Mass Assignment)
 app.get('/api/patients', async (req, res) => {
   try {
     const patients = await Patient.find();
-    res.json(patients);
+    res.status(200).json(patients);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Could not fetch patients' });
   }
 });
 
 app.post('/api/patients', async (req, res) => {
   try {
-    const patient = new Patient(req.body);
+    const patient = new Patient({
+      name: String(req.body.name || ''),
+      age: Number(req.body.age || 0),
+      disease: String(req.body.disease || ''),
+      assignedDoctor: String(req.body.assignedDoctor || ''),
+      assignedWard: String(req.body.assignedWard || '')
+    });
     await patient.save();
     res.status(201).json(patient);
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ error: 'Failed to create patient' });
   }
 });
 
 app.put('/api/patients/:id/discharge', async (req, res) => {
   try {
+    const patientId = String(req.params.id);
     const patient = await Patient.findByIdAndUpdate(
-      req.params.id,
+      patientId,
       { status: 'Discharged' },
       { new: true }
     );
-    res.json(patient);
+    if (!patient) {
+      return res.status(404).json({ error: 'Patient not found' });
+    }
+    res.status(200).json(patient);
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ error: 'Failed to discharge patient' });
   }
 });
 
-// --- APPOINTMENT ROUTES ---
+// Appointments Routes (Explicit fields to prevent Mass Assignment)
 app.get('/api/appointments', async (req, res) => {
   try {
     const appointments = await Appointment.find();
-    res.json(appointments);
+    res.status(200).json(appointments);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Could not fetch appointments' });
   }
 });
 
 app.post('/api/appointments', async (req, res) => {
   try {
-    const appointment = new Appointment(req.body);
+    const appointment = new Appointment({
+      patientName: String(req.body.patientName || ''),
+      doctorName: String(req.body.doctorName || ''),
+      dateTime: new Date(req.body.dateTime),
+      tokenNumber: Number(req.body.tokenNumber || 1)
+    });
     await appointment.save();
     res.status(201).json(appointment);
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ error: 'Failed to create appointment' });
   }
 });
 
-// --- ADMIN STATS ROUTE ---
+// Admin Stats Route
 app.get('/api/admin/stats', async (req, res) => {
   try {
     const doctorCount = await User.countDocuments({ role: 'Doctor' });
@@ -183,7 +216,7 @@ app.get('/api/admin/stats', async (req, res) => {
     const admittedPatients = await Patient.countDocuments({ status: 'Admitted' });
     const dischargedPatients = await Patient.countDocuments({ status: 'Discharged' });
 
-    res.json({
+    res.status(200).json({
       totalDoctors: doctorCount,
       totalNurses: nurseCount,
       activeAdmissions: admittedPatients,
@@ -191,11 +224,10 @@ app.get('/api/admin/stats', async (req, res) => {
       availableBedsEstimate: Math.max(0, 50 - admittedPatients)
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Could not retrieve stats' });
   }
 });
 
-// Start Server
 app.listen(PORT, () => {
   console.log(`Hospital Server running on port ${PORT}`);
 });
