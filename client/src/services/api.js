@@ -12,6 +12,9 @@ const api = axios.create({
 export const loginUser = (credentials) => api.post('/api/auth/login', credentials);
 export const registerUser = (userData) => api.post('/api/auth/register', userData);
 export const getPatients = () => api.get('/api/patients');
+export const createPatient = (patientData) => api.post('/api/patients', patientData);
 export const getAppointments = () => api.get('/api/appointments');
+export const createAppointment = (appointmentData) => api.post('/api/appointments', appointmentData);
+export const checkHealth = () => api.get('/health');
 
 export default api;

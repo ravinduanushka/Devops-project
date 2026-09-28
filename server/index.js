@@ -10,7 +10,20 @@ app.use(express.json());
 
 const allowedOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:3000';
 app.use(cors({
-  origin: allowedOrigin,
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    const allowed = [
+      allowedOrigin,
+      'http://localhost:3000',
+      'http://localhost:5173',
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:5173'
+    ];
+    if (allowed.includes(origin) || origin.startsWith('http://localhost:')) {
+      return callback(null, true);
+    }
+    return callback(null, true);
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
