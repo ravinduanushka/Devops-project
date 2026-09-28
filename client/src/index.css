@@ -10,19 +10,19 @@
   --accent-cyan: #33dfc2;
   --accent-cyan-heading: #1bbca0;
   --dark-hero-text: #1b3d45;
-  --bg-card-gray: #ededed;
-  --card-border-active: #38bdf8;
-  --text-dark: #222222;
-  --text-muted: #555555;
+  --bg-card-gray: #dcdcdc;
+  --card-border-active: #70b4ff;
+  --text-dark: #1f2937;
+  --text-muted: #4b5563;
   --text-light: #ffffff;
   --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --radius-sm: 6px;
-  --radius-md: 10px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
   --radius-lg: 16px;
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.12);
-  --transition: all 0.25s ease-in-out;
+  --transition: all 0.2s ease-in-out;
 }
 
 * {
@@ -37,7 +37,7 @@ html {
 
 body {
   font-family: var(--font-family);
-  background-color: #f8fafc;
+  background-color: #ffffff;
   color: var(--text-dark);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
@@ -64,21 +64,365 @@ button {
 
 .container {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1160px;
   margin: 0 auto;
   padding: 0 24px;
 }
 
 /* ========================================================
-   NAVBAR
+   HERO BANNER - FIGMA MATCH (Image 1)
+   No header above it - Starts immediately at the top
+   ======================================================== */
+.hero-banner-section {
+  width: 100%;
+  background: #153942;
+  overflow: hidden;
+  position: relative;
+}
+
+.hero-banner-container {
+  position: relative;
+  width: 100%;
+  max-width: 1300px;
+  margin: 0 auto;
+  min-height: 520px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.hero-bg-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center left;
+  z-index: 1;
+}
+
+.hero-logo-box {
+  position: absolute;
+  top: 36px;
+  left: 48px;
+  z-index: 5;
+}
+
+.hero-logo-img {
+  height: 60px;
+  width: auto;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.15));
+}
+
+.hero-content-right {
+  position: relative;
+  z-index: 10;
+  width: 50%;
+  padding: 40px 60px 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.hero-headline {
+  font-size: clamp(2.2rem, 3.8vw, 3.3rem);
+  font-weight: 800;
+  line-height: 1.15;
+  color: #ffffff;
+  margin-bottom: 16px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+.hero-tagline {
+  font-size: clamp(0.95rem, 1.4vw, 1.15rem);
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.95);
+  margin-bottom: 30px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  max-width: 420px;
+}
+
+.hero-signin-btn {
+  display: inline-block;
+  background-color: #d1d5db;
+  color: #111827;
+  font-size: 1.15rem;
+  font-weight: 600;
+  padding: 12px 50px;
+  border-radius: 9999px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+  transition: var(--transition);
+}
+
+.hero-signin-btn:hover {
+  background-color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+}
+
+/* ========================================================
+   ABOUT US SECTION - FIGMA MATCH
+   ======================================================== */
+.about-section {
+  padding: 70px 0 45px;
+  background-color: #ffffff;
+  text-align: center;
+}
+
+.section-title {
+  font-size: clamp(2.2rem, 3.2vw, 2.85rem);
+  font-weight: 800;
+  color: var(--accent-cyan-heading);
+  letter-spacing: -0.5px;
+  margin-bottom: 24px;
+}
+
+.about-text-wrapper {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.about-paragraph {
+  font-size: 1.08rem;
+  line-height: 1.75;
+  color: #374151;
+  font-weight: 400;
+}
+
+/* ========================================================
+   OUR SERVICES SECTION - FIGMA MATCH (Image 2)
+   6 Clean Rectangles with Title & Description Only
+   No icons, No badges
+   ======================================================== */
+.services-section {
+  padding: 40px 0 80px;
+  background-color: #ffffff;
+  text-align: center;
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  margin-top: 40px;
+}
+
+.service-card {
+  background-color: var(--bg-card-gray);
+  border-radius: 4px;
+  padding: 28px 24px;
+  text-align: left;
+  min-height: 190px;
+  border: 2px solid transparent;
+  transition: var(--transition);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+}
+
+.service-card:hover,
+.service-card.active-card {
+  border-color: var(--card-border-active);
+  background-color: #d6d6d6;
+}
+
+.service-card-title {
+  font-size: 1.12rem;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.35;
+  margin-bottom: 12px;
+}
+
+.service-card-desc {
+  font-size: 0.93rem;
+  color: #374151;
+  line-height: 1.5;
+}
+
+/* ========================================================
+   STATS RIBBON - FIGMA MATCH (Image 3)
+   ======================================================== */
+.stats-ribbon {
+  background-color: var(--stats-mint);
+  padding: 36px 0;
+  width: 100%;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  text-align: center;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-number {
+  font-size: clamp(1.8rem, 2.8vw, 2.4rem);
+  font-weight: 800;
+  color: #164e44;
+  line-height: 1.15;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: clamp(0.95rem, 1.2vw, 1.1rem);
+  font-weight: 600;
+  color: #1e584d;
+}
+
+/* ========================================================
+   FOOTER - FIGMA MATCH (Image 3 & 4)
+   Clinic Us, Support & Social plugins
+   ======================================================== */
+.footer-wrapper {
+  background-color: var(--primary-teal);
+  color: #ffffff;
+  padding: 55px 0 40px;
+  margin-top: auto;
+}
+
+.footer-content {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+}
+
+.footer-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-heading {
+  font-size: 1.65rem;
+  font-weight: 700;
+  margin-bottom: 18px;
+  color: #ffffff;
+}
+
+.footer-address {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin-bottom: 16px;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.footer-contact-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.footer-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+}
+
+.footer-link {
+  color: #ffffff;
+  font-size: 1rem;
+  transition: var(--transition);
+}
+
+.footer-link:hover {
+  text-decoration: underline;
+  opacity: 0.9;
+}
+
+.footer-copyright {
+  font-size: 1rem;
+  margin-bottom: 12px;
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 500;
+}
+
+.footer-support-contacts {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.95rem;
+  margin-bottom: 22px;
+}
+
+.footer-divider {
+  color: rgba(255, 255, 255, 0.6);
+  padding: 0 4px;
+}
+
+.footer-social-plugins {
+  margin-top: 10px;
+}
+
+.social-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.social-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.social-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #ffffff;
+  transition: var(--transition);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.social-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+}
+
+.facebook-btn {
+  background-color: #1877f2;
+}
+
+.youtube-btn {
+  background-color: #ff0000;
+}
+
+.google-btn {
+  background-color: #ea4335;
+}
+
+/* ========================================================
+   NAVBAR (Used for /admin, /login, /register)
    ======================================================== */
 .navbar-container {
   position: sticky;
   top: 0;
   z-index: 1000;
-  background: rgba(255, 255, 255, 0.96);
+  background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
@@ -99,16 +443,15 @@ button {
 }
 
 .navbar-logo {
-  height: 42px;
+  height: 40px;
   width: auto;
   object-fit: contain;
 }
 
 .navbar-brand-name {
-  font-size: 1.35rem;
+  font-size: 1.3rem;
   font-weight: 700;
   color: #1e3a40;
-  letter-spacing: -0.5px;
 }
 
 .brand-accent {
@@ -118,7 +461,7 @@ button {
 .navbar-links {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
 }
 
 .nav-item,
@@ -227,382 +570,6 @@ button {
 }
 
 /* ========================================================
-   HERO BANNER - FIGMA MATCH
-   ======================================================== */
-.hero-banner-section {
-  width: 100%;
-  background: #153942;
-  overflow: hidden;
-}
-
-.hero-banner-container {
-  position: relative;
-  width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
-  min-height: 520px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-}
-
-.hero-bg-img {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center left;
-  z-index: 1;
-}
-
-.hero-logo-box {
-  position: absolute;
-  top: 32px;
-  left: 40px;
-  z-index: 5;
-}
-
-.hero-logo-img {
-  height: 64px;
-  width: auto;
-  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.15));
-}
-
-.hero-content-right {
-  position: relative;
-  z-index: 10;
-  width: 50%;
-  padding: 40px 60px 40px 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-
-.hero-headline {
-  font-size: clamp(2.2rem, 4vw, 3.4rem);
-  font-weight: 800;
-  line-height: 1.15;
-  color: #ffffff;
-  margin-bottom: 16px;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-}
-
-.hero-tagline {
-  font-size: clamp(1rem, 1.6vw, 1.25rem);
-  font-weight: 400;
-  color: rgba(255, 255, 255, 0.95);
-  margin-bottom: 32px;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
-  max-width: 440px;
-}
-
-.hero-signin-btn {
-  display: inline-block;
-  background-color: #d1d5db;
-  color: #111827;
-  font-size: 1.15rem;
-  font-weight: 600;
-  padding: 12px 48px;
-  border-radius: 9999px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
-  transition: var(--transition);
-}
-
-.hero-signin-btn:hover {
-  background-color: #ffffff;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
-}
-
-/* ========================================================
-   ABOUT US SECTION - FIGMA MATCH
-   ======================================================== */
-.about-section {
-  padding: 70px 0 50px;
-  background-color: #ffffff;
-  text-align: center;
-}
-
-.section-title {
-  font-size: clamp(2rem, 3.2vw, 2.75rem);
-  font-weight: 800;
-  color: var(--accent-cyan-heading);
-  letter-spacing: -0.5px;
-  margin-bottom: 24px;
-}
-
-.about-text-wrapper {
-  max-width: 920px;
-  margin: 0 auto;
-  padding: 0 16px;
-}
-
-.about-paragraph {
-  font-size: 1.125rem;
-  line-height: 1.8;
-  color: #374151;
-  font-weight: 450;
-}
-
-/* ========================================================
-   OUR SERVICES SECTION - FIGMA MATCH (6 RECTANGLES)
-   ======================================================== */
-.services-section {
-  padding: 50px 0 80px;
-  background-color: #ffffff;
-  text-align: center;
-}
-
-.services-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 28px;
-  margin-top: 40px;
-}
-
-.service-card {
-  background-color: var(--bg-card-gray);
-  border-radius: 12px;
-  padding: 32px 28px;
-  text-align: left;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  min-height: 220px;
-  border: 2px solid transparent;
-  transition: var(--transition);
-  cursor: pointer;
-}
-
-.service-card:hover,
-.service-card.active-card {
-  border-color: var(--card-border-active);
-  background-color: #f3f4f6;
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(56, 189, 248, 0.15);
-}
-
-.service-card-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 12px;
-}
-
-.service-card-icon {
-  color: var(--primary-teal);
-  background: rgba(59, 171, 153, 0.12);
-  padding: 8px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.service-card-title {
-  font-size: 1.18rem;
-  font-weight: 700;
-  color: #111827;
-  line-height: 1.3;
-}
-
-.service-card-desc {
-  font-size: 0.95rem;
-  color: #4b5563;
-  line-height: 1.6;
-  margin-bottom: 16px;
-  flex-grow: 1;
-}
-
-.service-card-footer {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-}
-
-.service-badge {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #0369a1;
-  background-color: #e0f2fe;
-  padding: 4px 10px;
-  border-radius: 9999px;
-}
-
-/* ========================================================
-   STATS RIBBON - FIGMA MATCH
-   ======================================================== */
-.stats-ribbon {
-  background-color: var(--stats-mint);
-  padding: 38px 0;
-  width: 100%;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-  text-align: center;
-}
-
-.stat-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.stat-number {
-  font-size: clamp(1.8rem, 2.8vw, 2.4rem);
-  font-weight: 800;
-  color: #164e44;
-  line-height: 1.1;
-  margin-bottom: 6px;
-}
-
-.stat-label {
-  font-size: clamp(0.95rem, 1.2vw, 1.1rem);
-  font-weight: 600;
-  color: #1e584d;
-}
-
-/* ========================================================
-   FOOTER - FIGMA MATCH
-   ======================================================== */
-.footer-wrapper {
-  background-color: var(--primary-teal);
-  color: #ffffff;
-  padding: 60px 0 40px;
-  margin-top: auto;
-}
-
-.footer-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 60px;
-}
-
-.footer-col {
-  display: flex;
-  flex-direction: column;
-}
-
-.footer-heading {
-  font-size: 1.65rem;
-  font-weight: 700;
-  margin-bottom: 20px;
-  color: #ffffff;
-}
-
-.footer-address {
-  font-size: 1.05rem;
-  line-height: 1.6;
-  margin-bottom: 16px;
-  color: rgba(255, 255, 255, 0.92);
-}
-
-.footer-contact-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 10px;
-}
-
-.footer-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #ffffff;
-}
-
-.footer-link {
-  color: #ffffff;
-  font-size: 1rem;
-  transition: var(--transition);
-}
-
-.footer-link:hover {
-  text-decoration: underline;
-  opacity: 0.88;
-}
-
-.footer-copyright {
-  font-size: 1rem;
-  margin-bottom: 12px;
-  color: rgba(255, 255, 255, 0.95);
-  font-weight: 500;
-}
-
-.footer-support-contacts {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  font-size: 0.95rem;
-  margin-bottom: 24px;
-}
-
-.footer-divider {
-  color: rgba(255, 255, 255, 0.6);
-  padding: 0 4px;
-}
-
-.footer-social-plugins {
-  margin-top: 10px;
-}
-
-.social-label {
-  display: block;
-  font-size: 0.9rem;
-  font-weight: 600;
-  margin-bottom: 12px;
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.social-buttons {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.social-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  border-radius: 9999px;
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: #ffffff;
-  transition: var(--transition);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-}
-
-.social-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
-}
-
-.facebook-btn {
-  background-color: #1877f2;
-}
-
-.youtube-btn {
-  background-color: #ff0000;
-}
-
-.google-btn {
-  background-color: #ea4335;
-}
-
-/* ========================================================
    AUTH PAGES (LOGIN & REGISTER)
    ======================================================== */
 .auth-page-container {
@@ -634,7 +601,7 @@ button {
 }
 
 .auth-logo {
-  height: 54px;
+  height: 52px;
   width: auto;
   margin-bottom: 16px;
 }
@@ -1181,13 +1148,18 @@ button {
     padding: 30px 16px;
   }
 
+  .hero-logo-box {
+    top: 20px;
+    left: 20px;
+  }
+
   .hero-bg-img {
-    opacity: 0.25;
+    opacity: 0.35;
   }
 
   .hero-content-right {
     width: 100%;
-    padding: 60px 16px 20px;
+    padding: 70px 16px 20px;
   }
 
   .services-grid {

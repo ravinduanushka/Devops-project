@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
 function Home() {
@@ -9,93 +8,41 @@ function Home() {
   const services = [
     {
       id: 0,
-      title: "Doctor Consultations",
-      subtitle: "Doctor Consultations and OPD",
-      description: "Expert specialist appointments and clinical care.",
-      icon: (
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/>
-          <path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/>
-          <circle cx="20" cy="10" r="2"/>
-        </svg>
-      )
+      title: "Doctor Consultations and OPD",
+      description: "Expert specialist appointments and clinical care. Doctor Consultations & OPD"
     },
     {
       id: 1,
-      title: "Ward Management",
-      subtitle: "Inpatient and Ward Management",
-      description: "Dedicated patient observation and comfortable ward care.",
-      icon: (
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M2 4v16"/>
-          <path d="M2 8h18a2 2 0 0 1 2 2v10"/>
-          <path d="M2 17h20"/>
-          <path d="M6 8v9"/>
-        </svg>
-      )
+      title: "Inpatient and Ward Management",
+      description: "Dedicated patient observation and comfortable ward care."
     },
     {
       id: 2,
       title: "Medical Records",
-      subtitle: "Digital Health Records",
-      description: "Secure, centralized access to patient health files.",
-      icon: (
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-          <polyline points="14 2 14 8 20 8"/>
-          <line x1="16" y1="13" x2="8" y2="13"/>
-          <line x1="16" y1="17" x2="8" y2="17"/>
-          <polyline points="10 9 9 9 8 9"/>
-        </svg>
-      )
+      description: "Secure, centralized access to patient health files."
     },
     {
       id: 3,
       title: "24/7 Nursing Care",
-      subtitle: "Inpatient Observation",
-      description: "Round-the-clock inpatient observation and medical support.",
-      icon: (
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
-          <path d="M12 5v6"/>
-          <path d="M9 8h6"/>
-        </svg>
-      )
+      description: "Round-the-clock inpatient observation and medical support."
     },
     {
       id: 4,
       title: "Lab Diagnostics",
-      subtitle: "Clinical Testing",
-      description: "Rapid diagnostic testing and digital reports.",
-      icon: (
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M10 2v7.31"/>
-          <path d="M14 9.3V2"/>
-          <path d="M8.5 2h7"/>
-          <path d="M14 9.3a6.5 6.5 0 1 1-4 0"/>
-          <path d="M5.52 16h12.96"/>
-        </svg>
-      )
+      description: "Rapid diagnostic testing and digital reports."
     },
     {
       id: 5,
       title: "Pharmacy Services",
-      subtitle: "Prescription Dispensing",
-      description: "Fast electronic prescriptions and safe dispensing.",
-      icon: (
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/>
-          <path d="m8.5 8.5 7 7"/>
-        </svg>
-      )
+      description: "Fast electronic prescriptions and safe dispensing."
     }
   ];
 
   return (
     <div className="page-wrapper">
-      <Navbar />
+      {/* NO NAVBAR/HEADER - Starts immediately with the Hero banner as requested */}
 
-      {/* HERO SECTION MATCHING FIGMA DESIGN */}
+      {/* HERO SECTION MATCHING FIGMA DESIGN (Image 1) */}
       <section className="hero-banner-section">
         <div className="hero-banner-container">
           <img
@@ -107,7 +54,7 @@ function Home() {
             }}
           />
 
-          {/* Logo overlay on the top left */}
+          {/* Logo overlay on top left */}
           <div className="hero-logo-box">
             <img
               src="/health-logo.png"
@@ -152,7 +99,7 @@ function Home() {
         </div>
       </section>
 
-      {/* OUR SERVICES SECTION */}
+      {/* OUR SERVICES SECTION (Image 2 - 6 clean gray rectangles without icons or pills) */}
       <section id="services" className="services-section">
         <div className="container">
           <h2 className="section-title">Our Services</h2>
@@ -165,21 +112,15 @@ function Home() {
                 className={`service-card ${activeCard === service.id ? "active-card" : ""}`}
                 onMouseEnter={() => setActiveCard(service.id)}
               >
-                <div className="service-card-header">
-                  <div className="service-card-icon">{service.icon}</div>
-                  <h3 className="service-card-title">{service.title}</h3>
-                </div>
+                <h3 className="service-card-title">{service.title}</h3>
                 <p className="service-card-desc">{service.description}</p>
-                <div className="service-card-footer">
-                  <span className="service-badge">{service.subtitle}</span>
-                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* STATS BANNER MATCHING FIGMA */}
+      {/* STATS BANNER MATCHING FIGMA (Image 3) */}
       <section className="stats-ribbon">
         <div className="container">
           <div className="stats-grid">
@@ -203,7 +144,7 @@ function Home() {
         </div>
       </section>
 
-      {/* FOOTER */}
+      {/* FOOTER MATCHING FIGMA (Image 3 & 4 with Clinic Us and Support + Social plugins) */}
       <Footer />
     </div>
   );
