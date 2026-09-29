@@ -1846,6 +1846,8 @@ button {
 }
 
 .role-modal-card {
+  margin: 0;
+  outline: none;
   background: #ffffff;
   border-radius: 20px;
   width: 100%;

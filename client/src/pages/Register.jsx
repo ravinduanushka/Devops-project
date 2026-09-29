@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { registerUser } from "../services/api";
 
@@ -40,6 +40,32 @@ function Register() {
     setErrorMessage("");
     setSuccessMessage("");
   };
+
+  const modalRef = useRef(null);
+
+  useEffect(() => {
+    if (!selectedRole) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        handleCloseModal();
+      }
+    };
+
+    const handleClickOutside = (e) => {
+      if (modalRef.current && !modalRef.current.contains(e.target)) {
+        handleCloseModal();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [selectedRole]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -199,12 +225,11 @@ function Register() {
 
       {/* Registration Details Modal Dialog */}
       {selectedRole && (
-        <div className="role-modal-overlay" onClick={handleCloseModal}>
-          <div
+        <div className="role-modal-overlay">
+          <dialog
+            open
+            ref={modalRef}
             className="role-modal-card"
-            onClick={(e) => e.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
             aria-labelledby="modal-role-title"
           >
             <div className="role-modal-header">
@@ -405,7 +430,7 @@ function Register() {
                 </button>
               </div>
             </form>
-          </div>
+          </dialog>
         </div>
       )}
     </div>
