@@ -97,15 +97,11 @@ app.post('/api/auth/register', async (req, res, next) => {
     const name = cleanString(req.body.name);
     const phone = cleanString(req.body.phone);
 
-    if (!email || !password || !confirmPassword || !role || !name || !phone) {
+    if (!email || !password || !role || !name || !phone) {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
-    if (password.length < 6) {
-      return res.status(400).json({ error: 'Password must be at least 6 characters long' });
-    }
-
-    if (password !== confirmPassword) {
+    if (confirmPassword && password !== confirmPassword) {
       return res.status(400).json({ error: 'Passwords do not match' });
     }
 

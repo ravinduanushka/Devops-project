@@ -67,12 +67,6 @@ function Register() {
     setErrorMessage("");
     setSuccessMessage("");
 
-    if (formData.password.length < 6) {
-      setErrorMessage("Password must be at least 6 characters long.");
-      setLoading(false);
-      return;
-    }
-
     if (formData.password !== formData.confirmPassword) {
       setErrorMessage("Passwords do not match.");
       setLoading(false);
@@ -115,7 +109,9 @@ function Register() {
       setErrorMessage(
         error.response?.data?.error ||
         error.response?.data?.message ||
-        "Registration failed. Please check your information and try again."
+        (error.code === "ERR_NETWORK" || !error.response
+          ? "Cannot connect to server. Please ensure the backend server is running."
+          : "Registration failed. Please check your information and try again.")
       );
     } finally {
       setLoading(false);
@@ -372,7 +368,7 @@ function Register() {
 
               <div className="form-row-2">
                 <div className="form-group">
-                  <label htmlFor="reg-password">Password * (min 6 chars)</label>
+                  <label htmlFor="reg-password">Password *</label>
                   <input
                     id="reg-password"
                     type="password"
