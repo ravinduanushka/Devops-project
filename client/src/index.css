@@ -1610,3 +1610,277 @@ button {
     padding: 60px 24px;
   }
 }
+
+/* ========================================================
+   ROLE REGISTRATION PAGE (MATCHING FIGMA/IMAGE SPEC)
+   Blurred background, 4 role pill buttons, no footer
+   ======================================================== */
+.role-register-page {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: #f0f4f8;
+}
+
+.role-bg-layer {
+  position: absolute;
+  inset: -12px;
+  background-image: url('/registration-green.jpg'), url('/registration green.jpg'), url('/registration-page.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(4px) brightness(1.08) saturate(0.85);
+  opacity: 0.76;
+  transform: scale(1.04);
+  z-index: 0;
+}
+
+.role-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.42) 0%, rgba(240, 253, 250, 0.32) 100%);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  z-index: 1;
+}
+
+.role-register-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.role-top-bar {
+  padding: 30px 48px;
+  display: flex;
+  align-items: center;
+}
+
+.role-logo-link {
+  display: inline-flex;
+  align-items: center;
+  transition: transform 0.2s ease;
+}
+
+.role-logo-link:hover {
+  transform: scale(1.04);
+}
+
+.role-logo-img {
+  height: 58px;
+  width: auto;
+  object-fit: contain;
+}
+
+.role-selection-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 24px 24px 60px;
+  text-align: center;
+}
+
+.role-title {
+  font-size: clamp(2.4rem, 4.2vw, 3.6rem);
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+  text-shadow: 0 2px 8px rgba(255, 255, 255, 0.95);
+}
+
+.role-subtitle {
+  font-size: clamp(1.25rem, 2.2vw, 1.65rem);
+  font-weight: 700;
+  color: #1f5359;
+  margin-bottom: 50px;
+  letter-spacing: -0.3px;
+  text-shadow: 0 1px 4px rgba(255, 255, 255, 0.95);
+}
+
+.role-buttons-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(240px, 300px));
+  gap: 26px 40px;
+  margin-bottom: 44px;
+}
+
+.role-pill-btn {
+  background: rgba(162, 222, 213, 0.62);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  border-radius: 20px;
+  padding: 16px 28px;
+  min-height: 64px;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0d2f33;
+  cursor: pointer;
+  box-shadow: 0 8px 30px rgba(31, 83, 89, 0.12), inset 0 1px 2px rgba(255, 255, 255, 0.9);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0.2px;
+}
+
+.role-pill-btn:hover {
+  background: rgba(136, 212, 201, 0.78);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-color: #ffffff;
+  transform: translateY(-4px) scale(1.04);
+  box-shadow: 0 14px 34px rgba(31, 83, 89, 0.22), inset 0 1px 2px rgba(255, 255, 255, 1);
+}
+
+.role-pill-btn:active {
+  transform: translateY(-1px) scale(0.99);
+}
+
+.role-signin-hint {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #1e293b;
+  background: rgba(255, 255, 255, 0.68);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 10px 24px;
+  border-radius: 9999px;
+  box-shadow: 0 4px 16px rgba(31, 83, 89, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+}
+  border-radius: 9999px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.role-signin-link {
+  color: #1f5359;
+  font-weight: 800;
+  margin-left: 6px;
+  transition: color 0.2s ease;
+}
+
+.role-signin-link:hover {
+  color: #11363a;
+  text-decoration: underline;
+}
+
+/* Modal for Registration Form */
+.role-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: modalFadeIn 0.22s ease-out;
+}
+
+.role-modal-card {
+  background: #ffffff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 32px 36px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  position: relative;
+  animation: modalScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalScaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.role-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1.5px solid #e2e8f0;
+}
+
+.role-modal-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.role-modal-title {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.role-badge-tag {
+  background-color: #ccfbf1;
+  color: #0f766e;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.role-modal-close-btn {
+  background: #f1f5f9;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+.role-modal-close-btn:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+@media (max-width: 680px) {
+  .role-top-bar {
+    padding: 20px 24px;
+  }
+
+  .role-buttons-grid {
+    grid-template-columns: 1fr;
+    width: 100%;
+    max-width: 300px;
+    gap: 18px;
+    margin-bottom: 32px;
+  }
+
+  .role-modal-card {
+    padding: 24px 20px;
+  }
+}
