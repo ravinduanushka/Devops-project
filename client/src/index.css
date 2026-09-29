@@ -71,7 +71,7 @@ button {
 
 /* ========================================================
    HERO BANNER - FIGMA MATCH (Image 1)
-   No header above it - Starts immediately at the top
+   Full screen width, increased height, logo in white space
    ======================================================== */
 .hero-banner-section {
   width: 100%;
@@ -83,9 +83,8 @@ button {
 .hero-banner-container {
   position: relative;
   width: 100%;
-  max-width: 1300px;
-  margin: 0 auto;
-  min-height: 520px;
+  max-width: 100%;
+  min-height: clamp(620px, 75vh, 760px);
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -98,28 +97,30 @@ button {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center left;
+  object-position: top left;
   z-index: 1;
 }
 
 .hero-logo-box {
   position: absolute;
-  top: 36px;
-  left: 48px;
-  z-index: 5;
+  top: clamp(24px, 3.5vh, 40px);
+  left: clamp(36px, 5.5vw, 90px);
+  z-index: 10;
 }
 
 .hero-logo-img {
-  height: 60px;
+  height: clamp(52px, 5vw, 70px);
   width: auto;
-  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.15));
+  display: block;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.08));
 }
 
 .hero-content-right {
   position: relative;
   z-index: 10;
   width: 50%;
-  padding: 40px 60px 40px 20px;
+  max-width: 650px;
+  padding: 40px 6vw 40px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -195,7 +196,6 @@ button {
 /* ========================================================
    OUR SERVICES SECTION - FIGMA MATCH (Image 2)
    6 Clean Rectangles with Title & Description Only
-   No icons, No badges
    ======================================================== */
 .services-section {
   padding: 40px 0 80px;
@@ -211,36 +211,69 @@ button {
 }
 
 .service-card {
-  background-color: var(--bg-card-gray);
-  border-radius: 4px;
-  padding: 28px 24px;
+  background-color: #ffffff;
+  border-radius: 6px;
+  padding: 30px 24px;
   text-align: left;
   min-height: 190px;
-  border: 2px solid transparent;
-  transition: var(--transition);
+  border: 2px solid #81c9bd;
+  box-shadow: 0 4px 14px rgba(129, 201, 189, 0.15);
+  opacity: 0;
+  transform: translateY(35px) scale(0.95);
+  transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.4s ease,
+              box-shadow 0.3s ease,
+              border-color 0.3s ease;
   cursor: pointer;
   display: flex;
   flex-direction: column;
 }
 
+/* One-by-one increase and decrease transition animation */
+@keyframes cardPulseWave {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    border-color: #81c9bd;
+    box-shadow: 0 4px 14px rgba(129, 201, 189, 0.15);
+  }
+  50% {
+    transform: translateY(-8px) scale(1.035);
+    border-color: #3bb29f;
+    box-shadow: 0 16px 32px rgba(129, 201, 189, 0.4);
+  }
+}
+
+.services-grid.visible .service-card {
+  opacity: 1;
+}
+
+.services-grid.visible .service-card:nth-child(1) { animation: cardPulseWave 4.2s ease-in-out infinite 0s; }
+.services-grid.visible .service-card:nth-child(2) { animation: cardPulseWave 4.2s ease-in-out infinite 0.7s; }
+.services-grid.visible .service-card:nth-child(3) { animation: cardPulseWave 4.2s ease-in-out infinite 1.4s; }
+.services-grid.visible .service-card:nth-child(4) { animation: cardPulseWave 4.2s ease-in-out infinite 2.1s; }
+.services-grid.visible .service-card:nth-child(5) { animation: cardPulseWave 4.2s ease-in-out infinite 2.8s; }
+.services-grid.visible .service-card:nth-child(6) { animation: cardPulseWave 4.2s ease-in-out infinite 3.5s; }
+
 .service-card:hover,
 .service-card.active-card {
-  border-color: var(--card-border-active);
-  background-color: #d6d6d6;
+  animation-play-state: paused;
+  border-color: #2e9686;
+  transform: translateY(-10px) scale(1.04);
+  box-shadow: 0 18px 36px rgba(129, 201, 189, 0.45);
 }
 
 .service-card-title {
-  font-size: 1.12rem;
+  font-size: 1.15rem;
   font-weight: 700;
-  color: #111827;
+  color: #1e3a40;
   line-height: 1.35;
   margin-bottom: 12px;
 }
 
 .service-card-desc {
-  font-size: 0.93rem;
-  color: #374151;
-  line-height: 1.5;
+  font-size: 0.95rem;
+  color: #475569;
+  line-height: 1.55;
 }
 
 /* ========================================================
@@ -248,8 +281,15 @@ button {
    ======================================================== */
 .stats-ribbon {
   background-color: var(--stats-mint);
-  padding: 36px 0;
+  padding: 38px 0;
   width: 100%;
+}
+
+/* White gap matching Figma Image 4 style */
+.stats-footer-gap {
+  width: 100%;
+  height: clamp(60px, 8vh, 90px);
+  background-color: #ffffff;
 }
 
 .stats-grid {
@@ -280,23 +320,25 @@ button {
 }
 
 /* ========================================================
-   FOOTER - FIGMA MATCH (Image 3 & 4)
-   Clinic Us, Support & Social plugins
+   FOOTER - FIGMA IMAGE 4 STYLE
+   3 Columns: Clinic Us (Left), Support (Middle), Connect (Right)
+   Decreased height & address map plugin
    ======================================================== */
 .footer-wrapper {
   background-color: var(--primary-teal);
   color: #ffffff;
-  padding: 55px 0 40px;
+  padding: 30px 0 24px;
   margin-top: auto;
 }
 
-.footer-content {
-  max-width: 1160px;
+.footer-content-3col {
+  max-width: 1240px;
   margin: 0 auto;
   padding: 0 24px;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 60px;
+  grid-template-columns: 1fr 1.15fr 1.15fr;
+  align-items: flex-start;
+  gap: 32px;
 }
 
 .footer-col {
@@ -304,25 +346,58 @@ button {
   flex-direction: column;
 }
 
+.footer-col-clinic {
+  text-align: left;
+}
+
+.footer-col-support {
+  text-align: center;
+  align-items: center;
+}
+
+.footer-col-social {
+  text-align: right;
+  align-items: flex-end;
+}
+
 .footer-heading {
-  font-size: 1.65rem;
+  font-size: 1.35rem;
   font-weight: 700;
-  margin-bottom: 18px;
+  line-height: 1.25;
+  margin-bottom: 14px;
   color: #ffffff;
 }
 
-.footer-address {
-  font-size: 1.05rem;
-  line-height: 1.6;
-  margin-bottom: 16px;
+.footer-address-box {
+  margin-bottom: 10px;
+}
+
+.footer-address-link {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 8px;
   color: rgba(255, 255, 255, 0.95);
+  font-size: 1rem;
+  line-height: 1.45;
+  transition: var(--transition);
+}
+
+.footer-address-link:hover {
+  color: #e0fbf6;
+  text-decoration: underline;
+}
+
+.footer-icon-pin {
+  margin-top: 3px;
+  color: #ffffff;
+  flex-shrink: 0;
 }
 
 .footer-contact-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 10px;
+  gap: 10px;
+  margin-bottom: 8px;
 }
 
 .footer-icon {
@@ -334,7 +409,7 @@ button {
 
 .footer-link {
   color: #ffffff;
-  font-size: 1rem;
+  font-size: 0.95rem;
   transition: var(--transition);
 }
 
@@ -344,8 +419,8 @@ button {
 }
 
 .footer-copyright {
-  font-size: 1rem;
-  margin-bottom: 12px;
+  font-size: 0.95rem;
+  margin-bottom: 10px;
   color: rgba(255, 255, 255, 0.95);
   font-weight: 500;
 }
@@ -353,10 +428,19 @@ button {
 .footer-support-contacts {
   display: flex;
   align-items: center;
+  justify-content: center;
   flex-wrap: wrap;
   gap: 8px;
   font-size: 0.95rem;
-  margin-bottom: 22px;
+}
+
+.footer-icon-email {
+  font-size: 1.05rem;
+}
+
+.footer-icon-phone {
+  font-size: 1.05rem;
+  color: #ff3385; /* Pink telephone accent matching Figma Image 3/4 */
 }
 
 .footer-divider {
@@ -364,36 +448,45 @@ button {
   padding: 0 4px;
 }
 
-.footer-social-plugins {
-  margin-top: 10px;
-}
-
-.social-label {
+.social-label-right {
   display: block;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   font-weight: 600;
-  margin-bottom: 12px;
-  color: rgba(255, 255, 255, 0.92);
+  margin-bottom: 10px;
+  color: rgba(255, 255, 255, 0.95);
+  text-align: right;
 }
 
-.social-buttons {
+.social-buttons-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
 }
 
-.social-btn {
+.social-btn-black {
+  background-color: #000000;
+  color: #ffffff;
+  padding: 7px 14px;
+  border-radius: 9999px;
+  font-size: 0.82rem;
+  font-weight: 600;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  border-radius: 9999px;
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: #ffffff;
+  gap: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  white-space: nowrap;
   transition: var(--transition);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.social-btn-black:hover {
+  background-color: #1a1a1a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 .social-btn:hover {
@@ -1140,35 +1233,44 @@ button {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 860px) {
   .hero-banner-container {
-    min-height: auto;
-    flex-direction: column;
-    justify-content: center;
-    padding: 30px 16px;
+    min-height: 560px;
   }
 
   .hero-logo-box {
-    top: 20px;
-    left: 20px;
-  }
-
-  .hero-bg-img {
-    opacity: 0.35;
+    top: 24px;
+    left: 24px;
   }
 
   .hero-content-right {
-    width: 100%;
-    padding: 70px 16px 20px;
+    width: 58%;
+    padding: 30px 24px;
   }
 
   .services-grid {
     grid-template-columns: 1fr;
   }
 
-  .footer-content {
+  .footer-content-3col {
     grid-template-columns: 1fr;
-    gap: 40px;
+    gap: 24px;
+    text-align: center;
+  }
+
+  .footer-col-clinic,
+  .footer-col-support,
+  .footer-col-social {
+    text-align: center;
+    align-items: center;
+  }
+
+  .social-buttons-row {
+    justify-content: center;
+  }
+
+  .social-label-right {
+    text-align: center;
   }
 
   .mobile-toggle {
@@ -1210,5 +1312,301 @@ button {
 
   .admin-stats-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero-banner-container {
+    min-height: 500px;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+
+  .hero-bg-img {
+    opacity: 0.28;
+  }
+
+  .hero-content-right {
+    width: 100%;
+    padding: 40px 20px 30px;
+  }
+}
+
+/* ========================================================
+   SPLIT-SCREEN LOGIN PAGE (MATCHING FIGMA/IMAGE SPEC)
+   ======================================================== */
+.split-login-page {
+  min-height: 100vh;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background-color: #ffffff;
+}
+
+.login-left-pane {
+  background-color: #ffffff;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 48px;
+}
+
+.login-logo-link {
+  position: absolute;
+  top: 36px;
+  left: 48px;
+  display: inline-block;
+}
+
+.login-top-logo {
+  height: 52px;
+  width: auto;
+  object-fit: contain;
+}
+
+.login-form-center {
+  width: 100%;
+  max-width: 440px;
+  text-align: center;
+  margin: 0 auto;
+}
+
+.login-heading {
+  font-size: clamp(2rem, 3.2vw, 2.45rem);
+  font-weight: 800;
+  color: #1a202c;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+
+.login-social-sub {
+  font-size: 0.95rem;
+  color: #718096;
+  margin-bottom: 22px;
+}
+
+.login-social-circles {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.social-circle {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  transition: var(--transition);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+}
+
+.social-circle:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+}
+
+.fb-circle {
+  background-color: #3b5998;
+}
+
+.gp-circle {
+  background-color: #d34836;
+}
+
+.gp-text {
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: -0.5px;
+}
+
+.in-circle {
+  background-color: #0077b5;
+}
+
+.in-text {
+  font-weight: 700;
+  font-size: 1.15rem;
+  font-family: serif;
+}
+
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 26px;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background-color: #e2e8f0;
+}
+
+.divider-text {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #a0aec0;
+  letter-spacing: 0.5px;
+}
+
+.login-actual-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+}
+
+.input-pill-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.input-pill {
+  width: 100%;
+  background-color: #eef2f6;
+  border: 1.5px solid transparent;
+  border-radius: 9999px;
+  padding: 14px 24px;
+  font-size: 0.98rem;
+  color: #2d3748;
+  outline: none;
+  transition: var(--transition);
+}
+
+.input-pill:focus {
+  border-color: #29b399;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(41, 179, 153, 0.2);
+}
+
+.input-pill::placeholder {
+  color: #a0aec0;
+}
+
+.password-pill-wrapper .input-pill {
+  padding-right: 52px;
+}
+
+.password-eye-btn {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 4px;
+}
+
+.login-btn-center {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+}
+
+.login-submit-pill {
+  background-color: #29b399;
+  color: #ffffff;
+  border-radius: 9999px;
+  padding: 13px 64px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: 0 4px 14px rgba(41, 179, 153, 0.35);
+}
+
+.login-submit-pill:hover:not(:disabled) {
+  background-color: #229983;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(41, 179, 153, 0.45);
+}
+
+.login-submit-pill:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* RIGHT PANE - TEAL */
+.login-right-pane {
+  background-color: #3bab99;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  text-align: center;
+}
+
+.login-right-content {
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.join-heading {
+  font-size: clamp(2.2rem, 3.4vw, 2.75rem);
+  font-weight: 800;
+  color: #1e3a8a;
+  margin-bottom: 24px;
+  letter-spacing: -0.5px;
+}
+
+.join-description {
+  font-size: clamp(1.1rem, 1.6vw, 1.35rem);
+  font-weight: 600;
+  color: #ffffff;
+  line-height: 1.6;
+  margin-bottom: 38px;
+}
+
+.join-signup-btn {
+  background-color: #ffffff;
+  color: #111827;
+  border-radius: 9999px;
+  padding: 13px 56px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  display: inline-block;
+  transition: var(--transition);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.join-signup-btn:hover {
+  background-color: #f8fafc;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.22);
+}
+
+/* Responsive Split-Login */
+@media (max-width: 860px) {
+  .split-login-page {
+    grid-template-columns: 1fr;
+  }
+
+  .login-left-pane {
+    padding: 80px 24px 50px;
+  }
+
+  .login-logo-link {
+    top: 20px;
+    left: 20px;
+  }
+
+  .login-right-pane {
+    padding: 60px 24px;
   }
 }

@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { loginUser } from "../services/api";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
 
 function Login() {
   const navigate = useNavigate();
@@ -10,6 +8,7 @@ function Login() {
     email: "",
     password: ""
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -36,7 +35,7 @@ function Login() {
 
       const userData = response.data;
       localStorage.setItem("nexus_user", JSON.stringify(userData));
-      setSuccessMessage(`Welcome back, ${userData.name}! Redirecting...`);
+      setSuccessMessage(`Welcome back, ${userData.name}!`);
 
       setTimeout(() => {
         if (userData.role === "Admin") {
@@ -44,7 +43,7 @@ function Login() {
         } else {
           navigate("/");
         }
-      }, 1000);
+      }, 700);
     } catch (error) {
       setErrorMessage(
         error.response?.data?.error ||
@@ -57,91 +56,151 @@ function Login() {
   };
 
   return (
-    <div className="page-wrapper">
-      <Navbar />
+    <div className="split-login-page">
+      {/* LEFT PANE - WHITE BACKGROUND */}
+      <div className="login-left-pane">
+        {/* Top-left Brand Logo */}
+        <Link to="/" className="login-logo-link" title="Back to Home">
+          <img
+            src="/health-logo.png"
+            alt="NexusHealth Logo"
+            className="login-top-logo"
+            onError={(e) => {
+              e.currentTarget.src = "/health logo.png";
+            }}
+          />
+        </Link>
 
-      <main className="auth-page-container">
-        <div className="auth-card">
-          <div className="auth-header">
-            <img
-              src="/health-logo.png"
-              alt="NexusHealth Logo"
-              className="auth-logo"
-              onError={(e) => {
-                e.currentTarget.src = "/health logo.png";
-              }}
-            />
-            <h2 className="auth-title">Welcome to NexusHealth</h2>
-            <p className="auth-subtitle">Sign in to access your healthcare portal</p>
+        {/* Center Form Section */}
+        <div className="login-form-center">
+          <h1 className="login-heading">Login to Your Account</h1>
+          <p className="login-social-sub">Login using social networks</p>
+
+          {/* Social Network Circles */}
+          <div className="login-social-circles">
+            {/* Facebook circle */}
+            <button
+              type="button"
+              className="social-circle fb-circle"
+              aria-label="Login with Facebook"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+              </svg>
+            </button>
+
+            {/* Google+ circle */}
+            <button
+              type="button"
+              className="social-circle gp-circle"
+              aria-label="Login with Google"
+            >
+              <span className="gp-text">G+</span>
+            </button>
+
+            {/* LinkedIn circle */}
+            <button
+              type="button"
+              className="social-circle in-circle"
+              aria-label="Login with LinkedIn"
+            >
+              <span className="in-text">in</span>
+            </button>
           </div>
 
+          {/* OR Divider */}
+          <div className="login-divider">
+            <span className="divider-line"></span>
+            <span className="divider-text">OR</span>
+            <span className="divider-line"></span>
+          </div>
+
+          {/* Feedback Alerts */}
           {errorMessage && (
-            <div className="alert-box alert-error" role="alert">
-              <span className="alert-icon">⚠️</span>
+            <div className="alert-box alert-error" role="alert" style={{ marginBottom: "14px" }}>
               <span>{errorMessage}</span>
             </div>
           )}
 
           {successMessage && (
-            <div className="alert-box alert-success" role="alert">
-              <span className="alert-icon">✅</span>
+            <div className="alert-box alert-success" role="alert" style={{ marginBottom: "14px" }}>
               <span>{successMessage}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="auth-form">
-            <div className="form-group">
-              <label htmlFor="login-email">Email Address</label>
+          {/* Actual Login Form */}
+          <form onSubmit={handleSubmit} className="login-actual-form">
+            <div className="input-pill-wrapper">
               <input
-                id="login-email"
                 type="email"
                 name="email"
-                placeholder="name@nexushealth.com"
+                placeholder="Email"
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="form-input"
+                className="input-pill"
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="login-password">Password</label>
+            <div className="input-pill-wrapper password-pill-wrapper">
               <input
-                id="login-password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 name="password"
-                placeholder="••••••••"
+                placeholder="Password"
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className="form-input"
+                className="input-pill"
               />
+              <button
+                type="button"
+                className="password-eye-btn"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                  </svg>
+                ) : (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                )}
+              </button>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn btn-primary auth-submit-btn"
-            >
-              {loading ? "Authenticating..." : "Sign In"}
-            </button>
+            <div className="login-btn-center">
+              <button
+                type="submit"
+                disabled={loading}
+                className="login-submit-pill"
+              >
+                {loading ? "Signing in..." : "Sign In"}
+              </button>
+            </div>
           </form>
+        </div>
+      </div>
 
-          <div className="auth-footer-links">
-            <p>
-              Don&apos;t have an account?{" "}
-              <Link to="/register" className="accent-link">
-                Register here
-              </Link>
-            </p>
-            <p className="admin-quick-note">
-              Are you an administrator? Sign in above to manage staff and registrations.
-            </p>
+      {/* RIGHT PANE - TEAL BACKGROUND (#3bab99) */}
+      <div className="login-right-pane">
+        <div className="login-right-content">
+          <h2 className="join-heading">Join NexusHealth</h2>
+          <p className="join-description">
+            Create an account for patient care<br />
+            or<br />
+            hospital staff access.
+          </p>
+          <div className="join-action">
+            <Link to="/register" className="join-signup-btn">
+              sign Up
+            </Link>
           </div>
         </div>
-      </main>
-
-      <Footer />
+      </div>
     </div>
   );
 }
