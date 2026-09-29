@@ -255,13 +255,6 @@ function Register() {
                     id="reg-name"
                     type="text"
                     name="name"
-                    placeholder={
-                      selectedRole === "Doctor"
-                        ? "Dr. Sarah Jenkins"
-                        : selectedRole === "Nurse"
-                        ? "Nurse Amanda Silva"
-                        : "John Doe"
-                    }
                     value={formData.name}
                     onChange={handleChange}
                     required
@@ -275,7 +268,6 @@ function Register() {
                     id="reg-email"
                     type="email"
                     name="email"
-                    placeholder="user@nexushealth.com"
                     value={formData.email}
                     onChange={handleChange}
                     required
@@ -290,7 +282,6 @@ function Register() {
                   id="reg-phone"
                   type="tel"
                   name="phone"
-                  placeholder="077-1234567 / 091-9118207"
                   value={formData.phone}
                   onChange={handleChange}
                   required
@@ -309,7 +300,6 @@ function Register() {
                         id="doc-spec"
                         type="text"
                         name="doctorDetails.specialization"
-                        placeholder="e.g. Cardiology, Neurology, General"
                         value={formData.doctorDetails.specialization}
                         onChange={handleChange}
                         className="form-input"
@@ -321,7 +311,6 @@ function Register() {
                         id="doc-room"
                         type="text"
                         name="doctorDetails.roomNo"
-                        placeholder="e.g. Room 204 / OPD-1"
                         value={formData.doctorDetails.roomNo}
                         onChange={handleChange}
                         className="form-input"
@@ -341,7 +330,6 @@ function Register() {
                         id="nurse-ward"
                         type="text"
                         name="nurseDetails.assignedWard"
-                        placeholder="e.g. Ward B - ICU / Pediatrics"
                         value={formData.nurseDetails.assignedWard}
                         onChange={handleChange}
                         className="form-input"
@@ -374,7 +362,6 @@ function Register() {
                       id="rec-desk"
                       type="text"
                       name="receptionistDetails.deskNumber"
-                      placeholder="e.g. Front Desk #1 / Counter A"
                       value={formData.receptionistDetails.deskNumber}
                       onChange={handleChange}
                       className="form-input"
@@ -390,7 +377,6 @@ function Register() {
                     id="reg-password"
                     type="password"
                     name="password"
-                    placeholder="••••••••"
                     value={formData.password}
                     onChange={handleChange}
                     required
@@ -404,7 +390,6 @@ function Register() {
                     id="reg-confirm"
                     type="password"
                     name="confirmPassword"
-                    placeholder="••••••••"
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     required
