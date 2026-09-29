@@ -1872,24 +1872,19 @@ button {
 .role-modal-title-group {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
+}
+
+.role-modal-logo {
+  height: 42px;
+  width: auto;
+  object-fit: contain;
 }
 
 .role-modal-title {
   font-size: 1.45rem;
   font-weight: 800;
   color: #0f172a;
-}
-
-.role-badge-tag {
-  background-color: #ccfbf1;
-  color: #0f766e;
-  font-size: 0.82rem;
-  font-weight: 700;
-  padding: 4px 12px;
-  border-radius: 9999px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .role-modal-close-btn {

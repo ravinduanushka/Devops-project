@@ -106,11 +106,11 @@ function Register() {
       }
 
       await registerUser(payload);
-      setSuccessMessage(`Registered successfully as ${selectedRole}! Redirecting to login...`);
+      setSuccessMessage(`Account created successfully as ${selectedRole}! Redirecting to login to sign in with your email and password...`);
 
       setTimeout(() => {
         navigate("/login");
-      }, 1400);
+      }, 1500);
     } catch (error) {
       setErrorMessage(
         error.response?.data?.error ||
@@ -213,10 +213,17 @@ function Register() {
           >
             <div className="role-modal-header">
               <div className="role-modal-title-group">
+                <img
+                  src="/health-logo.png"
+                  alt="NexusHealth Logo"
+                  className="role-modal-logo"
+                  onError={(e) => {
+                    e.currentTarget.src = "/health logo.png";
+                  }}
+                />
                 <h2 id="modal-role-title" className="role-modal-title">
                   Register as {selectedRole}
                 </h2>
-                <span className="role-badge-tag">{selectedRole}</span>
               </div>
               <button
                 type="button"
@@ -406,20 +413,12 @@ function Register() {
                 </div>
               </div>
 
-              <div style={{ display: "flex", gap: "12px", marginTop: "10px" }}>
-                <button
-                  type="button"
-                  onClick={handleCloseModal}
-                  className="btn btn-outline"
-                  style={{ flex: 1 }}
-                >
-                  Change Role
-                </button>
+              <div style={{ marginTop: "14px" }}>
                 <button
                   type="submit"
                   disabled={loading}
                   className="btn btn-primary"
-                  style={{ flex: 2 }}
+                  style={{ width: "100%", padding: "14px", fontSize: "1.05rem", borderRadius: "10px" }}
                 >
                   {loading ? "Registering..." : `Create ${selectedRole} Account`}
                 </button>
