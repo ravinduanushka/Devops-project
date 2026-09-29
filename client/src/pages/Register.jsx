@@ -130,7 +130,7 @@ function Register() {
 
       {/* Main Crisp Foreground Content */}
       <div className="role-register-content">
-        {/* Top-left Brand Logo */}
+        {/* Top Bar with Logo (left) and Back to Home (right) */}
         <header className="role-top-bar">
           <Link to="/" className="role-logo-link" title="Back to Home">
             <img
@@ -141,6 +141,10 @@ function Register() {
                 e.currentTarget.src = "/health logo.png";
               }}
             />
+          </Link>
+
+          <Link to="/" className="role-back-home-link" title="Back to Home">
+            Back to Home
           </Link>
         </header>
 

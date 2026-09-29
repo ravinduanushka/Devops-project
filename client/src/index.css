@@ -1542,11 +1542,34 @@ button {
 /* RIGHT PANE - TEAL */
 .login-right-pane {
   background-color: #3bab99;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 48px;
   text-align: center;
+}
+
+.login-back-home-link {
+  position: absolute;
+  top: 36px;
+  right: 48px;
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-decoration: none;
+  border: none;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  letter-spacing: -0.2px;
+}
+
+.login-back-home-link:hover {
+  opacity: 0.85;
+  text-decoration: underline;
+  transform: translateX(-2px);
 }
 
 .login-right-content {
@@ -1609,6 +1632,11 @@ button {
   .login-right-pane {
     padding: 60px 24px;
   }
+
+  .login-back-home-link {
+    top: 20px;
+    right: 20px;
+  }
 }
 
 /* ========================================================
@@ -1661,6 +1689,27 @@ button {
   padding: 30px 48px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.role-back-home-link {
+  color: #1f5359;
+  font-size: 1.08rem;
+  font-weight: 700;
+  text-decoration: none;
+  border: none;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  letter-spacing: -0.2px;
+}
+
+.role-back-home-link:hover {
+  opacity: 0.75;
+  text-decoration: underline;
+  transform: translateX(-2px);
 }
 
 .role-logo-link {
@@ -1758,10 +1807,6 @@ button {
   border-radius: 9999px;
   box-shadow: 0 4px 16px rgba(31, 83, 89, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.9);
-}
-  border-radius: 9999px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.8);
 }
 
 .role-signin-link {

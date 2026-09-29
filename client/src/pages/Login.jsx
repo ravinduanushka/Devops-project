@@ -187,6 +187,9 @@ function Login() {
 
       {/* RIGHT PANE - TEAL BACKGROUND (#3bab99) */}
       <div className="login-right-pane">
+        <Link to="/" className="login-back-home-link" title="Back to Home">
+          Back to Home
+        </Link>
         <div className="login-right-content">
           <h2 className="join-heading">Join NexusHealth</h2>
           <p className="join-description">
