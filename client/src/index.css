@@ -714,13 +714,13 @@ button {
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 14px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
   text-align: left;
 }
 
@@ -732,7 +732,7 @@ button {
 
 .form-input,
 .form-select {
-  padding: 11px 14px;
+  padding: 10px 13px;
   border: 1.5px solid #d1d5db;
   border-radius: var(--radius-sm);
   font-size: 0.95rem;
