@@ -504,8 +504,9 @@ function Admin() {
                   <h4 className="role-box-title">Doctor Credentials</h4>
                   <div className="form-row-2">
                     <div className="form-group">
-                      <label>Medical Specialization</label>
+                      <label htmlFor="admin-doc-spec">Medical Specialization</label>
                       <input
+                        id="admin-doc-spec"
                         type="text"
                         name="doctorDetails.specialization"
                         placeholder="e.g. Cardiology, Paediatrics, Oncology"
@@ -515,8 +516,9 @@ function Admin() {
                       />
                     </div>
                     <div className="form-group">
-                      <label>Assigned Consultation Room</label>
+                      <label htmlFor="admin-doc-room">Assigned Consultation Room</label>
                       <input
+                        id="admin-doc-room"
                         type="text"
                         name="doctorDetails.roomNo"
                         placeholder="e.g. Room 405"
@@ -534,8 +536,9 @@ function Admin() {
                   <h4 className="role-box-title">Nurse Assignment</h4>
                   <div className="form-row-2">
                     <div className="form-group">
-                      <label>Assigned Ward</label>
+                      <label htmlFor="admin-nurse-ward">Assigned Ward</label>
                       <input
+                        id="admin-nurse-ward"
                         type="text"
                         name="nurseDetails.assignedWard"
                         placeholder="e.g. Ward C - Post Surgery"
@@ -545,8 +548,9 @@ function Admin() {
                       />
                     </div>
                     <div className="form-group">
-                      <label>Assigned Shift</label>
+                      <label htmlFor="admin-nurse-shift">Assigned Shift</label>
                       <select
+                        id="admin-nurse-shift"
                         name="nurseDetails.shiftTime"
                         value={regForm.nurseDetails.shiftTime}
                         onChange={handleRegChange}
@@ -565,8 +569,9 @@ function Admin() {
                 <div className="role-specific-box">
                   <h4 className="role-box-title">Desk Station</h4>
                   <div className="form-group">
-                    <label>Counter Number</label>
+                    <label htmlFor="admin-rec-desk">Counter Number</label>
                     <input
+                      id="admin-rec-desk"
                       type="text"
                       name="receptionistDetails.deskNumber"
                       placeholder="e.g. Front Reception Counter #2"
