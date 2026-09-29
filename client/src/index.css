@@ -1834,20 +1834,37 @@ button {
   justify-content: center;
   padding: 20px;
   animation: modalFadeIn 0.22s ease-out;
+  overflow-y: auto;
+  scrollbar-width: none; /* Hide scrollbar for Firefox */
+  -ms-overflow-style: none; /* Hide scrollbar for IE / Edge */
+}
+
+.role-modal-overlay::-webkit-scrollbar {
+  display: none; /* Hide scrollbar for Chrome / Safari */
+  width: 0;
+  height: 0;
 }
 
 .role-modal-card {
   background: #ffffff;
   border-radius: 20px;
   width: 100%;
-  max-width: 600px;
-  max-height: 90vh;
+  max-width: 580px;
+  max-height: 92vh;
   overflow-y: auto;
-  padding: 32px 36px;
+  scrollbar-width: none; /* Hide scrollbar for Firefox */
+  -ms-overflow-style: none; /* Hide scrollbar for IE / Edge */
+  padding: 26px 32px;
   box-shadow: 0 24px 48px rgba(0, 0, 0, 0.25);
   border: 1px solid rgba(255, 255, 255, 0.5);
   position: relative;
   animation: modalScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.role-modal-card::-webkit-scrollbar {
+  display: none; /* Hide scrollbar for Chrome / Safari */
+  width: 0;
+  height: 0;
 }
 
 @keyframes modalFadeIn {
@@ -1864,8 +1881,8 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
-  padding-bottom: 14px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
   border-bottom: 1.5px solid #e2e8f0;
 }
 
