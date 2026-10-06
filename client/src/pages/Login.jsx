@@ -38,7 +38,9 @@ function Login() {
       setSuccessMessage(`Welcome back, ${userData.name}!`);
 
       setTimeout(() => {
-        if (userData.role === "Admin") {
+        if (userData.role === "Doctor") {
+          navigate("/doctor");
+        } else if (userData.role === "Admin") {
           navigate("/admin");
         } else {
           navigate("/");
