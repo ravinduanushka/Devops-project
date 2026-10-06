@@ -15,6 +15,7 @@ export const getPatients = () => api.get('/api/patients');
 export const createPatient = (patientData) => api.post('/api/patients', patientData);
 export const getAppointments = () => api.get('/api/appointments');
 export const createAppointment = (appointmentData) => api.post('/api/appointments', appointmentData);
+export const updatePatient = (id, data) => api.put(`/api/patients/${id}`, data);
 export const checkHealth = () => api.get('/health');
 
 export default api;

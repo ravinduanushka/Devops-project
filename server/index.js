@@ -203,6 +203,19 @@ app.post('/api/patients', async (req, res, next) => {
   }
 });
 
+app.put('/api/patients/:id', async (req, res, next) => {
+  try {
+    const updateData = {};
+    if (req.body.status) updateData.status = cleanString(req.body.status);
+    if (req.body.diagnosis) updateData.diagnosis = cleanString(req.body.diagnosis);
+    if (req.body.wardNumber) updateData.wardNumber = cleanString(req.body.wardNumber);
+    const updated = await Patient.findByIdAndUpdate(req.params.id, updateData, { new: true });
+    return res.status(200).json(updated);
+  } catch (err) {
+    return next(err);
+  }
+});
+
 // Appointments API
 app.get('/api/appointments', async (_req, res, next) => {
   try {
