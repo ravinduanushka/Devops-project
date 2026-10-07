@@ -5036,6 +5036,33 @@ button {
   transform: translateY(-1px);
 }
 
+/* Receptionist Hero Left Text Overlay & Heading (Manageable decreased font size, No Mr/Ms user button) */
+.rec-hero-left-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: auto;
+  max-width: 58%;
+  height: 100%;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: clamp(28px, 4.8vw, 68px);
+  padding-right: 16px;
+  padding-top: 14px;
+  z-index: 5;
+}
+
+.rec-hero-custom-heading {
+  font-size: clamp(2.05rem, 2.9vw, 2.95rem);
+  font-weight: 850;
+  color: #173d2a;
+  line-height: 1.16;
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+
 /* Dashboard Layout: Unified #DAEFEC for Sidebar & Main Content */
 .rec-dashboard-layout {
   width: 100%;
