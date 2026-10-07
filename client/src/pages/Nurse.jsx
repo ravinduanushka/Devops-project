@@ -41,7 +41,7 @@ function Nurse() {
   const [inpatientList, setInpatientList] = useState([
     {
       bedNo: "Bed-01A",
-      patientName: "Elena Rostova",
+      patientName: "Kavindi Jayawardena",
       pid: "P-88219",
       age: 34,
       gender: "Female",
@@ -50,11 +50,11 @@ function Nurse() {
       admissionDate: "Oct 12, 2026",
       condition: "Stable",
       conditionColor: "nurse-cond-stable",
-      attendingPhysician: "Dr. Robert Vance"
+      attendingPhysician: "Dr. Priyantha Senanayake"
     },
     {
       bedNo: "Bed-02B",
-      patientName: "Marcus Thompson",
+      patientName: "Nuwan Pradeep",
       pid: "P-30891",
       age: 58,
       gender: "Male",
@@ -63,24 +63,24 @@ function Nurse() {
       admissionDate: "Oct 10, 2026",
       condition: "Under Observation",
       conditionColor: "nurse-cond-observation",
-      attendingPhysician: "Dr. Vance"
+      attendingPhysician: "Dr. Senanayake"
     },
     {
       bedNo: "Bed-03A",
-      patientName: "Ahmed Khan",
+      patientName: "Ruwani Dissanayake",
       pid: "P-44021",
       age: 42,
-      gender: "Male",
+      gender: "Female",
       bloodGroup: "O+",
       allergy: "Sulfa",
       admissionDate: "Oct 11, 2026",
       condition: "Guarded",
       conditionColor: "nurse-cond-guarded",
-      attendingPhysician: "Dr. Sarah Jenkins"
+      attendingPhysician: "Dr. Kanthi Rajapaksha"
     },
     {
       bedNo: "Bed-04C",
-      patientName: "Mei Lin Chen",
+      patientName: "Surangi Senaratne",
       pid: "P-55209",
       age: 27,
       gender: "Female",
@@ -89,7 +89,7 @@ function Nurse() {
       admissionDate: "Oct 13, 2026",
       condition: "Critical",
       conditionColor: "nurse-cond-critical",
-      attendingPhysician: "Dr. Robert Vance"
+      attendingPhysician: "Dr. Priyantha Senanayake"
     }
   ]);
 
@@ -119,7 +119,7 @@ function Nurse() {
               }),
               condition: "Stable",
               conditionColor: "nurse-cond-stable",
-              attendingPhysician: p.doctorAssigned || "Dr. Robert Vance"
+              attendingPhysician: p.doctorAssigned || "Dr. Priyantha Senanayake"
             }));
 
           if (dbInpatients.length > 0) {
