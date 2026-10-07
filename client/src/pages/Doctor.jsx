@@ -575,15 +575,23 @@ function Doctor() {
             </button>
           </div>
 
-          {/* Dr.user pill button positioned directly under "Your Family" words */}
-          <div className="doc-hero-user-badge-container">
-            <button
-              className="doc-hero-user-badge"
-              title="Doctor Profile"
-              onClick={() => showToast(`Signed in as ${doctorDisplayName}`)}
-            >
-              {doctorDisplayName}
-            </button>
+          {/* Left Text Overlay: Decreased letter size for "Your Health, Our Priority" matching user request */}
+          <div className="doc-hero-left-overlay">
+            <h1 className="doc-hero-custom-heading">
+              Your Health,<br />Our Priority
+            </h1>
+            <p className="doc-hero-custom-subheading">
+              Compassionate Care for You and<br />Your Family
+            </p>
+            <div className="doc-hero-btn-wrap">
+              <button
+                className="doc-hero-user-badge"
+                title="Doctor Profile"
+                onClick={() => showToast(`Signed in as ${doctorDisplayName}`)}
+              >
+                {doctorDisplayName}
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -594,35 +602,43 @@ function Doctor() {
           Right Column (Cards Stream): #DAEFEC
           ======================================================== */}
       <div className="doc-dashboard-layout">
-        {/* LEFT COLUMN: Sidebar Navigation (#B0E5DD) */}
+        {/* LEFT COLUMN: Sidebar Navigation with charming rectangle borders and staggered entrance (#B0E5DD) */}
         <aside className="doc-sidebar-col">
           <nav className="doc-nav-menu">
             <button
-              className={`doc-nav-item ${activeNav === "PatientQueue" ? "active" : ""}`}
+              className={`doc-nav-item doc-nav-anim-1 ${activeNav === "PatientQueue" ? "active" : ""}`}
               onClick={() => scrollToSection("patient-queue-card", "PatientQueue")}
+              title="View Patient Queue"
             >
-              PatientQueue
+              <span className="doc-nav-text">PatientQueue</span>
+              <span className="doc-nav-indicator" aria-hidden="true">›</span>
             </button>
 
             <button
-              className={`doc-nav-item ${activeNav === "WardRounds" ? "active" : ""}`}
+              className={`doc-nav-item doc-nav-anim-2 ${activeNav === "WardRounds" ? "active" : ""}`}
               onClick={() => scrollToSection("ward-rounds-card", "WardRounds")}
+              title="View Inpatient Ward Rounds"
             >
-              WardRounds
+              <span className="doc-nav-text">WardRounds</span>
+              <span className="doc-nav-indicator" aria-hidden="true">›</span>
             </button>
 
             <button
-              className={`doc-nav-item ${activeNav === "Prescriptions" ? "active" : ""}`}
+              className={`doc-nav-item doc-nav-anim-3 ${activeNav === "Prescriptions" ? "active" : ""}`}
               onClick={() => scrollToSection("prescriptions-card", "Prescriptions")}
+              title="Create New Prescription"
             >
-              Prescriptions
+              <span className="doc-nav-text">Prescriptions</span>
+              <span className="doc-nav-indicator" aria-hidden="true">›</span>
             </button>
 
             <button
-              className={`doc-nav-item ${activeNav === "MedicalRecords" ? "active" : ""}`}
+              className={`doc-nav-item doc-nav-anim-4 ${activeNav === "MedicalRecords" ? "active" : ""}`}
               onClick={() => scrollToSection("medical-records-card", "MedicalRecords")}
+              title="View Clinical Records & History"
             >
-              MedicalRecords
+              <span className="doc-nav-text">MedicalRecords</span>
+              <span className="doc-nav-indicator" aria-hidden="true">›</span>
             </button>
           </nav>
         </aside>

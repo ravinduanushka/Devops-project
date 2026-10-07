@@ -2049,31 +2049,70 @@ button {
   transform: translateY(-1px);
 }
 
-/* Dr.user button positioned directly under "Your Family" words */
-.doc-hero-user-badge-container {
+/* Hero Left Text Overlay: Decreased letter size matching user request */
+.doc-hero-left-overlay {
   position: absolute;
-  top: 65%;
-  left: 4.2%;
-  z-index: 10;
+  top: 0;
+  left: 0;
+  width: 52%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    rgba(238, 246, 249, 0.99) 0%,
+    rgba(231, 242, 244, 0.98) 55%,
+    rgba(184, 211, 222, 0.96) 100%
+  );
+  mask-image: linear-gradient(to right, black 72%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, black 72%, transparent 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: clamp(28px, 4.2vw, 60px);
+  padding-right: 20px;
+  padding-top: clamp(28px, 3.2vw, 44px);
+  z-index: 5;
 }
 
+.doc-hero-custom-heading {
+  font-size: clamp(1.8rem, 2.65vw, 2.6rem);
+  font-weight: 850;
+  color: #1e293b;
+  line-height: 1.15;
+  letter-spacing: -0.6px;
+  margin: 0;
+}
+
+.doc-hero-custom-subheading {
+  font-size: clamp(0.92rem, 1.16vw, 1.12rem);
+  font-weight: 500;
+  color: #475569;
+  line-height: 1.4;
+  margin: 12px 0 0 0;
+}
+
+.doc-hero-btn-wrap {
+  margin-top: 16px;
+}
+
+/* Dr.user pill button with white outline border matching user image */
 .doc-hero-user-badge {
   background-color: #4EB2A1;
   color: #ffffff;
-  font-size: clamp(1.05rem, 1.35vw, 1.35rem);
+  font-size: clamp(1rem, 1.25vw, 1.25rem);
   font-weight: 800;
-  padding: 10px clamp(28px, 3.4vw, 44px);
+  padding: 8px clamp(26px, 3.2vw, 40px);
   border-radius: 9999px;
-  box-shadow: 0 5px 15px rgba(35, 120, 107, 0.3);
-  border: none;
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 4px 14px rgba(35, 120, 107, 0.35);
   cursor: pointer;
   transition: all 0.2s ease;
   letter-spacing: 0.3px;
+  display: inline-block;
 }
 
 .doc-hero-user-badge:hover {
   transform: translateY(-2px);
-  box-shadow: 0 7px 18px rgba(35, 120, 107, 0.4);
+  box-shadow: 0 6px 18px rgba(35, 120, 107, 0.45);
 }
 
 /* ========================================================
@@ -2093,7 +2132,7 @@ button {
   width: 250px;
   min-width: 250px;
   background-color: #B0E5DD;
-  padding: 42px 28px 60px;
+  padding: 38px 22px 60px;
   box-sizing: border-box;
   flex-shrink: 0;
 }
@@ -2103,28 +2142,95 @@ button {
   top: 30px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
+  width: 100%;
 }
 
+/* Suitable Rectangle Border with charming design matching theme */
 .doc-nav-item {
-  font-size: 1.25rem;
-  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 18px;
+  background: #ffffff;
+  border: 2px solid #2d7a6e;
+  border-radius: 12px;
   color: #123e37;
-  text-align: left;
-  background: none;
-  border: none;
+  font-size: 1.05rem;
+  font-weight: 800;
   cursor: pointer;
-  transition: all 0.2s ease;
-  padding: 4px 0;
-  display: block;
+  box-shadow: 0 3px 8px rgba(18, 62, 55, 0.08);
+  transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  text-align: left;
+}
+
+.doc-nav-text {
   letter-spacing: -0.2px;
 }
 
-.doc-nav-item:hover,
-.doc-nav-item.active {
-  color: #042420;
+.doc-nav-indicator {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #2d7a6e;
+  transition: transform 0.22s ease, color 0.22s ease;
+  line-height: 1;
+}
+
+.doc-nav-item:hover {
   transform: translateX(6px);
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.4);
+  background: #f0fbf8;
+  border-color: #19584e;
+  box-shadow: 0 6px 16px rgba(18, 62, 55, 0.15);
+  color: #0b2f29;
+}
+
+.doc-nav-item:hover .doc-nav-indicator {
+  transform: translateX(3px);
+  color: #19584e;
+}
+
+.doc-nav-item.active {
+  background: #1e594f;
+  border-color: #113a33;
+  color: #ffffff;
+  transform: translateX(6px);
+  box-shadow: 0 6px 18px rgba(18, 62, 55, 0.25);
+}
+
+.doc-nav-item.active .doc-nav-indicator {
+  color: #33dfc2;
+  transform: translateX(3px);
+}
+
+/* Staggered One-by-One Entrance Transitions for Sidebar Items */
+@keyframes sidebarItemSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.doc-nav-anim-1 {
+  animation: sidebarItemSlideIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.15s backwards;
+}
+
+.doc-nav-anim-2 {
+  animation: sidebarItemSlideIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.30s backwards;
+}
+
+.doc-nav-anim-3 {
+  animation: sidebarItemSlideIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.45s backwards;
+}
+
+.doc-nav-anim-4 {
+  animation: sidebarItemSlideIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.60s backwards;
 }
 
 /* Right Main Cards Column (#DAEFEC) */
