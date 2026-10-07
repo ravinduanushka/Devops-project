@@ -623,7 +623,7 @@ function Patient() {
                 <div className="patient-rx-mint-card">
                   <h4 className="patient-rx-mint-title">Follow-up Consultation:</h4>
                   <p className="patient-rx-mint-text">
-                    Dr. Vance – Cardiology, October 26, 2026
+                    Dr. Senanayake – Cardiology, October 26, 2026
                   </p>
                 </div>
               </div>
