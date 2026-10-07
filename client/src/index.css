@@ -2135,11 +2135,12 @@ button {
   background-color: #DAEFEC;
 }
 
-/* Left Sidebar Column (#B0E5DD) */
+/* Left Sidebar Column - Unified #DAEFEC */
 .doc-sidebar-col {
   width: 250px;
   min-width: 250px;
-  background-color: #B0E5DD;
+  background-color: #DAEFEC;
+  border-right: 1.5px solid rgba(45, 122, 110, 0.14);
   padding: 38px 22px 60px;
   box-sizing: border-box;
   flex-shrink: 0;
@@ -3269,11 +3270,12 @@ button {
   background-color: #DAEFEC;
 }
 
-/* Left Sidebar Column (#B0E5DD) */
+/* Left Sidebar Column - Unified #DAEFEC */
 .patient-sidebar-col {
   width: 250px;
   min-width: 250px;
-  background-color: #B0E5DD;
+  background-color: #DAEFEC;
+  border-right: 1.5px solid rgba(45, 122, 110, 0.14);
   padding: 38px 22px 60px;
   box-sizing: border-box;
   flex-shrink: 0;
