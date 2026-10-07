@@ -4969,23 +4969,25 @@ button {
 
 /* Receptionist Hero Banner Section */
 .rec-hero-section {
-  position: relative;
   width: 100%;
+  background: #ffffff;
+  position: relative;
   overflow: hidden;
-  background: #cce9e3;
 }
 
 .rec-hero-container {
   position: relative;
   width: 100%;
-  max-height: 480px;
-  height: clamp(340px, 42vw, 480px);
+  max-width: 100%;
+  height: clamp(380px, 36vw, 520px);
+  background: linear-gradient(to bottom, #d6eade 0%, #cce9e3 100%);
   overflow: hidden;
-  display: flex;
-  align-items: center;
 }
 
 .rec-hero-bg-img {
+  position: absolute;
+  top: 0;
+  right: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -4996,31 +4998,31 @@ button {
 /* NexusHealth Top-Left Logo */
 .rec-hero-logo-box {
   position: absolute;
-  top: clamp(14px, 2.5vw, 24px);
-  left: clamp(20px, 3.5vw, 44px);
+  top: 18px;
+  left: 32px;
   z-index: 10;
 }
 
 .rec-hero-logo-img {
-  height: clamp(38px, 4.5vw, 52px);
+  height: clamp(36px, 4vw, 54px);
   width: auto;
   object-fit: contain;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.06));
 }
 
 /* Top Right Sign Out Pill */
 .rec-hero-top-right {
   position: absolute;
-  top: clamp(16px, 2.5vw, 26px);
-  right: clamp(20px, 3.5vw, 44px);
+  top: 18px;
+  right: 32px;
   z-index: 10;
 }
 
 .rec-logout-pill {
-  background: #ef4444;
+  background: rgba(239, 68, 68, 0.88);
   color: #ffffff;
-  padding: 7px 18px;
-  border-radius: 9999px;
+  padding: 6px 16px;
+  border-radius: 20px;
   font-size: 0.85rem;
   font-weight: 600;
   transition: all 0.2s ease;
@@ -5032,33 +5034,6 @@ button {
 .rec-logout-pill:hover {
   background: #dc2626;
   transform: translateY(-1px);
-}
-
-/* Receptionist Hero Left Text Overlay & Heading (No Mr/Ms user button) */
-.rec-hero-left-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: auto;
-  max-width: 58%;
-  height: 100%;
-  background: transparent;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding-left: clamp(28px, 4.8vw, 68px);
-  padding-right: 16px;
-  padding-top: 14px;
-  z-index: 5;
-}
-
-.rec-hero-custom-heading {
-  font-size: clamp(2.1rem, 3.1vw, 3.15rem);
-  font-weight: 850;
-  color: #11382c;
-  line-height: 1.16;
-  letter-spacing: -0.5px;
-  margin: 0;
 }
 
 /* Dashboard Layout: Unified #DAEFEC for Sidebar & Main Content */
