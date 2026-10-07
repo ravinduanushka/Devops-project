@@ -38,22 +38,22 @@ function Patient() {
   const [tokenStatus, setTokenStatus] = useState({
     yourToken: "#05",
     currentlyServing: "#04",
-    scheduledVisit: "Dr. Robert Vance (Cardiology) - Today at 10:15 AM"
+    scheduledVisit: "Dr. Priyantha Senanayake (Cardiology) - Today at 10:15 AM"
   });
 
   const [doctorsList] = useState([
-    { name: "Dr. Robert Vance", specialty: "Cardiology", fee: "Rs. 2,500.00", feeUsd: "$50.00" },
-    { name: "Dr. Elena Rostova", specialty: "General Medicine", fee: "Rs. 2,000.00", feeUsd: "$40.00" },
-    { name: "Dr. Marcus Thompson", specialty: "Pulmonology", fee: "Rs. 2,800.00", feeUsd: "$55.00" },
-    { name: "Dr. Sophia Patel", specialty: "Neurology", fee: "Rs. 3,000.00", feeUsd: "$60.00" }
+    { name: "Dr. Priyantha Senanayake", specialty: "Cardiology", fee: "Rs. 2,500.00", feeUsd: "$50.00" },
+    { name: "Dr. Champa Gunasekara", specialty: "General Medicine", fee: "Rs. 2,000.00", feeUsd: "$40.00" },
+    { name: "Dr. Sanath Weerasinghe", specialty: "Pulmonology", fee: "Rs. 2,800.00", feeUsd: "$55.00" },
+    { name: "Dr. Sanduni Wickramasinghe", specialty: "Neurology", fee: "Rs. 3,000.00", feeUsd: "$60.00" }
   ]);
 
   const [bookingForm, setBookingForm] = useState({
-    doctor: "Dr. Robert Vance - Cardiology",
+    doctor: "Dr. Priyantha Senanayake - Cardiology",
     specialty: "Cardiology",
     consultationType: "In-Person Visit",
     dateTime: "Today, Oct 7, 2026 - 10:15 AM",
-    patientName: currentUser?.name ? `${currentUser.name} (PID: P-1042)` : "Elena Rostova (PID: P-1042)",
+    patientName: currentUser?.name ? `${currentUser.name} (PID: P-1042)` : "Kavindi Jayawardena (PID: P-1042)",
     patientAge: 34
   });
 
@@ -72,7 +72,7 @@ function Patient() {
     e.preventDefault();
     try {
       await createAppointment({
-        patientName: currentUser?.name || "Elena Rostova",
+        patientName: currentUser?.name || "Kavindi Jayawardena",
         doctorName: bookingForm.doctor.split(" - ")[0],
         department: bookingForm.specialty,
         dateTime: new Date().toISOString(),
@@ -87,11 +87,11 @@ function Patient() {
 
   const handleCancelBooking = () => {
     setBookingForm({
-      doctor: "Dr. Robert Vance - Cardiology",
+      doctor: "Dr. Priyantha Senanayake - Cardiology",
       specialty: "Cardiology",
       consultationType: "In-Person Visit",
       dateTime: "Today, Oct 7, 2026 - 10:15 AM",
-      patientName: currentUser?.name ? `${currentUser.name} (PID: P-1042)` : "Elena Rostova (PID: P-1042)",
+      patientName: currentUser?.name ? `${currentUser.name} (PID: P-1042)` : "Kavindi Jayawardena (PID: P-1042)",
       patientAge: 34
     });
     showToast("Booking form reset.");
@@ -101,7 +101,7 @@ function Patient() {
   // STEP 2: MY RECORDS STATE (Diagnosis & Vitals)
   // ==========================================
   const [medicalRecord] = useState({
-    patientName: "Elena Rostova",
+    patientName: "Kavindi Jayawardena",
     pid: "P-88210",
     age: 34,
     gender: "Female",
@@ -160,7 +160,7 @@ function Patient() {
     status: "Current Status: Inpatient Admitted - Ward 3B",
     bed: "Bed-01A",
     admittedDate: "Oct 12, 2026",
-    doctor: "Dr. Robert Vance",
+    doctor: "Dr. Priyantha Senanayake",
     nurse: "Nurse K. Perera",
     logs: [
       "08:00 AM - Breakfast served (Low sodium diet)",
