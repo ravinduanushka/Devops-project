@@ -558,7 +558,9 @@ function Doctor() {
   };
 
   // Doctor display name connected to user registration/database login
-  const doctorDisplayName = currentUser?.name ? `Dr.${currentUser.name}` : "Dr.user";
+  const doctorDisplayName = currentUser?.name
+    ? (currentUser.name.startsWith("Dr.") ? currentUser.name : `Dr. ${currentUser.name}`)
+    : "Dr. Priyantha Senanayake";
 
   // Calculate dynamic bed counts
   const dischargedCount = wardPatients.filter((p) => p.condition === "Discharged").length;
