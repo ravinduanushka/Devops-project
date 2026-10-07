@@ -4097,13 +4097,11 @@ button {
    ========================================================================== */
 
 .nurse-page-wrapper {
-  width: 100%;
-  min-height: 100vh;
-  background-color: #DAEFEC;
   display: flex;
   flex-direction: column;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  overflow-x: hidden;
+  min-height: 100vh;
+  background-color: #DAEFEC;
+  color: #1f2937;
 }
 
 /* Nurse Hero Banner Section */
