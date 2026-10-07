@@ -327,6 +327,14 @@ function Receptionist() {
               Sign Out
             </button>
           </div>
+
+          {/* Left Text Overlay: Heading (Manageable size, No Mr/Ms User badge per user instruction) */}
+          <div className="rec-hero-left-overlay">
+            <h1 className="rec-hero-custom-heading">
+              Your Portal<br />
+              to Better Care.
+            </h1>
+          </div>
         </div>
       </section>
 
