@@ -2080,7 +2080,7 @@ button {
 }
 
 .doc-hero-custom-heading {
-  font-size: clamp(2.1rem, 3.1vw, 3.15rem);
+  font-size: clamp(2.5rem, 3.7vw, 3.75rem);
   font-weight: 850;
   color: #1a2e3b;
   line-height: 1.2;
@@ -2090,7 +2090,7 @@ button {
 }
 
 .doc-hero-custom-subheading {
-  font-size: clamp(1.05rem, 1.35vw, 1.35rem);
+  font-size: clamp(1.2rem, 1.6vw, 1.6rem);
   font-weight: 500;
   color: #475569;
   line-height: 1.4;
@@ -3229,7 +3229,7 @@ button {
 }
 
 .patient-hero-custom-heading {
-  font-size: clamp(2.1rem, 3.1vw, 3.15rem);
+  font-size: clamp(2.5rem, 3.7vw, 3.75rem);
   font-weight: 850;
   color: #11382c;
   line-height: 1.16;
