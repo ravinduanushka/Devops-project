@@ -7,7 +7,7 @@ import { getPatients, getAppointments, updatePatient } from "../services/api";
 const initialPatientsCatalog = {
   "04": {
     token: "04",
-    name: "Elena Rostova",
+    name: "Kavindi Jayawardena",
     age: 34,
     gender: "Female",
     pid: "P-88210",
@@ -30,7 +30,7 @@ const initialPatientsCatalog = {
   },
   "05": {
     token: "05",
-    name: "Liam Carter",
+    name: "Kasun Madusanka",
     age: 46,
     gender: "Male",
     pid: "P-1033",
@@ -53,7 +53,7 @@ const initialPatientsCatalog = {
   },
   "06": {
     token: "06",
-    name: "Sophia Patel",
+    name: "Nalani Wickramasinghe",
     age: 29,
     gender: "Female",
     pid: "P-2045",
@@ -75,7 +75,7 @@ const initialPatientsCatalog = {
   },
   "07": {
     token: "07",
-    name: "Marcus Thompson",
+    name: "Nuwan Pradeep",
     age: 58,
     gender: "Male",
     pid: "P-3089",
