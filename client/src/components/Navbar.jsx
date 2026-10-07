@@ -89,6 +89,13 @@ function Navbar() {
             Nurse
           </Link>
           <Link
+            to="/receptionist"
+            className="nav-item"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Receptionist
+          </Link>
+          <Link
             to="/admin"
             className="nav-item admin-badge-link"
             onClick={() => setMobileMenuOpen(false)}

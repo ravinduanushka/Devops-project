@@ -4953,3 +4953,742 @@ button {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* ==========================================================================
+   RECEPTIONIST PORTAL STYLES (Matching Doctor, Patient, & Nurse Pages)
+   ========================================================================== */
+
+.rec-page-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #DAEFEC;
+  color: #1f2937;
+}
+
+/* Receptionist Hero Banner Section */
+.rec-hero-section {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: #cce9e3;
+}
+
+.rec-hero-container {
+  position: relative;
+  width: 100%;
+  max-height: 480px;
+  height: clamp(340px, 42vw, 480px);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.rec-hero-bg-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+/* NexusHealth Top-Left Logo */
+.rec-hero-logo-box {
+  position: absolute;
+  top: clamp(14px, 2.5vw, 24px);
+  left: clamp(20px, 3.5vw, 44px);
+  z-index: 10;
+}
+
+.rec-hero-logo-img {
+  height: clamp(38px, 4.5vw, 52px);
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* Top Right Sign Out Pill */
+.rec-hero-top-right {
+  position: absolute;
+  top: clamp(16px, 2.5vw, 26px);
+  right: clamp(20px, 3.5vw, 44px);
+  z-index: 10;
+}
+
+.rec-logout-pill {
+  background: #ef4444;
+  color: #ffffff;
+  padding: 7px 18px;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: none;
+}
+
+.rec-logout-pill:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+}
+
+/* Receptionist Hero Left Text Overlay & Heading (No Mr/Ms user button) */
+.rec-hero-left-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: auto;
+  max-width: 58%;
+  height: 100%;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: clamp(28px, 4.8vw, 68px);
+  padding-right: 16px;
+  padding-top: 14px;
+  z-index: 5;
+}
+
+.rec-hero-custom-heading {
+  font-size: clamp(2.1rem, 3.1vw, 3.15rem);
+  font-weight: 850;
+  color: #11382c;
+  line-height: 1.16;
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+
+/* Dashboard Layout: Unified #DAEFEC for Sidebar & Main Content */
+.rec-dashboard-layout {
+  width: 100%;
+  display: flex;
+  min-height: calc(100vh - 460px);
+  background-color: #DAEFEC;
+}
+
+/* Left Sidebar Column - Unified #DAEFEC */
+.rec-sidebar-col {
+  width: 260px;
+  min-width: 260px;
+  background-color: #DAEFEC;
+  border-right: 1.5px solid rgba(45, 122, 110, 0.14);
+  padding: 38px 20px 60px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.rec-nav-menu {
+  position: sticky;
+  top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.rec-nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  background: #ffffff;
+  border: 2px solid #2d7a6e;
+  border-radius: 12px;
+  color: #123e37;
+  font-size: 1.02rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(18, 62, 55, 0.08);
+  transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  text-align: left;
+}
+
+.rec-nav-text {
+  letter-spacing: -0.2px;
+  word-break: break-word;
+}
+
+.rec-nav-indicator {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #2d7a6e;
+  transition: transform 0.22s ease, color 0.22s ease;
+  line-height: 1;
+}
+
+.rec-nav-item:hover {
+  transform: translateX(6px);
+  background: #f0fbf8;
+  border-color: #19584e;
+  box-shadow: 0 6px 16px rgba(18, 62, 55, 0.15);
+  color: #0b2f29;
+}
+
+.rec-nav-item:hover .rec-nav-indicator {
+  transform: translateX(3px);
+  color: #19584e;
+}
+
+.rec-nav-item.active {
+  background: #1e594f;
+  border-color: #113a33;
+  color: #ffffff;
+  transform: translateX(6px);
+  box-shadow: 0 6px 18px rgba(18, 62, 55, 0.25);
+}
+
+.rec-nav-item.active .rec-nav-indicator {
+  color: #33dfc2;
+  transform: translateX(3px);
+}
+
+/* Staggered Sidebar Animations */
+.rec-nav-anim-1 { animation: sidebarItemSlideIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.15s backwards; }
+.rec-nav-anim-2 { animation: sidebarItemSlideIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.30s backwards; }
+.rec-nav-anim-3 { animation: sidebarItemSlideIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.45s backwards; }
+.rec-nav-anim-4 { animation: sidebarItemSlideIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.60s backwards; }
+
+/* Right Main Cards Column */
+.rec-main-col {
+  flex: 1;
+  background-color: #DAEFEC;
+  padding: 36px 36px 60px;
+  box-sizing: border-box;
+}
+
+.rec-cards-stream {
+  max-width: 1060px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* White Card Containers Matching Previous Pages */
+.rec-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px 26px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+
+.rec-card-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #1e3a35;
+  margin-bottom: 18px;
+  line-height: 1.25;
+}
+
+/* Sub-sections & Form Inputs */
+.rec-sub-section {
+  background: #ffffff;
+  border-radius: 8px;
+}
+
+.rec-sub-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #115e59;
+  margin-bottom: 14px;
+}
+
+.rec-grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 28px;
+}
+
+.rec-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rec-form-group label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.rec-form-control.underline-input {
+  border: none;
+  border-bottom: 1.5px solid #cbd5e1;
+  border-radius: 0;
+  padding: 8px 4px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #1e293b;
+  background: transparent;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.rec-form-control.underline-input:focus {
+  border-bottom-color: #0d6b63;
+}
+
+.rec-age-gender-pair {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rec-slash {
+  font-weight: 700;
+  color: #64748b;
+}
+
+.rec-form-control.select-box {
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #1e293b;
+  background: #ffffff;
+}
+
+.rec-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 14px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.rec-btn-cancel {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 0.88rem;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.rec-btn-cancel:hover {
+  color: #0f172a;
+}
+
+.rec-btn-primary {
+  background: #0d6b63;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.88rem;
+  padding: 10px 24px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(13, 107, 99, 0.2);
+}
+
+.rec-btn-primary:hover {
+  background: #094e48;
+  transform: translateY(-1px);
+}
+
+/* Card 2, 3, 4 Split Panels */
+.rec-split-card-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.rec-split-panel-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 20px 22px;
+}
+
+.rec-panel-heading {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #115e59;
+  margin-bottom: 16px;
+}
+
+.rec-form-control.rounded-input {
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 9px 12px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #1e293b;
+  background: #ffffff;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.rec-form-control.readonly-input {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.rec-input-icon-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.rec-input-icon {
+  position: absolute;
+  right: 12px;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.rec-token-slip-box {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 18px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.rec-slip-header {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.84rem;
+  color: #475569;
+}
+
+.rec-slip-header strong {
+  font-size: 0.95rem;
+  color: #0f172a;
+}
+
+.rec-slip-token-number {
+  font-size: 2rem;
+  font-weight: 850;
+  color: #0f172a;
+  margin: 4px 0;
+}
+
+.rec-slip-details {
+  width: 100%;
+  font-size: 0.82rem;
+  color: #334155;
+  text-align: left;
+  background: #f8fafc;
+  padding: 10px 14px;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rec-slip-meta-row {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px dashed #cbd5e1;
+  padding-top: 6px;
+  margin-top: 4px;
+}
+
+.rec-btn-slip-action {
+  background: #0d6b63;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 8px 18px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.2s ease;
+}
+
+.rec-btn-slip-action:hover {
+  background: #094e48;
+}
+
+/* Card 3: Bed Allocation */
+.rec-ward-status-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.rec-ward-title-text {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1e3a35;
+}
+
+.rec-bed-legend {
+  display: flex;
+  gap: 14px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.dot-avail { background-color: #10b981; }
+.dot-occ { background-color: #ef4444; }
+
+.rec-bed-tiles-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.rec-bed-tile {
+  padding: 8px 4px;
+  border-radius: 6px;
+  font-size: 0.76rem;
+  font-weight: 750;
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.tile-occ {
+  background-color: #e53e3e;
+  cursor: not-allowed;
+  opacity: 0.9;
+}
+
+.tile-avail {
+  background-color: #10b981;
+  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.3);
+}
+
+.tile-avail:hover {
+  transform: scale(1.05);
+  background-color: #059669;
+}
+
+.tile-selected {
+  outline: 3px solid #0f172a;
+  transform: scale(1.08);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.35);
+}
+
+.rec-assignment-details-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 0.88rem;
+}
+
+.rec-assign-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 8px;
+}
+
+.rec-assign-label {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.rec-assign-val {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.rec-assign-badge-highlight {
+  background: #0d6b63;
+  color: #ffffff;
+  font-weight: 800;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+}
+
+/* Card 4: Discharge & Billing */
+.rec-approvals-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 0.88rem;
+  color: #1e293b;
+}
+
+.rec-appr-status .status-pill {
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 12px;
+  margin-left: 6px;
+}
+
+.pill-awaiting {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.pill-cleared {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.rec-clearance-items {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.rec-clearance-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.84rem;
+  color: #334155;
+}
+
+.rec-check-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #10b981;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.rec-invoice-table {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+.rec-invoice-header {
+  font-weight: 700;
+  color: #475569;
+  border-bottom: 1px solid #cbd5e1;
+  padding-bottom: 6px;
+}
+
+.rec-invoice-row {
+  display: flex;
+  justify-content: space-between;
+  color: #334155;
+  padding: 3px 0;
+}
+
+.rec-invoice-total-row {
+  display: flex;
+  justify-content: space-between;
+  border-top: 2px solid #cbd5e1;
+  padding-top: 8px;
+  margin-top: 4px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.rec-invoice-total-val {
+  color: #0d6b63;
+  font-size: 1.1rem;
+}
+
+.rec-payment-status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.rec-badge-payment-done {
+  background: #10b981;
+  color: #ffffff;
+  font-size: 0.76rem;
+  font-weight: 750;
+  padding: 3px 12px;
+  border-radius: 12px;
+}
+
+/* Toast Notifications */
+.rec-toast-notification {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  background: #0d6b63;
+  color: #ffffff;
+  padding: 12px 22px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  animation: slideInUp 0.3s ease;
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 900px) {
+  .rec-dashboard-layout {
+    flex-direction: column;
+  }
+  .rec-sidebar-col {
+    width: 100%;
+    min-width: 100%;
+    border-right: none;
+    border-bottom: 1.5px solid rgba(45, 122, 110, 0.14);
+    padding: 20px 16px;
+  }
+  .rec-nav-menu {
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .rec-nav-item {
+    flex: 1 1 calc(50% - 8px);
+    padding: 10px 14px;
+    font-size: 0.95rem;
+  }
+  .rec-main-col {
+    padding: 24px 16px 40px;
+  }
+  .rec-grid-2col,
+  .rec-split-card-grid {
+    grid-template-columns: 1fr;
+  }
+}
