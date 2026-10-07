@@ -391,7 +391,7 @@ function Doctor() {
   // STEP 3: PRESCRIPTIONS STATE
   // ==========================================
   const [rxPatient, setRxPatient] = useState({
-    name: "Elena Rostova",
+    name: "Kavindi Jayawardena",
     age: "34",
     gender: "Female",
     patientId: "#P-88210"
@@ -456,7 +456,7 @@ function Doctor() {
     {
       id: 1,
       bedNo: "201-A",
-      patientName: "Liam Carter",
+      patientName: "Kasun Madusanka",
       admissionDate: "Oct 12, 2026",
       condition: "Stable",
       conditionColor: "cond-stable",
@@ -466,7 +466,7 @@ function Doctor() {
     {
       id: 2,
       bedNo: "201-B",
-      patientName: "Sophia Patel",
+      patientName: "Nalani Wickramasinghe",
       admissionDate: "Oct 14, 2026",
       condition: "Guarded",
       conditionColor: "cond-guarded",
@@ -476,7 +476,7 @@ function Doctor() {
     {
       id: 3,
       bedNo: "203-A",
-      patientName: "Marcus Thompson",
+      patientName: "Nuwan Pradeep",
       admissionDate: "Oct 15, 2026",
       condition: "Critical",
       conditionColor: "cond-critical",
