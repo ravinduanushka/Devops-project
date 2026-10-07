@@ -5,6 +5,7 @@ import Register from "./pages/Register";
 import Admin from "./pages/Admin";
 import Doctor from "./pages/Doctor";
 import Patient from "./pages/Patient";
+import Nurse from "./pages/Nurse";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/admin" element={<Admin />} />
         <Route path="/doctor" element={<Doctor />} />
         <Route path="/patient" element={<Patient />} />
+        <Route path="/nurse" element={<Nurse />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

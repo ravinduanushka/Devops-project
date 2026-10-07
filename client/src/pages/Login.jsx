@@ -44,6 +44,8 @@ function Login() {
           navigate("/admin");
         } else if (userData.role === "Patient") {
           navigate("/patient");
+        } else if (userData.role === "Nurse") {
+          navigate("/nurse");
         } else {
           navigate("/");
         }
