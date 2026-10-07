@@ -507,11 +507,13 @@ function Nurse() {
             </div>
 
             {/* ----------------------------------------------------
-                WORKFLOW STEP 2: VITAL RECORDING (Matching Image 2)
+                WORKFLOW STEP 2: VITAL RECORDING (Matching Doctor/Patient style)
                 - Logs BP, Heart Rate, Temperature, SpO2
                 - Historical vitals trends
                 ---------------------------------------------------- */}
             <div id="vital-recording-card" className="nurse-card">
+              <h2 className="nurse-card-title">Record Patient Vital Signs</h2>
+
               {/* Header Info Strip */}
               <div className="nurse-patient-strip">
                 <div className="nurse-patient-meta">
@@ -524,8 +526,6 @@ function Nurse() {
 
               {/* Form Subcard */}
               <div className="nurse-vitals-subcard">
-                <h3 className="nurse-subcard-title">Record New Vital Signs</h3>
-
                 <form onSubmit={handleLogVitals}>
                   <div className="nurse-vitals-form-grid">
                     {/* Row 1: BP & Heart Rate */}
@@ -617,20 +617,20 @@ function Nurse() {
             </div>
 
             {/* ----------------------------------------------------
-                WORKFLOW STEP 3: MED ADMINISTRATION (Matching Image 2)
+                WORKFLOW STEP 3: MED ADMINISTRATION (Matching Doctor/Patient style)
                 - Active Medication Schedule
                 - Administer and verify dosages
                 ---------------------------------------------------- */}
             <div id="med-administration-card" className="nurse-card">
+              <h2 className="nurse-card-title">Medication Administration Schedule</h2>
+
               {/* Header Strip */}
               <div className="nurse-med-schedule-strip">
-                Active Medication Schedule - Ward 3B / {activePatient.bedNo} ({activePatient.patientName})
+                Active Medication Schedule &bull; Ward 3B / {activePatient.bedNo} ({activePatient.patientName})
               </div>
 
               {/* Subcard Table */}
               <div className="nurse-med-subcard">
-                <h3 className="nurse-subcard-title">Medication Administration Record</h3>
-
                 <div className="nurse-table-scroll">
                   <table className="nurse-clean-table">
                     <thead>
@@ -674,19 +674,19 @@ function Nurse() {
             </div>
 
             {/* ----------------------------------------------------
-                WORKFLOW STEP 4: SHIFT HANDOVER (Matching Image 3)
+                WORKFLOW STEP 4: SHIFT HANDOVER (Matching Doctor/Patient style)
                 - Ward Clinical Notes & Summary
                 - Checklist and oncoming nurse acknowledgment
                 ---------------------------------------------------- */}
             <div id="shift-handover-card" className="nurse-card">
+              <h2 className="nurse-card-title">Shift Handover & Clinical Notes</h2>
+
               {/* Top Shift Status Strip */}
               <div className="nurse-handover-header-strip">
-                Shift Handover Summary - Day Shift (07:00 AM - 03:00 PM) &bull; Duty Nurse: {nurseDisplayName}
+                Shift Handover Summary &bull; Day Shift (07:00 AM - 03:00 PM) &bull; Duty Nurse: {nurseDisplayName}
               </div>
 
               <div className="nurse-handover-subcard">
-                <h3 className="nurse-subcard-title">Nurse portal - Shift Handover</h3>
-
                 <form onSubmit={handleSubmitHandover}>
                   <div className="nurse-handover-grid">
                     {/* Left: Ward 3B Clinical Notes */}
