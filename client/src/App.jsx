@@ -6,6 +6,7 @@ import Admin from "./pages/Admin";
 import Doctor from "./pages/Doctor";
 import Patient from "./pages/Patient";
 import Nurse from "./pages/Nurse";
+import Receptionist from "./pages/Receptionist";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/doctor" element={<Doctor />} />
         <Route path="/patient" element={<Patient />} />
         <Route path="/nurse" element={<Nurse />} />
+        <Route path="/receptionist" element={<Receptionist />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
