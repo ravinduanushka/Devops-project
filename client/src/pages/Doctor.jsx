@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import { getPatients, getAppointments, updatePatient } from "../services/api";
@@ -505,13 +505,51 @@ function Doctor() {
     }
   };
 
-  // Sidebar smooth scrolling
+  const isManualScroll = useRef(false);
+
+  // Auto-switch sidebar active category as user scrolls down the page
+  useEffect(() => {
+    const sections = [
+      { id: "patient-queue-card", nav: "PatientQueue" },
+      { id: "ward-rounds-card", nav: "WardRounds" },
+      { id: "prescriptions-card", nav: "Prescriptions" },
+      { id: "medical-records-card", nav: "MedicalReports" }
+    ];
+
+    const handleScroll = () => {
+      if (isManualScroll.current) return;
+
+      const scrollPosition = window.scrollY + 220;
+
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const el = document.getElementById(sections[i].id);
+        if (el) {
+          const top = el.offsetTop;
+          if (scrollPosition >= top) {
+            setActiveNav(sections[i].nav);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Sidebar smooth scrolling when manually clicked
   const scrollToSection = (id, navName) => {
     setActiveNav(navName);
+    isManualScroll.current = true;
     const element = document.getElementById(id);
     if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
+      const yOffset = -20;
+      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: "smooth" });
     }
+    setTimeout(() => {
+      isManualScroll.current = false;
+    }, 850);
   };
 
   const handleLogout = () => {
@@ -545,14 +583,16 @@ function Doctor() {
           ======================================================== */}
       <section className="doc-hero-section">
         <div className="doc-hero-container">
-          <img
-            src="/doctor-page.jpg"
-            alt="Doctor Consultation and Healthcare"
-            className="doc-hero-bg-img"
-            onError={(e) => {
-              e.currentTarget.src = "/doctor page .jpg";
-            }}
-          />
+          <div className="doc-hero-img-wrap">
+            <img
+              src="/doctor-page.jpg"
+              alt="Doctor Consultation and Healthcare"
+              className="doc-hero-bg-img"
+              onError={(e) => {
+                e.currentTarget.src = "/doctor page .jpg";
+              }}
+            />
+          </div>
 
           {/* NexusHealth Logo in top-left position */}
           <div className="doc-hero-logo-box">
@@ -575,13 +615,13 @@ function Doctor() {
             </button>
           </div>
 
-          {/* Left Text Overlay: Decreased letter size for "Your Health, Our Priority" matching user request */}
+          {/* Left Text Overlay: 2 single lines with Dr.user badge under them */}
           <div className="doc-hero-left-overlay">
             <h1 className="doc-hero-custom-heading">
-              Your Health,<br />Our Priority
+              Your Health, Our Priority
             </h1>
             <p className="doc-hero-custom-subheading">
-              Compassionate Care for You and<br />Your Family
+              Compassionate Care for You and Your Family
             </p>
             <div className="doc-hero-btn-wrap">
               <button
@@ -633,11 +673,11 @@ function Doctor() {
             </button>
 
             <button
-              className={`doc-nav-item doc-nav-anim-4 ${activeNav === "MedicalRecords" ? "active" : ""}`}
-              onClick={() => scrollToSection("medical-records-card", "MedicalRecords")}
-              title="View Clinical Records & History"
+              className={`doc-nav-item doc-nav-anim-4 ${activeNav === "MedicalReports" ? "active" : ""}`}
+              onClick={() => scrollToSection("medical-records-card", "MedicalReports")}
+              title="View Clinical Reports & History"
             >
-              <span className="doc-nav-text">MedicalRecords</span>
+              <span className="doc-nav-text">MedicalReports</span>
               <span className="doc-nav-indicator" aria-hidden="true">›</span>
             </button>
           </nav>
@@ -1115,6 +1155,8 @@ function Doctor() {
                 Action: Doctor saves clinical notes
                 ---------------------------------------------------- */}
             <div id="medical-records-card" className="doc-card">
+              <h2 className="doc-card-title">Medical Reports</h2>
+
               {/* Header Info Strip */}
               <div className="doc-patient-top-strip">
                 <div className="doc-patient-info-left">

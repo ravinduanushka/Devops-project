@@ -68,6 +68,20 @@ function Navbar() {
             Our Services
           </button>
           <Link
+            to="/doctor"
+            className="nav-item"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Doctor
+          </Link>
+          <Link
+            to="/patient"
+            className="nav-item"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Patient
+          </Link>
+          <Link
             to="/admin"
             className="nav-item admin-badge-link"
             onClick={() => setMobileMenuOpen(false)}
