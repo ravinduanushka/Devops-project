@@ -4233,11 +4233,11 @@ button {
 
 /* Left Sidebar Column - Unified #DAEFEC */
 .nurse-sidebar-col {
-  width: 250px;
-  min-width: 250px;
+  width: 260px;
+  min-width: 260px;
   background-color: #DAEFEC;
   border-right: 1.5px solid rgba(45, 122, 110, 0.14);
-  padding: 38px 22px 60px;
+  padding: 38px 20px 60px;
   box-sizing: border-box;
   flex-shrink: 0;
 }
@@ -4255,8 +4255,9 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
   width: 100%;
-  padding: 12px 18px;
+  padding: 12px 16px;
   background: #ffffff;
   border: 2px solid #2d7a6e;
   border-radius: 12px;
