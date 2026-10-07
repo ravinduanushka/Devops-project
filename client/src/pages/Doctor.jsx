@@ -146,7 +146,7 @@ function Doctor() {
   // Connected Patient Database / Catalog
   const [patientsCatalog, setPatientsCatalog] = useState(initialPatientsCatalog);
 
-  // Active Patient in Context (Initially Kamal Perera for Medical Records, Elena for Queue)
+  // Active Patient in Context (Initially Kamal Perera for Medical Records, Kavindi for Queue)
   const [activeMedicalPatient, setActiveMedicalPatient] = useState(initialPatientsCatalog["08"]);
 
   // ==========================================
@@ -154,7 +154,7 @@ function Doctor() {
   // ==========================================
   const [nowServing, setNowServing] = useState({
     token: "04",
-    patientName: "Elena Rostova",
+    patientName: "Kavindi Jayawardena",
     age: 34,
     room: "02"
   });
@@ -162,7 +162,7 @@ function Doctor() {
   const [queueList, setQueueList] = useState([
     {
       token: "#05",
-      patientName: "Liam Carter",
+      patientName: "Kasun Madusanka",
       age: 46,
       estimatedTime: "10:15 AM",
       status: "In Consultation",
@@ -170,7 +170,7 @@ function Doctor() {
     },
     {
       token: "#06",
-      patientName: "Sophia Patel",
+      patientName: "Nalani Wickramasinghe",
       age: 29,
       estimatedTime: "10:30 AM",
       status: "Waiting",
@@ -178,7 +178,7 @@ function Doctor() {
     },
     {
       token: "#07",
-      patientName: "Marcus Thompson",
+      patientName: "Nuwan Pradeep",
       age: 58,
       estimatedTime: "11:00 AM",
       status: "Scheduled",
