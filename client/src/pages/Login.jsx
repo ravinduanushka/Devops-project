@@ -46,6 +46,8 @@ function Login() {
           navigate("/patient");
         } else if (userData.role === "Nurse") {
           navigate("/nurse");
+        } else if (userData.role === "Receptionist" || userData.role === "Reception") {
+          navigate("/receptionist");
         } else {
           navigate("/");
         }
