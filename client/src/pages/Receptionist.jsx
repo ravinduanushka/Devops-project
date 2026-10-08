@@ -209,20 +209,72 @@ function Receptionist() {
     doctorClearance: "Cleared by Dr. Robert Vance",
     nursingClearance: "Verified by Nurse Sarah Chen",
     charges: [
-      { item: "Room Charges (Bed-01A)", amount: "Rs. 8,500.00" },
-      { item: "Doctor Visit Fees", amount: "Rs. 4,500.00" },
-      { item: "Pharmacy & Medication", amount: "Rs. 3,500.00" },
-      { item: "Lab & Diagnostic Tests", amount: "Rs. 2,000.00" }
+      { id: 1, item: "Room Charges (Bed-01A)", amount: "8500" },
+      { id: 2, item: "Doctor Visit Fees", amount: "4500" },
+      { id: 3, item: "Pharmacy & Medication", amount: "3500" },
+      { id: 4, item: "Lab & Diagnostic Tests", amount: "2000" }
     ],
     totalAmount: "Rs. 18,500.00",
     paymentStatus: "Payment Completed",
     isCleared: false
   });
 
-  const handleGenerateDischarge = (e) => {
-    e.preventDefault();
+  const calculateTotalBill = () => {
+    const sum = dischargeData.charges.reduce((acc, c) => {
+      const val = parseFloat(c.amount) || 0;
+      return acc + val;
+    }, 0);
+    return `Rs. ${sum.toLocaleString("en-IN", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })}`;
+  };
+
+  const handleChargeChange = (index, field, value) => {
+    setDischargeData((prev) => {
+      const nextCharges = [...prev.charges];
+      nextCharges[index] = {
+        ...nextCharges[index],
+        [field]: value
+      };
+      return {
+        ...prev,
+        charges: nextCharges
+      };
+    });
+  };
+
+  const handleAddChargeItem = () => {
     setDischargeData((prev) => ({
       ...prev,
+      charges: [
+        ...prev.charges,
+        { id: Date.now(), item: "", amount: "" }
+      ]
+    }));
+  };
+
+  const handleRemoveChargeItem = (index) => {
+    setDischargeData((prev) => {
+      if (prev.charges.length <= 1) {
+        return {
+          ...prev,
+          charges: [{ id: Date.now(), item: "", amount: "" }]
+        };
+      }
+      return {
+        ...prev,
+        charges: prev.charges.filter((_, idx) => idx !== index)
+      };
+    });
+  };
+
+  const handleGenerateDischarge = (e) => {
+    e.preventDefault();
+    const finalTotal = calculateTotalBill();
+    setDischargeData((prev) => ({
+      ...prev,
+      totalAmount: finalTotal,
       currentStatus: "Discharged & Cleared",
       isCleared: true
     }));
@@ -231,7 +283,7 @@ function Receptionist() {
       prev.map((b) => (b.id === dischargeData.bedNo ? { ...b, status: "available", patient: "" } : b))
     );
     showToast(
-      `✓ Discharge slip generated for ${dischargeData.patientName}! ${dischargeData.bedNo} is now free and available.`
+      `✓ Discharge slip generated for ${dischargeData.patientName} (${finalTotal})! ${dischargeData.bedNo} is now free and available.`
     );
   };
 
