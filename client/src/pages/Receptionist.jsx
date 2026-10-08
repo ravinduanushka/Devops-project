@@ -803,28 +803,89 @@ function Receptionist() {
 
                 {/* Right: Invoice & Bill Summary */}
                 <div className="rec-split-panel-card">
-                  <h3 className="rec-panel-heading">Invoice &amp; Bill Summary</h3>
+                  <div className="rec-panel-header-wrap">
+                    <h3 className="rec-panel-heading">Invoice &amp; Bill Summary</h3>
+                    <span className="rec-editable-badge" title="Receptionist can edit charges below">
+                      ✏️ Editable
+                    </span>
+                  </div>
 
                   <div className="rec-invoice-table">
                     <div className="rec-invoice-header">
                       <span>Itemized Charges</span>
+                      <span className="rec-invoice-header-hint">Type to edit item &amp; amount</span>
                     </div>
 
-                    {dischargeData.charges.map((c, idx) => (
-                      <div key={idx} className="rec-invoice-row">
-                        <span>{c.item}</span>
-                        <strong>{c.amount}</strong>
-                      </div>
-                    ))}
+                    <div className="rec-invoice-rows-list">
+                      {dischargeData.charges.map((c, idx) => (
+                        <div key={c.id || idx} className="rec-invoice-row-editable">
+                          <input
+                            type="text"
+                            className="rec-invoice-input-item"
+                            value={c.item}
+                            onChange={(e) => handleChargeChange(idx, "item", e.target.value)}
+                            placeholder="Charge item description..."
+                            aria-label={`Charge description ${idx + 1}`}
+                          />
+                          <div className="rec-invoice-amount-box">
+                            <span className="rec-currency-prefix">Rs.</span>
+                            <input
+                              type="number"
+                              min="0"
+                              step="any"
+                              className="rec-invoice-input-amount"
+                              value={c.amount}
+                              onChange={(e) => handleChargeChange(idx, "amount", e.target.value)}
+                              placeholder="0.00"
+                              aria-label={`Amount for ${c.item || "item " + (idx + 1)}`}
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            className="rec-invoice-del-btn"
+                            onClick={() => handleRemoveChargeItem(idx)}
+                            title="Remove this charge item"
+                            aria-label="Remove item"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+
+                    <button
+                      type="button"
+                      className="rec-invoice-add-btn"
+                      onClick={handleAddChargeItem}
+                    >
+                      <span>+</span> Add Charge Item
+                    </button>
 
                     <div className="rec-invoice-total-row">
                       <span>Total Amount:</span>
-                      <span className="rec-invoice-total-val">{dischargeData.totalAmount}</span>
+                      <span className="rec-invoice-total-val">{calculateTotalBill()}</span>
                     </div>
 
                     <div className="rec-payment-status-row">
                       <span>Payment Status:</span>
-                      <span className="rec-badge-payment-done">{dischargeData.paymentStatus}</span>
+                      <select
+                        className={`rec-payment-status-select ${
+                          dischargeData.paymentStatus === "Payment Completed"
+                            ? "status-completed"
+                            : dischargeData.paymentStatus === "Pending Payment"
+                            ? "status-pending"
+                            : "status-partial"
+                        }`}
+                        value={dischargeData.paymentStatus}
+                        onChange={(e) =>
+                          setDischargeData((prev) => ({ ...prev, paymentStatus: e.target.value }))
+                        }
+                      >
+                        <option value="Payment Completed">Payment Completed</option>
+                        <option value="Pending Payment">Pending Payment</option>
+                        <option value="Partially Paid">Partially Paid</option>
+                        <option value="Insurance Claim Pending">Insurance Claim Pending</option>
+                      </select>
                     </div>
                   </div>
                 </div>
