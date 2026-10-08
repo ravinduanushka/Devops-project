@@ -5591,18 +5591,159 @@ button {
   font-weight: 800;
 }
 
+.rec-panel-header-wrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.rec-editable-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #0d6b63;
+  background: rgba(13, 107, 99, 0.08);
+  border: 1px solid rgba(13, 107, 99, 0.25);
+  padding: 3px 9px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
 .rec-invoice-table {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   font-size: 0.85rem;
 }
 
 .rec-invoice-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   font-weight: 700;
   color: #475569;
   border-bottom: 1px solid #cbd5e1;
   padding-bottom: 6px;
+}
+
+.rec-invoice-header-hint {
+  font-size: 0.73rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.rec-invoice-rows-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rec-invoice-row-editable {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rec-invoice-input-item {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.84rem;
+  color: #1e293b;
+  font-weight: 500;
+  background: #ffffff;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.rec-invoice-input-item:focus {
+  border-color: #0d6b63;
+  box-shadow: 0 0 0 2px rgba(13, 107, 99, 0.15);
+}
+
+.rec-invoice-amount-box {
+  display: flex;
+  align-items: center;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 0 8px;
+  background: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.rec-invoice-amount-box:focus-within {
+  border-color: #0d6b63;
+  box-shadow: 0 0 0 2px rgba(13, 107, 99, 0.15);
+}
+
+.rec-currency-prefix {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #64748b;
+  margin-right: 4px;
+  user-select: none;
+}
+
+.rec-invoice-input-amount {
+  width: 90px;
+  border: none;
+  background: transparent;
+  padding: 6px 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #0f172a;
+  text-align: right;
+  outline: none;
+}
+
+.rec-invoice-del-btn {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  line-height: 1;
+  padding: 0;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.rec-invoice-del-btn:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #dc2626;
+}
+
+.rec-invoice-add-btn {
+  align-self: flex-start;
+  background: #f0fdfa;
+  border: 1px dashed #0d6b63;
+  color: #0d6b63;
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+  transition: all 0.2s;
+}
+
+.rec-invoice-add-btn:hover {
+  background: #ccfbf1;
+  border-color: #0f766e;
 }
 
 .rec-invoice-row {
@@ -5615,8 +5756,9 @@ button {
 .rec-invoice-total-row {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   border-top: 2px solid #cbd5e1;
-  padding-top: 8px;
+  padding-top: 10px;
   margin-top: 4px;
   font-size: 0.95rem;
   font-weight: 800;
@@ -5625,7 +5767,8 @@ button {
 
 .rec-invoice-total-val {
   color: #0d6b63;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
+  font-weight: 800;
 }
 
 .rec-payment-status-row {
@@ -5633,9 +5776,35 @@ button {
   justify-content: space-between;
   align-items: center;
   margin-top: 6px;
-  font-size: 0.82rem;
+  font-size: 0.84rem;
   font-weight: 600;
   color: #475569;
+}
+
+.rec-payment-status-select {
+  border: none;
+  font-size: 0.76rem;
+  font-weight: 750;
+  padding: 5px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.rec-payment-status-select.status-completed {
+  background: #10b981;
+  color: #ffffff;
+}
+
+.rec-payment-status-select.status-pending {
+  background: #f59e0b;
+  color: #ffffff;
+}
+
+.rec-payment-status-select.status-partial {
+  background: #3b82f6;
+  color: #ffffff;
 }
 
 .rec-badge-payment-done {
