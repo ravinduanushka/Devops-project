@@ -90,9 +90,30 @@ const appointmentSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
+const prescriptionSchema = new mongoose.Schema({
+  patientName: { type: String, required: true, trim: true },
+  patientId: { type: String, default: '' },
+  doctorName: { type: String, required: true, trim: true },
+  diagnosis: { type: String, default: '' },
+  symptoms: { type: String, default: '' },
+  medications: [
+    {
+      name: { type: String, required: true },
+      dosage: { type: String, default: '' },
+      frequency: { type: String, default: '' },
+      duration: { type: String, default: '' },
+      instructions: { type: String, default: '' }
+    }
+  ],
+  followUpAdvice: { type: String, default: '' },
+  status: { type: String, default: 'Pending Dispensing' },
+  createdAt: { type: Date, default: Date.now }
+});
+
 const User = mongoose.model('User', userSchema);
 const Patient = mongoose.model('Patient', patientSchema);
 const Appointment = mongoose.model('Appointment', appointmentSchema);
+const Prescription = mongoose.model('Prescription', prescriptionSchema);
 
 // ==================== ROUTES ====================
 
@@ -271,6 +292,55 @@ app.put('/api/appointments/:id', async (req, res, next) => {
     if (req.body.status) updateData.status = cleanString(req.body.status);
     if (req.body.doctorName) updateData.doctorName = cleanString(req.body.doctorName);
     const updated = await Appointment.findByIdAndUpdate(req.params.id, updateData, { new: true });
+    return res.status(200).json(updated);
+  } catch (err) {
+    return next(err);
+  }
+});
+
+// Prescriptions API (Doctor -> Patient & Pharmacy)
+app.get('/api/prescriptions', async (_req, res, next) => {
+  try {
+    const prescriptions = await Prescription.find().sort({ createdAt: -1 });
+    return res.status(200).json(prescriptions);
+  } catch (err) {
+    return next(err);
+  }
+});
+
+app.post('/api/prescriptions', async (req, res, next) => {
+  try {
+    const prescription = new Prescription({
+      patientName: cleanString(req.body.patientName),
+      patientId: cleanString(req.body.patientId || req.body.pid),
+      doctorName: cleanString(req.body.doctorName),
+      diagnosis: cleanString(req.body.diagnosis),
+      symptoms: cleanString(req.body.symptoms),
+      medications: Array.isArray(req.body.medications) ? req.body.medications : [],
+      followUpAdvice: cleanString(req.body.followUpAdvice),
+      status: cleanString(req.body.status) || 'Pending Dispensing'
+    });
+    await prescription.save();
+
+    // Also update patient record diagnosis if patient exists
+    if (prescription.patientName && prescription.diagnosis) {
+      await Patient.findOneAndUpdate(
+        { name: prescription.patientName },
+        { diagnosis: prescription.diagnosis }
+      );
+    }
+
+    return res.status(201).json(prescription);
+  } catch (err) {
+    return next(err);
+  }
+});
+
+app.put('/api/prescriptions/:id', async (req, res, next) => {
+  try {
+    const updateData = {};
+    if (req.body.status) updateData.status = cleanString(req.body.status);
+    const updated = await Prescription.findByIdAndUpdate(req.params.id, updateData, { new: true });
     return res.status(200).json(updated);
   } catch (err) {
     return next(err);
