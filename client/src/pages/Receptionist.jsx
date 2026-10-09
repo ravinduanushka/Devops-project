@@ -949,6 +949,55 @@ function Receptionist() {
             <div id="bed-allocation-card" className="rec-card">
               <h2 className="rec-card-title">Bed Allocation - Ward 3B</h2>
 
+              {/* Pending Admission Request Banner from Doctor */}
+              {pendingAdmissions.length > 0 && (
+                <div style={{
+                  margin: "0 0 16px 0",
+                  padding: "12px 16px",
+                  borderRadius: "8px",
+                  background: "#eff6ff",
+                  border: "1px solid #bfdbfe",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  flexWrap: "wrap",
+                  gap: "10px"
+                }}>
+                  <div style={{ fontSize: "0.875rem", color: "#1e40af" }}>
+                    <span style={{ fontWeight: 700, marginRight: "6px" }}>🏥 Pending Inpatient Admission:</span>
+                    <strong>{pendingAdmissions[0].patientName}</strong> (PID: {pendingAdmissions[0].patientId}) &bull; Order: <em>"{pendingAdmissions[0].orderNotes || "Admit to Ward 3B"}"</em> by <strong>{pendingAdmissions[0].doctorName}</strong>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const order = pendingAdmissions[0];
+                      setBedAssignPatient({
+                        name: order.patientName,
+                        id: order.patientId,
+                        doctor: order.doctorName,
+                        ward: order.ward || "Ward 3B",
+                        diagnosis: order.diagnosis,
+                        dbId: order.dbId
+                      });
+                      setSelectedBedToAssign("Bed-02A");
+                      showToast(`Loaded admission request for ${order.patientName}. Preselected Bed-02A.`);
+                    }}
+                    style={{
+                      background: "#2563eb",
+                      color: "#ffffff",
+                      padding: "6px 14px",
+                      borderRadius: "6px",
+                      fontSize: "0.8rem",
+                      fontWeight: 600,
+                      border: "none",
+                      cursor: "pointer"
+                    }}
+                  >
+                    Select &amp; Assign Bed-02A
+                  </button>
+                </div>
+              )}
+
               <div className="rec-split-card-grid">
                 {/* Left: Ward 3B Status & Bed Grid */}
                 <div className="rec-split-panel-card">
