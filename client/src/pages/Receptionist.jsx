@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
-import { getPatients, createPatient, getAppointments, createAppointment, updatePatient } from "../services/api";
+import { getPatients, createPatient, getAppointments, createAppointment, updatePatient, getAdmissions, updateAdmission } from "../services/api";
 
 function Receptionist() {
   const navigate = useNavigate();
