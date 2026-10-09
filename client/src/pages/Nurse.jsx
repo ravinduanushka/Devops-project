@@ -287,12 +287,23 @@ function Nurse() {
       syncInpatients();
     };
 
+    const handleBedFreed = (e) => {
+      const data = e?.detail;
+      const freedBed = data?.bedNo || "Bed-02A";
+      setInpatientList((prev) =>
+        prev.filter((p) => p.bedNo !== freedBed)
+      );
+      showToast(`⚡ ${freedBed} has been released and freed upon discharge settlement.`);
+    };
+
     window.addEventListener("nexus_bed_allocated", handleBedAllocated);
+    window.addEventListener("nexus_bed_freed", handleBedFreed);
     window.addEventListener("storage", syncInpatients);
     const interval = setInterval(syncInpatients, 4000);
 
     return () => {
       window.removeEventListener("nexus_bed_allocated", handleBedAllocated);
+      window.removeEventListener("nexus_bed_freed", handleBedFreed);
       window.removeEventListener("storage", syncInpatients);
       clearInterval(interval);
     };
