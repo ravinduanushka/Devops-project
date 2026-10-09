@@ -364,21 +364,6 @@ function Receptionist() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Sidebar smooth scrolling when manually clicked
-  const scrollToSection = (id, navName) => {
-    setActiveNav(navName);
-    isManualScroll.current = true;
-    const element = document.getElementById(id);
-    if (element) {
-      const yOffset = -20;
-      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      window.scrollTo({ top: y, behavior: "smooth" });
-    }
-    setTimeout(() => {
-      isManualScroll.current = false;
-    }, 850);
-  };
-
   return (
     <div className="rec-page-wrapper">
       {/* Toast Notification */}
