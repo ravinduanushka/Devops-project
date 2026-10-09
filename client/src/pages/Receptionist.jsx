@@ -140,34 +140,34 @@ function Receptionist() {
   // SECTION 3: BED ALLOCATION STATE
   // ==========================================
   const initialBeds = [
-    { id: "Bed-01A", status: "occupied", patient: "Elena Rostova" },
-    { id: "Bed-01B", status: "occupied", patient: "Marcus Thompson" },
-    { id: "Bed-01C", status: "occupied", patient: "Ahmed Khan" },
+    { id: "Bed-01A", status: "occupied", patient: "Kavindi Jayawardena" },
+    { id: "Bed-01B", status: "occupied", patient: "Kasun Madusanka" },
+    { id: "Bed-01C", status: "occupied", patient: "Mohamed Rizwan" },
     { id: "Bed-02A", status: "available", patient: "" },
     { id: "Bed-02B", status: "available", patient: "" },
-    { id: "Bed-03A", status: "occupied", patient: "Mei Lin Chen" },
-    { id: "Bed-03B", status: "occupied", patient: "David Miller" },
-    { id: "Bed-03C", status: "occupied", patient: "Sarah Connor" },
+    { id: "Bed-03A", status: "occupied", patient: "Nuwan Pradeep" },
+    { id: "Bed-03B", status: "occupied", patient: "Dilani Weerasinghe" },
+    { id: "Bed-03C", status: "occupied", patient: "Nalani Wickramasinghe" },
     { id: "Bed-03D", status: "available", patient: "" },
     { id: "Bed-04A", status: "available", patient: "" },
     { id: "Bed-04B", status: "available", patient: "" },
-    { id: "Bed-04C", status: "occupied", patient: "John Doe" },
+    { id: "Bed-04C", status: "occupied", patient: "Dinesh Bandara" },
     { id: "Bed-04D", status: "available", patient: "" },
     { id: "Bed-05A", status: "available", patient: "" },
     { id: "Bed-05B", status: "available", patient: "" },
-    { id: "Bed-05C", status: "occupied", patient: "Grace Hopper" },
-    { id: "Bed-06A", status: "occupied", patient: "Alan Turing" },
-    { id: "Bed-06B", status: "occupied", patient: "Ada Lovelace" },
+    { id: "Bed-05C", status: "occupied", patient: "Chamari Silva" },
+    { id: "Bed-06A", status: "occupied", patient: "Sunil Shantha" },
+    { id: "Bed-06B", status: "occupied", patient: "Anoma Jayasuriya" },
     { id: "Bed-06C", status: "available", patient: "" },
-    { id: "Bed-06D", status: "occupied", patient: "Marie Curie" }
+    { id: "Bed-06D", status: "occupied", patient: "Rohan De Silva" }
   ];
 
   const [bedsList, setBedsList] = useState(initialBeds);
   const [selectedBedToAssign, setSelectedBedToAssign] = useState("Bed-02A");
   const [bedAssignPatient, setBedAssignPatient] = useState({
-    name: "Elena Rostova",
+    name: "Kavindi Jayawardena",
     id: "P-88219",
-    doctor: "Dr. Vance"
+    doctor: "Dr. Priyantha Senanayake"
   });
 
   const occupiedCount = bedsList.filter((b) => b.status === "occupied").length;
@@ -202,12 +202,12 @@ function Receptionist() {
   // SECTION 4: DISCHARGE & BILLING STATE
   // ==========================================
   const [dischargeData, setDischargeData] = useState({
-    patientName: "Elena Rostova",
+    patientName: "Kavindi Jayawardena",
     bedNo: "Bed-01A",
     pid: "P-88219",
     currentStatus: "Awaiting Clearance",
-    doctorClearance: "Cleared by Dr. Robert Vance",
-    nursingClearance: "Verified by Nurse Sarah Chen",
+    doctorClearance: "Cleared by Dr. Priyantha Senanayake",
+    nursingClearance: "Verified by Nurse Chamari Perera",
     charges: [
       { id: 1, item: "Room Charges (Bed-01A)", amount: "8500" },
       { id: 2, item: "Doctor Visit Fees", amount: "4500" },
