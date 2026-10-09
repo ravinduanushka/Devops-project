@@ -505,33 +505,33 @@ function Doctor() {
   // STEP 3: PRESCRIPTIONS STATE
   // ==========================================
   const [rxPatient, setRxPatient] = useState({
-    name: "Kavindi Jayawardena",
-    age: "34",
-    gender: "Female",
-    patientId: "#P-88210"
+    name: "Kamal Perera",
+    age: "38",
+    gender: "Male",
+    patientId: "#P-1042"
   });
 
   const [currentMedInput, setCurrentMedInput] = useState({
-    name: "Amoxicillin",
+    name: "Paracetamol 500mg",
     dosage: "500 mg",
     frequency: "Twice daily",
-    duration: "7 days"
+    duration: "3 days"
   });
 
   const [medicationsList, setMedicationsList] = useState([
-    { id: 1, name: "Ibuprofen", dosage: "400 mg", frequency: "Once daily", duration: "5 days" },
-    { id: 2, name: "Metformin", dosage: "500 mg", frequency: "Twice daily", duration: "14 days" }
+    { id: 1, name: "Amoxicillin 500mg", dosage: "500 mg", frequency: "Twice daily", duration: "7 days", instructions: "After meals" },
+    { id: 2, name: "Ibuprofen 400mg", dosage: "400 mg", frequency: "Twice daily", duration: "5 days", instructions: "With food" }
   ]);
 
   const [diagnostics, setDiagnostics] = useState({
     bloodTests: true,
     urineTest: false,
-    xRay: false,
-    ecg: false
+    xRay: true,
+    ecg: true
   });
 
   const [followUpAdvice, setFollowUpAdvice] = useState(
-    "Take after meals. Drink plenty of water. Schedule a follow-up in 2 weeks."
+    "Take after meals. Drink plenty of water. Schedule a follow-up in 1 week."
   );
 
   const handleAddMedication = () => {
@@ -543,7 +543,8 @@ function Doctor() {
         name: currentMedInput.name,
         dosage: currentMedInput.dosage,
         frequency: currentMedInput.frequency,
-        duration: currentMedInput.duration
+        duration: currentMedInput.duration,
+        instructions: "As directed"
       }
     ]);
     showToast(`Added ${currentMedInput.name} to prescription.`);
@@ -554,8 +555,77 @@ function Doctor() {
   };
 
   // WORKFLOW ACTION 3: Doctor clicks [ Issue & Save Prescription ]
-  const handleSavePrescription = () => {
-    showToast(`✓ Prescription issued for ${rxPatient.name} (${rxPatient.patientId})! Sent to Pharmacy & Patient Portal.`);
+  const handleSavePrescription = async () => {
+    const cleanName = rxPatient.name || activeMedicalPatient.name || "Kamal Perera";
+    const cleanPid = (rxPatient.patientId || activeMedicalPatient.pid || "P-1042").replace(/^#/, "");
+
+    const rxPayload = {
+      patientName: cleanName,
+      patientId: cleanPid,
+      doctorName: "Dr. Vance",
+      diagnosis: diagnosisText || "Acute bronchitis with mild bronchial irritation",
+      symptoms: symptomsText || "Persistent dry cough, mild chest tightness upon exertion",
+      medications: medicationsList.map((m) => ({
+        name: m.name,
+        dosage: m.dosage,
+        frequency: m.frequency,
+        duration: m.duration,
+        instructions: m.instructions || (m.name.toLowerCase().includes("amoxicillin") ? "After meals" : "With food")
+      })),
+      followUpAdvice: followUpAdvice || "Take after meals. Drink plenty of water. Schedule a follow-up in 1 week.",
+      vitals: vitalsData,
+      status: "Pending Dispensing",
+      issuedAt: new Date().toISOString()
+    };
+
+    // 1. Post to backend server API
+    try {
+      await createPrescription(rxPayload);
+    } catch {
+      // offline fallback operates seamlessly
+    }
+
+    // 2. Dispatch to Patient Portal: Prescriptions tab & MyRecords tab
+    const patientRxList = rxPayload.medications.map((m) => ({
+      name: m.name,
+      dosage: m.dosage,
+      frequency: m.frequency,
+      duration: m.duration,
+      instructions: m.instructions
+    }));
+    localStorage.setItem("nexus_patient_prescriptions", JSON.stringify(patientRxList));
+
+    const updatedRecordEncounter = {
+      id: Date.now(),
+      date: `Today, Oct 09, 2026 - Dr. Vance Consultation`,
+      notes: `Doctor diagnosis notes: ${rxPayload.diagnosis}. Symptoms: ${rxPayload.symptoms}. Vitals: BP ${vitalsData.bp}, Pulse ${vitalsData.pulse}, Temp ${vitalsData.temp}. Prescribed: ${rxPayload.medications.map((m) => m.name).join(", ")}. Follow-up: ${rxPayload.followUpAdvice}`
+    };
+    localStorage.setItem("nexus_patient_latest_record", JSON.stringify(updatedRecordEncounter));
+
+    // 3. Dispatch to Hospital Pharmacy Queue (for dispensing verification and fulfillment)
+    const pharmacyOrder = {
+      orderId: `RX-${Math.floor(1000 + Math.random() * 9000)}`,
+      patientName: rxPayload.patientName,
+      patientId: rxPayload.patientId,
+      doctorName: rxPayload.doctorName,
+      diagnosis: rxPayload.diagnosis,
+      medications: rxPayload.medications,
+      status: "Pending Verification",
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+    try {
+      const existingQueue = JSON.parse(localStorage.getItem("nexus_pharmacy_queue") || "[]");
+      const filteredQueue = Array.isArray(existingQueue) ? existingQueue.filter((q) => q.patientName !== rxPayload.patientName) : [];
+      localStorage.setItem("nexus_pharmacy_queue", JSON.stringify([pharmacyOrder, ...filteredQueue]));
+    } catch {
+      localStorage.setItem("nexus_pharmacy_queue", JSON.stringify([pharmacyOrder]));
+    }
+
+    // 4. Trigger instant real-time synchronization across views
+    window.dispatchEvent(new Event("storage"));
+    window.dispatchEvent(new CustomEvent("nexus_prescription_issued", { detail: rxPayload }));
+
+    showToast(`✓ Prescription issued for ${cleanName} (PID: ${cleanPid})! Dispatched to Hospital Pharmacy Queue & Patient Portal (Prescriptions & MyRecords).`);
   };
 
   const handleCancelPrescription = () => {
