@@ -30,26 +30,26 @@ const initialPatientsCatalog = {
   },
   "05": {
     token: "05",
-    name: "Kasun Madusanka",
-    age: 46,
+    name: "Kamal Perera",
+    age: 38,
     gender: "Male",
-    pid: "P-1033",
+    pid: "P-1042",
     room: "02",
     bloodGroup: "O+",
-    allergy: "Codeine",
-    vitals: { bp: "128/82 mmHg", pulse: "76 bpm", temp: "98.8°F" },
+    allergy: "Penicillin",
+    vitals: { bp: "124/80 mmHg", pulse: "74 bpm", temp: "98.6°F" },
     pastHistory: [
-      { date: "Oct 12, 2026 - General Surgery", desc: "Post-op recovery, vitals stable." },
-      { date: "Jun 18, 2026 - Dermatology", desc: "Excised benign skin lesion, healed." }
+      { date: "Oct 09, 2026 - OPD Intake", desc: "Front-desk registration completed, token assigned." },
+      { date: "May 14, 2025 - Routine Health Check", desc: "All baseline labs normal, healthy recovery." }
     ],
-    symptoms: "Post-op wound follow-up, mild abdominal tenderness upon palpation.",
-    diagnosis: "Post-appendectomy recovery, healing satisfactorily without sign of infection.",
+    symptoms: "Mild chest tightness upon exertion, persistent dry cough for 2 days.",
+    diagnosis: "Early exertion-related bronchial irritation. Conservative symptomatic care.",
     medications: [
-      { id: 1, name: "Cefuroxime", dosage: "500 mg", frequency: "Twice daily", duration: "5 days" },
-      { id: 2, name: "Ibuprofen", dosage: "400 mg", frequency: "Once daily", duration: "5 days" }
+      { id: 1, name: "Salbutamol Inhaler", dosage: "100 mcg", frequency: "As needed", duration: "14 days" },
+      { id: 2, name: "Paracetamol", dosage: "500 mg", frequency: "Twice daily", duration: "5 days" }
     ],
-    diagnostics: { bloodTests: true, urineTest: false, xRay: false, ecg: false },
-    followUpAdvice: "Keep surgical dressing dry. Avoid heavy lifting for 2 weeks."
+    diagnostics: { bloodTests: true, urineTest: false, xRay: true, ecg: true },
+    followUpAdvice: "Rest adequately. Return immediately if breathlessness or tightness worsens."
   },
   "06": {
     token: "06",
