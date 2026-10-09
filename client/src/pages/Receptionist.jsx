@@ -1220,14 +1220,64 @@ function Receptionist() {
                     </p>
 
                     <div className="rec-clearance-items">
-                      <div className="rec-clearance-row">
-                        <span className="rec-check-icon">✓</span>
-                        <span><strong>Doctor Clearance:</strong> {dischargeData.doctorClearance}</span>
+                      <div className="rec-clearance-row" style={{
+                        background: "#f0fdf4",
+                        border: "1px solid #86efac",
+                        padding: "8px 12px",
+                        borderRadius: "8px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px"
+                      }}>
+                        <span className="rec-check-icon" style={{
+                          background: "#16a34a",
+                          color: "#ffffff",
+                          width: "20px",
+                          height: "20px",
+                          borderRadius: "50%",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: "0.75rem",
+                          fontWeight: 700
+                        }}>✓</span>
+                        <span style={{ fontSize: "0.85rem", color: "#166534" }}>
+                          <strong>Doctor Clearance:</strong> <span style={{
+                            background: "#dcfce7",
+                            color: "#15803d",
+                            padding: "2px 8px",
+                            borderRadius: "6px",
+                            fontWeight: 700,
+                            marginLeft: "4px"
+                          }}>{dischargeData.doctorClearance || "Cleared by Dr. Robert Vance"}</span>
+                        </span>
                       </div>
 
-                      <div className="rec-clearance-row">
-                        <span className="rec-check-icon">✓</span>
-                        <span><strong>Nursing Clearance:</strong> {dischargeData.nursingClearance}</span>
+                      <div className="rec-clearance-row" style={{
+                        background: "#f8fafc",
+                        border: "1px solid #e2e8f0",
+                        padding: "8px 12px",
+                        borderRadius: "8px",
+                        marginTop: "8px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px"
+                      }}>
+                        <span className="rec-check-icon" style={{
+                          background: "#0284c7",
+                          color: "#ffffff",
+                          width: "20px",
+                          height: "20px",
+                          borderRadius: "50%",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: "0.75rem",
+                          fontWeight: 700
+                        }}>✓</span>
+                        <span style={{ fontSize: "0.85rem", color: "#1e293b" }}>
+                          <strong>Nursing Clearance:</strong> {dischargeData.nursingClearance}
+                        </span>
                       </div>
                     </div>
                   </div>
