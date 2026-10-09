@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
-import { getPatients, getAppointments, updatePatient, createPrescription } from "../services/api";
+import { getPatients, getAppointments, updatePatient, createPrescription, createAdmission } from "../services/api";
 
 // Catalog of patient clinical profiles supporting the connected workflow
 const initialPatientsCatalog = {
@@ -315,13 +315,44 @@ function Doctor() {
       }
     };
 
+    const handleBedAllocated = (e) => {
+      let allocated = e?.detail;
+      if (!allocated) {
+        try {
+          allocated = JSON.parse(localStorage.getItem("nexus_allocated_bed"));
+        } catch {
+          allocated = null;
+        }
+      }
+      if (allocated && allocated.patientName) {
+        setWardPatients((prev) => {
+          const entry = {
+            id: Date.now(),
+            bedNo: allocated.bedNo || "Bed-02A",
+            patientName: allocated.patientName,
+            admissionDate: "Oct 09, 2026",
+            condition: "Stable",
+            conditionColor: "cond-stable",
+            nurseSummary: allocated.diagnosis || "Admitted under Ward 3B for continuous clinical care",
+            actionType: "discharge",
+            dbId: allocated.pid
+          };
+          return [entry, ...prev.filter((p) => p.bedNo !== entry.bedNo && p.patientName !== entry.patientName)];
+        });
+      }
+    };
+
     window.addEventListener("nexus_queue_updated", handleQueueUpdate);
+    window.addEventListener("nexus_bed_allocated", handleBedAllocated);
     window.addEventListener("storage", handleQueueUpdate);
+    window.addEventListener("storage", handleBedAllocated);
     const interval = setInterval(fetchDbData, 3500);
 
     return () => {
       window.removeEventListener("nexus_queue_updated", handleQueueUpdate);
+      window.removeEventListener("nexus_bed_allocated", handleBedAllocated);
       window.removeEventListener("storage", handleQueueUpdate);
+      window.removeEventListener("storage", handleBedAllocated);
       clearInterval(interval);
     };
   }, []);
