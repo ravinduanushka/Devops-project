@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
-import { getPatients, getAppointments, updatePatient } from "../services/api";
+import { getPatients, getAppointments, updatePatient, createPrescription } from "../services/api";
 
 // Catalog of patient clinical profiles supporting the connected workflow
 const initialPatientsCatalog = {
@@ -348,26 +348,48 @@ function Doctor() {
         name: next.patientName,
         age: next.age,
         gender: "Male",
-        pid: `P-${1000 + parseInt(tokenKey, 10)}`,
+        pid: next.patientId || `P-${1000 + parseInt(tokenKey, 10)}`,
         room: "02",
         bloodGroup: "O+",
-        allergy: "None known",
-        vitals: { bp: "120/80 mmHg", pulse: "75 bpm", temp: "98.6°F" },
+        allergy: "Penicillin",
+        vitals: { bp: "124/80 mmHg", pulse: "74 bpm", temp: "98.6°F" },
         pastHistory: [
-          { date: "Recent Visit - OPD Consultation", desc: "General consultation, vitals logged." }
+          { date: "Oct 09, 2026 - OPD Intake", desc: "Front-desk registration completed, token assigned." }
         ],
-        symptoms: "Patient called for consultation from queue.",
-        diagnosis: "Routine checkup and clinical evaluation.",
+        symptoms: "Persistent dry cough, mild chest tightness upon exertion.",
+        diagnosis: "Acute bronchitis with mild bronchial irritation.",
         medications: [
-          { id: 1, name: "Amoxicillin", dosage: "500 mg", frequency: "Twice daily", duration: "7 days" }
+          { id: 1, name: "Amoxicillin 500mg", dosage: "500 mg", frequency: "Twice daily", duration: "7 days", instructions: "After meals" },
+          { id: 2, name: "Ibuprofen 400mg", dosage: "400 mg", frequency: "Twice daily", duration: "5 days", instructions: "With food" }
         ],
-        diagnostics: { bloodTests: true, urineTest: false, xRay: false, ecg: false },
-        followUpAdvice: "Drink plenty of water. Schedule a follow-up in 2 weeks."
+        diagnostics: { bloodTests: true, urineTest: false, xRay: true, ecg: true },
+        followUpAdvice: "Take after meals. Drink plenty of water. Schedule a follow-up in 1 week."
       };
 
       // Load patient context into Medical Records & Prescriptions
       loadPatientContext(patientData);
-      showToast(`Now serving Token #${tokenKey}: ${next.patientName}. Context loaded into Medical Records & Prescriptions!`);
+
+      // Broadcast active serving status (#05) to Patient Portal and localStorage in real-time
+      const activeTokUpdate = {
+        token: `#${tokenKey}`,
+        patientName: next.patientName,
+        patientId: patientData.pid,
+        currentlyServing: tokenKey,
+        status: "In Consultation",
+        estimatedTime: "10:15 AM",
+        doctorName: "Dr. Vance",
+        department: "Cardiology"
+      };
+      localStorage.setItem("nexus_active_token", JSON.stringify(activeTokUpdate));
+      window.dispatchEvent(new Event("storage"));
+      window.dispatchEvent(new CustomEvent("nexus_queue_updated", { detail: activeTokUpdate }));
+
+      showToast(`Now serving Token #${tokenKey}: ${next.patientName}. Record loaded into clinical examination workspace!`);
+
+      // Auto-navigate to clinical examination workspace
+      setTimeout(() => {
+        scrollToSection("medical-records-card", "MedicalRecords");
+      }, 350);
     } else {
       showToast("No more waiting patients in queue.");
     }
@@ -375,9 +397,9 @@ function Doctor() {
 
   const loadPatientContext = (patientData) => {
     setActiveMedicalPatient(patientData);
-    setSymptomsText(patientData.symptoms);
-    setDiagnosisText(patientData.diagnosis);
-    setVitalsData(patientData.vitals);
+    setSymptomsText(patientData.symptoms || "Persistent dry cough, mild chest tightness upon exertion.");
+    setDiagnosisText(patientData.diagnosis || "Acute bronchitis with mild bronchial irritation.");
+    setVitalsData(patientData.vitals || { bp: "124/80 mmHg", pulse: "74 bpm", temp: "98.6°F" });
 
     // Update Prescriptions form with this patient
     setRxPatient({
