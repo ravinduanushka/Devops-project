@@ -63,19 +63,31 @@ const userSchema = new mongoose.Schema({
 
 const patientSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
-  age: { type: Number, required: true, min: 0 },
-  diagnosis: { type: String, required: true, trim: true },
-  assignedDoctor: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  wardNumber: { type: String, required: true, trim: true },
-  status: { type: String, enum: ['Admitted', 'Discharged'], default: 'Admitted' },
+  patientId: { type: String, default: '' },
+  age: { type: Number, default: 0, min: 0 },
+  gender: { type: String, default: 'Male' },
+  contact: { type: String, default: '' },
+  nic: { type: String, default: '' },
+  bloodGroup: { type: String, default: 'O+' },
+  allergies: { type: String, default: '' },
+  diagnosis: { type: String, default: 'OPD Consultation', trim: true },
+  assignedDoctor: { type: mongoose.Schema.Types.Mixed, default: null },
+  wardNumber: { type: String, default: '', trim: true },
+  status: { type: String, default: 'Registered' },
   admittedAt: { type: Date, default: Date.now }
 });
 
 const appointmentSchema = new mongoose.Schema({
   patientName: { type: String, required: true, trim: true },
+  patientId: { type: String, default: '' },
   doctorName: { type: String, required: true, trim: true },
-  dateTime: { type: Date, required: true },
-  tokenNumber: { type: Number, required: true, min: 1 }
+  department: { type: String, default: 'General Medicine' },
+  dateTime: { type: Date, default: Date.now },
+  tokenNumber: { type: Number, required: true, min: 1 },
+  status: { type: String, default: 'Waiting' },
+  type: { type: String, default: 'In-Person Consultation' },
+  fee: { type: String, default: 'Rs. 2,500 Paid' },
+  createdAt: { type: Date, default: Date.now }
 });
 
 const User = mongoose.model('User', userSchema);
@@ -191,10 +203,17 @@ app.post('/api/patients', async (req, res, next) => {
   try {
     const patient = new Patient({
       name: cleanString(req.body.name),
+      patientId: cleanString(req.body.patientId || req.body.pid),
       age: Number(req.body.age) || 0,
-      diagnosis: cleanString(req.body.diagnosis),
-      assignedDoctor: req.body.assignedDoctor,
-      wardNumber: cleanString(req.body.wardNumber)
+      gender: cleanString(req.body.gender) || 'Male',
+      contact: cleanString(req.body.contact || req.body.contactNumber),
+      nic: cleanString(req.body.nic || req.body.nicNumber),
+      bloodGroup: cleanString(req.body.bloodGroup) || 'O+',
+      allergies: cleanString(req.body.allergies),
+      diagnosis: cleanString(req.body.diagnosis) || 'OPD Consultation',
+      assignedDoctor: req.body.assignedDoctor || null,
+      wardNumber: cleanString(req.body.wardNumber),
+      status: cleanString(req.body.status) || 'Registered'
     });
     await patient.save();
     return res.status(201).json(patient);
@@ -219,7 +238,7 @@ app.put('/api/patients/:id', async (req, res, next) => {
 // Appointments API
 app.get('/api/appointments', async (_req, res, next) => {
   try {
-    const appointments = await Appointment.find();
+    const appointments = await Appointment.find().sort({ createdAt: -1, tokenNumber: 1 });
     return res.status(200).json(appointments);
   } catch (err) {
     return next(err);
@@ -230,12 +249,29 @@ app.post('/api/appointments', async (req, res, next) => {
   try {
     const appointment = new Appointment({
       patientName: cleanString(req.body.patientName),
+      patientId: cleanString(req.body.patientId || req.body.pid),
       doctorName: cleanString(req.body.doctorName),
-      dateTime: new Date(req.body.dateTime),
-      tokenNumber: Number(req.body.tokenNumber) || 1
+      department: cleanString(req.body.department) || 'General Medicine',
+      dateTime: req.body.dateTime ? new Date(req.body.dateTime) : new Date(),
+      tokenNumber: Number(req.body.tokenNumber) || 1,
+      status: cleanString(req.body.status) || 'Waiting',
+      type: cleanString(req.body.type) || 'In-Person Consultation',
+      fee: cleanString(req.body.fee) || 'Rs. 2,500 Paid'
     });
     await appointment.save();
     return res.status(201).json(appointment);
+  } catch (err) {
+    return next(err);
+  }
+});
+
+app.put('/api/appointments/:id', async (req, res, next) => {
+  try {
+    const updateData = {};
+    if (req.body.status) updateData.status = cleanString(req.body.status);
+    if (req.body.doctorName) updateData.doctorName = cleanString(req.body.doctorName);
+    const updated = await Appointment.findByIdAndUpdate(req.params.id, updateData, { new: true });
+    return res.status(200).json(updated);
   } catch (err) {
     return next(err);
   }
