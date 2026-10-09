@@ -681,13 +681,9 @@ function Receptionist() {
                           required
                         />
                         <datalist id="receptionist-patient-options">
-                          <option value="Kamal Perera (ID: P-88219)" />
-                          <option value="Kamal Perera (NIC: 198812345678)" />
-                          <option value="Kavindi Jayawardena (ID: P-88210)" />
-                          <option value="Kasun Madusanka (ID: P-1033)" />
-                          <option value="Nalani Wickramasinghe (ID: P-2045)" />
-                          <option value="Nuwan Pradeep (ID: P-3089)" />
-                          <option value="Dinithi Fernando (ID: P-4012)" />
+                          {patientOptions.map((opt, idx) => (
+                            <option key={idx} value={opt} />
+                          ))}
                         </datalist>
                         <span className="rec-input-icon">🔍</span>
                       </div>
