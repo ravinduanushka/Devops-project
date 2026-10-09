@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
-import { getPatients } from "../services/api";
+import { getPatients, getPrescriptions, updatePrescription } from "../services/api";
 
 function Nurse() {
   const navigate = useNavigate();
@@ -41,6 +41,19 @@ function Nurse() {
   const [inpatientList, setInpatientList] = useState([
     {
       bedNo: "Bed-01A",
+      patientName: "Kamal Perera",
+      pid: "P-1042",
+      age: 38,
+      gender: "Male",
+      bloodGroup: "O+",
+      allergy: "None known",
+      admissionDate: "Oct 09, 2026",
+      condition: "Stable",
+      conditionColor: "nurse-cond-stable",
+      attendingPhysician: "Dr. Vance"
+    },
+    {
+      bedNo: "Bed-01B",
       patientName: "Kavindi Jayawardena",
       pid: "P-88219",
       age: 34,
@@ -94,7 +107,19 @@ function Nurse() {
   ]);
 
   // Active Patient Context for Vital Recording & Medication Administration
-  const [activePatient, setActivePatient] = useState(inpatientList[0]);
+  const [activePatient, setActivePatient] = useState({
+    bedNo: "Bed-01A",
+    patientName: "Kamal Perera",
+    pid: "P-1042",
+    age: 38,
+    gender: "Male",
+    bloodGroup: "O+",
+    allergy: "None known",
+    admissionDate: "Oct 09, 2026",
+    condition: "Stable",
+    conditionColor: "nurse-cond-stable",
+    attendingPhysician: "Dr. Vance"
+  });
 
   // Load database patients if available
   useEffect(() => {
@@ -178,25 +203,27 @@ function Nurse() {
   };
 
   // ==========================================
-  // SECTION 3: MEDICATION ADMINISTRATION STATE
+  // SECTION 3: MEDICATION ADMINISTRATION & PHARMACY QUEUE STATE
   // ==========================================
+  const [activeRxRecord, setActiveRxRecord] = useState(null);
+
   const [medSchedule, setMedSchedule] = useState([
     {
       id: 1,
       scheduledTime: "1) 08:00 AM",
       medName: "Amoxicillin 500mg",
-      dosage: "1 Cap",
-      instructions: "After meals",
-      nurseVerification: "Verified by Nurse K. Perera",
-      status: "Administered",
-      isAdministered: true
+      dosage: "500 mg",
+      instructions: "After meals (Twice daily)",
+      nurseVerification: "Pending Verification",
+      status: "Mark Given",
+      isAdministered: false
     },
     {
       id: 2,
       scheduledTime: "2) 12:00 PM",
       medName: "Ibuprofen 400mg",
-      dosage: "1 Tab",
-      instructions: "With food",
+      dosage: "400 mg",
+      instructions: "With food (Twice daily)",
       nurseVerification: "Pending Verification",
       status: "Mark Given",
       isAdministered: false
@@ -205,15 +232,91 @@ function Nurse() {
       id: 3,
       scheduledTime: "3) 06:00 PM",
       medName: "Paracetamol 500mg",
-      dosage: "1 Tab",
-      instructions: "As needed for pain",
+      dosage: "500 mg",
+      instructions: "As needed for fever/pain",
       nurseVerification: "Pending Verification",
       status: "Mark Given",
       isAdministered: false
     }
   ]);
 
-  const handleMarkMedGiven = (id) => {
+  // Load and listen for digital prescription orders from Doctor Portal & Backend DB
+  useEffect(() => {
+    const fetchPrescriptionOrders = async () => {
+      let latestRx = null;
+
+      // 1. Check local storage pharmacy queue
+      try {
+        const storedQueue = localStorage.getItem("nexus_pharmacy_queue");
+        if (storedQueue) {
+          const parsed = JSON.parse(storedQueue);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            latestRx = parsed[0];
+          }
+        }
+      } catch {}
+
+      // 2. Fetch from backend API
+      try {
+        const res = await getPrescriptions();
+        if (Array.isArray(res.data) && res.data.length > 0) {
+          const dbLatest = res.data[0];
+          if (!latestRx) {
+            latestRx = {
+              orderId: dbLatest._id ? `RX-${dbLatest._id.slice(-4)}` : "RX-DB",
+              patientName: dbLatest.patientName,
+              patientId: dbLatest.patientId,
+              doctorName: dbLatest.doctorName,
+              diagnosis: dbLatest.diagnosis,
+              medications: dbLatest.medications,
+              status: dbLatest.status || "Pending Verification",
+              timestamp: new Date(dbLatest.createdAt || Date.now()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+              dbId: dbLatest._id
+            };
+          } else if (dbLatest._id) {
+            latestRx.dbId = dbLatest._id;
+          }
+        }
+      } catch {}
+
+      if (latestRx && latestRx.medications && latestRx.medications.length > 0) {
+        setActiveRxRecord(latestRx);
+        const mappedSchedule = latestRx.medications.map((m, idx) => ({
+          id: idx + 1,
+          scheduledTime: `${idx + 1}) 0${8 + idx * 4}:00 ${8 + idx * 4 >= 12 ? "PM" : "AM"}`,
+          medName: m.name,
+          dosage: m.dosage || "1 Tab",
+          instructions: m.instructions || (m.frequency ? `${m.frequency} (${m.duration || "5 days"})` : "As directed"),
+          nurseVerification: latestRx.status === "Dispensed" ? "Verified & Dispensed" : "Pending Verification",
+          status: latestRx.status === "Dispensed" ? "Administered" : "Mark Given",
+          isAdministered: latestRx.status === "Dispensed"
+        }));
+        setMedSchedule(mappedSchedule);
+      }
+    };
+
+    fetchPrescriptionOrders();
+
+    const handleRxEvent = (e) => {
+      const rx = e?.detail;
+      if (rx) {
+        showToast(`⚡ New digital prescription order received for ${rx.patientName || "Kamal Perera"}!`);
+      }
+      fetchPrescriptionOrders();
+    };
+
+    window.addEventListener("nexus_prescription_issued", handleRxEvent);
+    window.addEventListener("storage", fetchPrescriptionOrders);
+    const interval = setInterval(fetchPrescriptionOrders, 4000);
+
+    return () => {
+      window.removeEventListener("nexus_prescription_issued", handleRxEvent);
+      window.removeEventListener("storage", fetchPrescriptionOrders);
+      clearInterval(interval);
+    };
+  }, []);
+
+  const handleMarkMedGiven = async (id) => {
     const verifiedBy = currentUser?.name ? `Verified by Nurse ${currentUser.name}` : "Verified by Nurse K. Perera";
     setMedSchedule((prev) =>
       prev.map((item) =>
@@ -227,8 +330,30 @@ function Nurse() {
           : item
       )
     );
+
+    // If updated, sync with database and pharmacy queue
+    if (activeRxRecord?.dbId) {
+      try {
+        await updatePrescription(activeRxRecord.dbId, { status: "Dispensed" });
+      } catch {}
+    }
+
+    try {
+      const storedQueue = localStorage.getItem("nexus_pharmacy_queue");
+      if (storedQueue) {
+        const parsed = JSON.parse(storedQueue);
+        const updatedQueue = parsed.map((item) =>
+          item.patientName === activePatient.patientName
+            ? { ...item, status: "Dispensed & Administered" }
+            : item
+        );
+        localStorage.setItem("nexus_pharmacy_queue", JSON.stringify(updatedQueue));
+        window.dispatchEvent(new Event("storage"));
+      }
+    } catch {}
+
     const item = medSchedule.find((m) => m.id === id);
-    showToast(`✓ Administered dose: ${item?.medName} for ${activePatient.patientName}`);
+    showToast(`✓ Administered & Dispensed: ${item?.medName} for ${activePatient.patientName}`);
   };
 
   // ==========================================
@@ -622,12 +747,48 @@ function Nurse() {
                 - Administer and verify dosages
                 ---------------------------------------------------- */}
             <div id="med-administration-card" className="nurse-card">
-              <h2 className="nurse-card-title">Medication Administration Schedule</h2>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px", marginBottom: "8px" }}>
+                <h2 className="nurse-card-title" style={{ margin: 0 }}>Medication Administration &amp; Pharmacy Dispensing</h2>
+                <span style={{ fontSize: "0.8rem", padding: "4px 10px", borderRadius: "12px", background: "#e0f2fe", color: "#0369a1", fontWeight: 600 }}>
+                  Hospital Pharmacy Sync: Active
+                </span>
+              </div>
 
               {/* Header Strip */}
               <div className="nurse-med-schedule-strip">
-                Active Medication Schedule &bull; Ward 3B / {activePatient.bedNo} ({activePatient.patientName})
+                Active Medication Schedule &bull; Ward 3B / {activePatient.bedNo} ({activePatient.patientName} &bull; PID: {activePatient.pid})
               </div>
+
+              {/* Digital Prescription Order Banner if arrived from Doctor */}
+              {activeRxRecord && (
+                <div style={{
+                  margin: "12px 0 16px 0",
+                  padding: "12px 16px",
+                  borderRadius: "8px",
+                  background: "#f0fdf4",
+                  border: "1px solid #86efac",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  flexWrap: "wrap",
+                  gap: "10px"
+                }}>
+                  <div style={{ fontSize: "0.875rem", color: "#166534" }}>
+                    <span style={{ fontWeight: 700, marginRight: "6px" }}>⚡ Digital Rx Order #{activeRxRecord.orderId || "RX-1042"}:</span>
+                    Prescribed by <strong>{activeRxRecord.doctorName || "Dr. Vance"}</strong> for <strong>{activeRxRecord.patientName || "Kamal Perera"}</strong> &bull; <em>Diagnosis: {activeRxRecord.diagnosis || "Acute bronchitis with mild bronchial irritation"}</em>
+                  </div>
+                  <span style={{
+                    fontSize: "0.75rem",
+                    fontWeight: 700,
+                    padding: "4px 10px",
+                    borderRadius: "6px",
+                    background: medSchedule.every((m) => m.isAdministered) ? "#16a34a" : "#0284c7",
+                    color: "#ffffff"
+                  }}>
+                    {medSchedule.every((m) => m.isAdministered) ? "✓ Dispensed & Administered" : "Ready for Dispensing Verification"}
+                  </span>
+                </div>
+              )}
 
               {/* Subcard Table */}
               <div className="nurse-med-subcard">
