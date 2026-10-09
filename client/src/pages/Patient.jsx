@@ -30,18 +30,32 @@ function Patient() {
   // Patient display name
   const patientDisplayName = currentUser?.name
     ? `Mr/Ms ${currentUser.name}`
-    : "Mr/Ms User";
+    : "Mr. Kamal Perera";
 
   // ==========================================
   // STEP 1: APPOINTMENTS STATE & WORKFLOW
   // ==========================================
-  const [tokenStatus, setTokenStatus] = useState({
-    yourToken: "#05",
-    currentlyServing: "#04",
-    scheduledVisit: "Dr. Priyantha Senanayake (Cardiology) - Today at 10:15 AM"
+  const [tokenStatus, setTokenStatus] = useState(() => {
+    try {
+      const activeTok = localStorage.getItem("nexus_active_token");
+      if (activeTok) {
+        const parsed = JSON.parse(activeTok);
+        return {
+          yourToken: parsed.token || "#05",
+          currentlyServing: parsed.currentlyServing ? `#${parsed.currentlyServing}` : "#04",
+          scheduledVisit: `${parsed.doctorName || "Dr. Vance"} (${parsed.department || "Cardiology"}) - Today at ${parsed.estimatedTime || "10:15 AM"}`
+        };
+      }
+    } catch {}
+    return {
+      yourToken: "#05",
+      currentlyServing: "#04",
+      scheduledVisit: "Dr. Vance (Cardiology) - Today at 10:15 AM"
+    };
   });
 
   const [doctorsList] = useState([
+    { name: "Dr. Vance", specialty: "Cardiology", fee: "Rs. 2,500.00", feeUsd: "$50.00" },
     { name: "Dr. Priyantha Senanayake", specialty: "Cardiology", fee: "Rs. 2,500.00", feeUsd: "$50.00" },
     { name: "Dr. Champa Gunasekara", specialty: "General Medicine", fee: "Rs. 2,000.00", feeUsd: "$40.00" },
     { name: "Dr. Sanath Weerasinghe", specialty: "Pulmonology", fee: "Rs. 2,800.00", feeUsd: "$55.00" },
@@ -49,12 +63,12 @@ function Patient() {
   ]);
 
   const [bookingForm, setBookingForm] = useState({
-    doctor: "Dr. Priyantha Senanayake - Cardiology",
+    doctor: "Dr. Vance - Cardiology",
     specialty: "Cardiology",
     consultationType: "In-Person Visit",
-    dateTime: "Today, Oct 7, 2026 - 10:15 AM",
-    patientName: currentUser?.name ? `${currentUser.name} (PID: P-1042)` : "Kavindi Jayawardena (PID: P-1042)",
-    patientAge: 34
+    dateTime: "Today, Oct 9, 2026 - 10:15 AM",
+    patientName: currentUser?.name ? `${currentUser.name} (PID: P-1042)` : "Kamal Perera (PID: P-1042)",
+    patientAge: 38
   });
 
   // Doctor selection auto-updates specialty and fee
@@ -72,7 +86,7 @@ function Patient() {
     e.preventDefault();
     try {
       await createAppointment({
-        patientName: currentUser?.name || "Kavindi Jayawardena",
+        patientName: currentUser?.name || "Kamal Perera",
         doctorName: bookingForm.doctor.split(" - ")[0],
         department: bookingForm.specialty,
         dateTime: new Date().toISOString(),
@@ -87,25 +101,75 @@ function Patient() {
 
   const handleCancelBooking = () => {
     setBookingForm({
-      doctor: "Dr. Priyantha Senanayake - Cardiology",
+      doctor: "Dr. Vance - Cardiology",
       specialty: "Cardiology",
       consultationType: "In-Person Visit",
-      dateTime: "Today, Oct 7, 2026 - 10:15 AM",
-      patientName: currentUser?.name ? `${currentUser.name} (PID: P-1042)` : "Kavindi Jayawardena (PID: P-1042)",
-      patientAge: 34
+      dateTime: "Today, Oct 9, 2026 - 10:15 AM",
+      patientName: currentUser?.name ? `${currentUser.name} (PID: P-1042)` : "Kamal Perera (PID: P-1042)",
+      patientAge: 38
     });
     showToast("Booking form reset.");
   };
+
+  // Sync token status in real-time from Receptionist dispatch and backend database
+  useEffect(() => {
+    const syncTokenFromDb = async () => {
+      try {
+        const res = await getAppointments();
+        if (res?.data && Array.isArray(res.data) && res.data.length > 0) {
+          const latestAppt = res.data[0];
+          setTokenStatus({
+            yourToken: `#${String(latestAppt.tokenNumber || "05").padStart(2, "0")}`,
+            currentlyServing: "#04",
+            scheduledVisit: `${latestAppt.doctorName || "Dr. Vance"} (${latestAppt.department || "Cardiology"}) - Today at 10:15 AM`
+          });
+        }
+      } catch {
+        // fallback to storage
+      }
+    };
+
+    syncTokenFromDb();
+
+    const handleStorageUpdate = (event) => {
+      let activeTok = event?.detail;
+      if (!activeTok) {
+        try {
+          activeTok = JSON.parse(localStorage.getItem("nexus_active_token"));
+        } catch {
+          activeTok = null;
+        }
+      }
+
+      if (activeTok) {
+        setTokenStatus({
+          yourToken: activeTok.token || "#05",
+          currentlyServing: activeTok.currentlyServing ? `#${activeTok.currentlyServing}` : "#04",
+          scheduledVisit: `${activeTok.doctorName || "Dr. Vance"} (${activeTok.department || "Cardiology"}) - Today at ${activeTok.estimatedTime || "10:15 AM"}`
+        });
+      }
+    };
+
+    window.addEventListener("nexus_queue_updated", handleStorageUpdate);
+    window.addEventListener("storage", handleStorageUpdate);
+    const interval = setInterval(syncTokenFromDb, 4000);
+
+    return () => {
+      window.removeEventListener("nexus_queue_updated", handleStorageUpdate);
+      window.removeEventListener("storage", handleStorageUpdate);
+      clearInterval(interval);
+    };
+  }, []);
 
   // ==========================================
   // STEP 2: MY RECORDS STATE (Diagnosis & Vitals)
   // ==========================================
   const [medicalRecord] = useState({
-    patientName: "Kavindi Jayawardena",
-    pid: "P-88210",
-    age: 34,
-    gender: "Female",
-    bloodGroup: "B+",
+    patientName: "Kamal Perera",
+    pid: "P-1042",
+    age: 38,
+    gender: "Male",
+    bloodGroup: "O+",
     allergy: "Penicillin",
     diagnosisHistory: [
       {
