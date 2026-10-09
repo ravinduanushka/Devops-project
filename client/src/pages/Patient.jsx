@@ -131,6 +131,36 @@ function Patient() {
 
     syncTokenFromDb();
 
+    // Fetch latest prescription and clinical notes from backend
+    const syncRxFromDb = async () => {
+      try {
+        const rxRes = await getPrescriptions();
+        if (rxRes?.data && Array.isArray(rxRes.data) && rxRes.data.length > 0) {
+          const latest = rxRes.data[0];
+          if (latest.medications && latest.medications.length > 0) {
+            setPrescriptions(latest.medications);
+          }
+          if (latest.diagnosis) {
+            setMedicalRecord((prev) => ({
+              ...prev,
+              diagnosisHistory: [
+                {
+                  id: Date.now(),
+                  date: `Today, ${new Date(latest.createdAt || Date.now()).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} - ${latest.doctorName || "Dr. Vance"} Consultation`,
+                  notes: `Doctor diagnosis notes: ${latest.diagnosis}. Symptoms: ${latest.symptoms || "Mild bronchial irritation"}. Advised: ${latest.followUpAdvice || "Take as prescribed"}.`
+                },
+                ...prev.diagnosisHistory.filter((item) => !item.notes.includes(latest.diagnosis))
+              ]
+            }));
+          }
+        }
+      } catch {
+        // offline fallback operates seamlessly
+      }
+    };
+
+    syncRxFromDb();
+
     const handleStorageUpdate = (event) => {
       let activeTok = event?.detail;
       if (!activeTok) {
@@ -148,14 +178,62 @@ function Patient() {
           scheduledVisit: `${activeTok.doctorName || "Dr. Vance"} (${activeTok.department || "Cardiology"}) - Today at ${activeTok.estimatedTime || "10:15 AM"}`
         });
       }
+
+      // Check if new prescription was dispatched by Doctor
+      try {
+        const storedRx = localStorage.getItem("nexus_patient_prescriptions");
+        if (storedRx) {
+          const parsedRx = JSON.parse(storedRx);
+          if (Array.isArray(parsedRx) && parsedRx.length > 0) {
+            setPrescriptions(parsedRx);
+          }
+        }
+        const storedRec = localStorage.getItem("nexus_patient_latest_record");
+        if (storedRec) {
+          const parsedRec = JSON.parse(storedRec);
+          setMedicalRecord((prev) => ({
+            ...prev,
+            diagnosisHistory: [
+              parsedRec,
+              ...prev.diagnosisHistory.filter((item) => item.id !== parsedRec.id)
+            ]
+          }));
+        }
+      } catch {}
+    };
+
+    const handleRxDispatched = (event) => {
+      const rxData = event?.detail;
+      if (rxData && rxData.medications) {
+        setPrescriptions(rxData.medications);
+        if (rxData.diagnosis) {
+          setMedicalRecord((prev) => ({
+            ...prev,
+            diagnosisHistory: [
+              {
+                id: Date.now(),
+                date: `Today, Oct 09, 2026 - ${rxData.doctorName || "Dr. Vance"} Consultation`,
+                notes: `Doctor diagnosis notes: ${rxData.diagnosis}. Symptoms: ${rxData.symptoms}. Prescribed: ${rxData.medications.map((m) => m.name).join(", ")}. Follow-up: ${rxData.followUpAdvice}`
+              },
+              ...prev.diagnosisHistory.filter((item) => !item.notes.includes(rxData.diagnosis))
+            ]
+          }));
+        }
+        showToast("🔔 New Prescription & Consultation Record received from Dr. Vance!");
+      }
     };
 
     window.addEventListener("nexus_queue_updated", handleStorageUpdate);
+    window.addEventListener("nexus_prescription_issued", handleRxDispatched);
     window.addEventListener("storage", handleStorageUpdate);
-    const interval = setInterval(syncTokenFromDb, 4000);
+    const interval = setInterval(() => {
+      syncTokenFromDb();
+      syncRxFromDb();
+    }, 4000);
 
     return () => {
       window.removeEventListener("nexus_queue_updated", handleStorageUpdate);
+      window.removeEventListener("nexus_prescription_issued", handleRxDispatched);
       window.removeEventListener("storage", handleStorageUpdate);
       clearInterval(interval);
     };
@@ -164,51 +242,81 @@ function Patient() {
   // ==========================================
   // STEP 2: MY RECORDS STATE (Diagnosis & Vitals)
   // ==========================================
-  const [medicalRecord] = useState({
-    patientName: "Kamal Perera",
-    pid: "P-1042",
-    age: 38,
-    gender: "Male",
-    bloodGroup: "O+",
-    allergy: "Penicillin",
-    diagnosisHistory: [
-      {
-        id: 1,
-        date: "Oct 12, 2026 - Cardiology Consultation",
-        notes: "Doctor diagnosis notes: Mild hypertension under control, continue medication."
-      },
-      {
-        id: 2,
-        date: "Sep 14, 2026 - GP Follow-up",
-        notes: "Routine check-up, vital signs stable, advised dietary improvements."
+  const [medicalRecord, setMedicalRecord] = useState(() => {
+    try {
+      const latestRec = localStorage.getItem("nexus_patient_latest_record");
+      if (latestRec) {
+        const parsedRec = JSON.parse(latestRec);
+        return {
+          patientName: "Kamal Perera",
+          pid: "P-1042",
+          age: 38,
+          gender: "Male",
+          bloodGroup: "O+",
+          allergy: "Penicillin",
+          diagnosisHistory: [
+            parsedRec,
+            {
+              id: 2,
+              date: "Sep 14, 2026 - GP Follow-up",
+              notes: "Routine check-up, vital signs stable, advised dietary improvements."
+            }
+          ],
+          vitals: { bp: "124/80 mmHg", pulse: "74 bpm", temp: "98.6 F" }
+        };
       }
-    ],
-    vitals: {
-      bp: "120/80 mmHg",
-      pulse: "78 bpm",
-      temp: "98.6 F"
-    }
+    } catch {}
+    return {
+      patientName: "Kamal Perera",
+      pid: "P-1042",
+      age: 38,
+      gender: "Male",
+      bloodGroup: "O+",
+      allergy: "Penicillin",
+      diagnosisHistory: [
+        {
+          id: 1,
+          date: "Oct 09, 2026 - Dr. Vance Consultation",
+          notes: "Doctor diagnosis notes: Acute bronchitis with mild bronchial irritation. Prescribed Amoxicillin 500mg, Ibuprofen 400mg."
+        },
+        {
+          id: 2,
+          date: "Sep 14, 2026 - GP Follow-up",
+          notes: "Routine check-up, vital signs stable, advised dietary improvements."
+        }
+      ],
+      vitals: { bp: "124/80 mmHg", pulse: "74 bpm", temp: "98.6 F" }
+    };
   });
 
   // ==========================================
   // STEP 3: PRESCRIPTIONS STATE
   // ==========================================
-  const [prescriptions] = useState([
-    {
-      name: "Amoxicillin 500mg",
-      dosage: "—",
-      frequency: "Twice daily",
-      duration: "7 days",
-      instructions: "After meals"
-    },
-    {
-      name: "Ibuprofen 400mg",
-      dosage: "—",
-      frequency: "Once daily",
-      duration: "5 days",
-      instructions: "With food"
-    }
-  ]);
+  const [prescriptions, setPrescriptions] = useState(() => {
+    try {
+      const storedRx = localStorage.getItem("nexus_patient_prescriptions");
+      if (storedRx) {
+        const parsed = JSON.parse(storedRx);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return [
+      {
+        name: "Amoxicillin 500mg",
+        dosage: "500 mg",
+        frequency: "Twice daily",
+        duration: "7 days",
+        instructions: "After meals"
+      },
+      {
+        name: "Ibuprofen 400mg",
+        dosage: "400 mg",
+        frequency: "Twice daily",
+        duration: "5 days",
+        instructions: "With food"
+      }
+    ];
+  });
 
   const handleDownloadRx = () => {
     showToast("✓ Generating Digital Prescription (PDF)... Download starting!");
