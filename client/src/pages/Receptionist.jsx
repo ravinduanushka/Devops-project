@@ -270,7 +270,7 @@ function Receptionist() {
   // SECTION 3: BED ALLOCATION STATE
   // ==========================================
   const initialBeds = [
-    { id: "Bed-01A", status: "occupied", patient: "Kamal Perera" },
+    { id: "Bed-01A", status: "occupied", patient: "Kavindi Jayawardena" },
     { id: "Bed-01B", status: "occupied", patient: "Kasun Madusanka" },
     { id: "Bed-01C", status: "occupied", patient: "Mohamed Rizwan" },
     { id: "Bed-02A", status: "available", patient: "" },
@@ -294,14 +294,103 @@ function Receptionist() {
 
   const [bedsList, setBedsList] = useState(initialBeds);
   const [selectedBedToAssign, setSelectedBedToAssign] = useState("Bed-02A");
+  const [pendingAdmissions, setPendingAdmissions] = useState([
+    {
+      orderId: "ADM-1042",
+      patientName: "Kamal Perera",
+      patientId: "P-1042",
+      doctorName: "Dr. Vance",
+      ward: "Ward 3B",
+      orderNotes: "Admit to Ward 3B - Hospitalization required for clinical observation & intravenous respiratory therapy",
+      diagnosis: "Acute bronchitis with mild bronchial irritation",
+      status: "Pending Bed Allocation",
+      timestamp: "10:20 AM"
+    }
+  ]);
+
   const [bedAssignPatient, setBedAssignPatient] = useState({
     name: "Kamal Perera",
-    id: "P-88219",
-    doctor: "Dr. Priyantha Senanayake"
+    id: "P-1042",
+    doctor: "Dr. Vance",
+    ward: "Ward 3B",
+    diagnosis: "Acute bronchitis with mild bronchial irritation"
   });
 
   const occupiedCount = bedsList.filter((b) => b.status === "occupied").length;
   const totalBeds = 32;
+
+  // Real-time synchronization of Doctor admission orders
+  useEffect(() => {
+    const fetchAdmissionsData = async () => {
+      let localOrders = [];
+      try {
+        const stored = localStorage.getItem("nexus_pending_admissions");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            localOrders = parsed;
+          }
+        }
+      } catch {}
+
+      try {
+        const res = await getAdmissions();
+        if (Array.isArray(res.data) && res.data.length > 0) {
+          const dbOrders = res.data
+            .filter((o) => o.status === "Pending Bed Allocation")
+            .map((o) => ({
+              orderId: o._id ? `ADM-${o._id.slice(-4)}` : "ADM-DB",
+              patientName: o.patientName,
+              patientId: o.patientId,
+              doctorName: o.doctorName,
+              ward: o.ward || "Ward 3B",
+              orderNotes: o.orderNotes,
+              diagnosis: o.diagnosis,
+              status: o.status,
+              timestamp: new Date(o.createdAt || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              dbId: o._id
+            }));
+
+          if (dbOrders.length > 0) {
+            localOrders = [...dbOrders, ...localOrders.filter((l) => !dbOrders.some((d) => d.patientName === l.patientName))];
+          }
+        }
+      } catch {}
+
+      if (localOrders.length > 0) {
+        setPendingAdmissions(localOrders);
+        const topOrder = localOrders[0];
+        setBedAssignPatient({
+          name: topOrder.patientName || "Kamal Perera",
+          id: topOrder.patientId || "P-1042",
+          doctor: topOrder.doctorName || "Dr. Vance",
+          ward: topOrder.ward || "Ward 3B",
+          diagnosis: topOrder.diagnosis || "Acute bronchitis with mild bronchial irritation",
+          dbId: topOrder.dbId
+        });
+      }
+    };
+
+    fetchAdmissionsData();
+
+    const handleNewAdmission = (e) => {
+      const order = e?.detail;
+      if (order) {
+        showToast(`⚡ Inpatient admission request received for ${order.patientName}: "${order.orderNotes || "Admit to Ward 3B"}"!`);
+      }
+      fetchAdmissionsData();
+    };
+
+    window.addEventListener("nexus_admission_ordered", handleNewAdmission);
+    window.addEventListener("storage", fetchAdmissionsData);
+    const interval = setInterval(fetchAdmissionsData, 4000);
+
+    return () => {
+      window.removeEventListener("nexus_admission_ordered", handleNewAdmission);
+      window.removeEventListener("storage", fetchAdmissionsData);
+      clearInterval(interval);
+    };
+  }, []);
 
   const handleBedClick = (bed) => {
     if (bed.status === "available") {
@@ -312,20 +401,74 @@ function Receptionist() {
     }
   };
 
-  const handleConfirmBedAllocation = (e) => {
+  const handleConfirmBedAllocation = async (e) => {
     e.preventDefault();
-    if (!selectedBedToAssign) {
-      showToast("Please choose an available bed first.");
-      return;
-    }
+    const bedId = selectedBedToAssign || "Bed-02A";
+
+    // 1. Update Bed grid state
     setBedsList((prev) =>
       prev.map((b) =>
-        b.id === selectedBedToAssign
+        b.id === bedId
           ? { ...b, status: "occupied", patient: bedAssignPatient.name }
           : b
       )
     );
-    showToast(`✓ Bed ${selectedBedToAssign} allocated to ${bedAssignPatient.name} (PID: ${bedAssignPatient.id})!`);
+
+    // 2. Build allocated bed object
+    const allocatedRecord = {
+      bedNo: bedId,
+      ward: bedAssignPatient.ward || "Ward 3B",
+      patientName: bedAssignPatient.name || "Kamal Perera",
+      pid: bedAssignPatient.id || "P-1042",
+      age: 38,
+      gender: "Male",
+      bloodGroup: "O+",
+      allergy: "Penicillin",
+      admissionDate: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      condition: "Stable",
+      conditionColor: "nurse-cond-stable",
+      attendingPhysician: bedAssignPatient.doctor || "Dr. Vance",
+      diagnosis: bedAssignPatient.diagnosis || "Acute bronchitis with mild bronchial irritation"
+    };
+
+    // 3. Update backend database
+    if (bedAssignPatient.dbId) {
+      try {
+        await updateAdmission(bedAssignPatient.dbId, {
+          status: "Bed Allocated",
+          bedNo: bedId,
+          ward: bedAssignPatient.ward || "Ward 3B"
+        });
+      } catch {}
+    }
+
+    try {
+      const allPatients = await getPatients();
+      if (Array.isArray(allPatients.data)) {
+        const match = allPatients.data.find((p) => p.name === allocatedRecord.patientName);
+        if (match && match._id) {
+          await updatePatient(match._id, {
+            status: "Admitted",
+            wardNumber: `${allocatedRecord.ward} / ${bedId}`,
+            assignedDoctor: allocatedRecord.attendingPhysician
+          });
+        }
+      }
+    } catch {}
+
+    // 4. Update localStorage and broadcast to Nurse Portal & Doctor Portal
+    localStorage.setItem("nexus_allocated_bed", JSON.stringify(allocatedRecord));
+    try {
+      const stored = JSON.parse(localStorage.getItem("nexus_pending_admissions") || "[]");
+      const updatedPending = Array.isArray(stored) ? stored.filter((p) => p.patientName !== allocatedRecord.patientName) : [];
+      localStorage.setItem("nexus_pending_admissions", JSON.stringify(updatedPending));
+      setPendingAdmissions(updatedPending);
+    } catch {}
+
+    window.dispatchEvent(new Event("storage"));
+    window.dispatchEvent(new CustomEvent("nexus_bed_allocated", { detail: allocatedRecord }));
+
+    showToast(`✓ Confirmed: Bed ${bedId} in Ward 3B allocated to ${allocatedRecord.patientName} (PID: ${allocatedRecord.pid})! Enrolled into Nurse WardMonitoring census.`);
   };
 
   // ==========================================
