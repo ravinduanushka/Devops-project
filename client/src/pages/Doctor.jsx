@@ -342,17 +342,29 @@ function Doctor() {
       }
     };
 
+    const handleBedFreed = (e) => {
+      const data = e?.detail;
+      const freedBed = data?.bedNo || "Bed-02A";
+      setWardPatients((prev) =>
+        prev.map((p) => p.bedNo === freedBed ? { ...p, condition: "Discharged", conditionColor: "cond-discharged" } : p)
+      );
+    };
+
     window.addEventListener("nexus_queue_updated", handleQueueUpdate);
     window.addEventListener("nexus_bed_allocated", handleBedAllocated);
+    window.addEventListener("nexus_bed_freed", handleBedFreed);
     window.addEventListener("storage", handleQueueUpdate);
     window.addEventListener("storage", handleBedAllocated);
+    window.addEventListener("storage", handleBedFreed);
     const interval = setInterval(fetchDbData, 3500);
 
     return () => {
       window.removeEventListener("nexus_queue_updated", handleQueueUpdate);
       window.removeEventListener("nexus_bed_allocated", handleBedAllocated);
+      window.removeEventListener("nexus_bed_freed", handleBedFreed);
       window.removeEventListener("storage", handleQueueUpdate);
       window.removeEventListener("storage", handleBedAllocated);
+      window.removeEventListener("storage", handleBedFreed);
       clearInterval(interval);
     };
   }, []);
@@ -716,8 +728,19 @@ function Doctor() {
   const [wardTab, setWardTab] = useState("Ward Rounds");
   const [wardPatients, setWardPatients] = useState([
     {
+      id: 101,
+      bedNo: "Bed-02A",
+      patientName: "Kamal Perera",
+      admissionDate: "Oct 09, 2026",
+      condition: "Recovered",
+      conditionColor: "cond-stable",
+      nurseSummary: "Clinical recovery achieved, vital signs normal",
+      actionType: "discharge",
+      dbId: "P-1042"
+    },
+    {
       id: 1,
-      bedNo: "201-A",
+      bedNo: "Bed-01B",
       patientName: "Kasun Madusanka",
       admissionDate: "Oct 12, 2026",
       condition: "Stable",
@@ -727,7 +750,7 @@ function Doctor() {
     },
     {
       id: 2,
-      bedNo: "201-B",
+      bedNo: "Bed-03A",
       patientName: "Nalani Wickramasinghe",
       admissionDate: "Oct 14, 2026",
       condition: "Guarded",
@@ -737,7 +760,7 @@ function Doctor() {
     },
     {
       id: 3,
-      bedNo: "203-A",
+      bedNo: "Bed-02B",
       patientName: "Nuwan Pradeep",
       admissionDate: "Oct 15, 2026",
       condition: "Critical",
@@ -749,7 +772,19 @@ function Doctor() {
 
   // WORKFLOW ACTION 4: Doctor clicks [ Approve Discharge ]
   const handleApproveDischarge = async (patientItem) => {
-    showToast(`✓ Discharge approved for ${patientItem.patientName}! Bed ${patientItem.bedNo} is now available.`);
+    const doctorName = "Dr. Robert Vance";
+    const clearanceData = {
+      patientName: patientItem.patientName || "Kamal Perera",
+      bedNo: patientItem.bedNo || "Bed-02A",
+      pid: patientItem.dbId || "P-1042",
+      doctorName: doctorName,
+      doctorClearance: `Cleared by ${doctorName}`,
+      clearanceDate: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      status: "Cleared by Doctor - Ready for Financial Settlement",
+      isDoctorCleared: true
+    };
+
     setWardPatients((prev) =>
       prev.map((p) =>
         p.patientName === patientItem.patientName
@@ -758,13 +793,23 @@ function Doctor() {
       )
     );
 
+    // Save clearance for Receptionist Discharge & Billing
+    localStorage.setItem("nexus_discharge_clearance", JSON.stringify(clearanceData));
+    window.dispatchEvent(new Event("storage"));
+    window.dispatchEvent(new CustomEvent("nexus_discharge_approved", { detail: clearanceData }));
+
     if (patientItem.dbId) {
       try {
-        await updatePatient(patientItem.dbId, { status: "Discharged" });
+        await updatePatient(patientItem.dbId, {
+          status: "Discharge Approved",
+          doctorClearance: `Cleared by ${doctorName}`
+        });
       } catch (e) {
         console.warn("Discharge database update notice:", e);
       }
     }
+
+    showToast(`✓ Clinical discharge approved for ${patientItem.patientName} (${patientItem.bedNo}) by ${doctorName}! Synchronized to Receptionist Discharge & Billing.`);
   };
 
   const isManualScroll = useRef(false);
