@@ -85,19 +85,19 @@ function Receptionist() {
   // SECTION 2: OPD TOKEN GENERATION STATE
   // ==========================================
   const [doctorsList] = useState([
-    { name: "Dr. Robert Vance", specialty: "Cardiology", fee: "Rs. 2,500 Paid" },
-    { name: "Dr. Elena Rostova", specialty: "General Medicine", fee: "Rs. 2,000 Paid" },
-    { name: "Dr. Marcus Thompson", specialty: "Pulmonology", fee: "Rs. 2,800 Paid" },
-    { name: "Dr. Sarah Jenkins", specialty: "Pediatrics", fee: "Rs. 2,200 Paid" }
+    { name: "Dr. Sanath Weerasinghe", specialty: "Pulmonology", fee: "Rs. 2,800 Paid" },
+    { name: "Dr. Priyantha Senanayake", specialty: "Cardiology", fee: "Rs. 2,500 Paid" },
+    { name: "Dr. Champa Gunasekara", specialty: "General Medicine", fee: "Rs. 2,000 Paid" },
+    { name: "Dr. Malini Fernando", specialty: "Pediatrics", fee: "Rs. 2,200 Paid" }
   ]);
 
   const [tokenForm, setTokenForm] = useState({
-    selectedDoctor: "Dr. Robert Vance - Cardiology",
-    clinicUnit: "Cardiology",
-    searchPatient: "Elena Rostova (ID: P-88219)",
+    selectedDoctor: "Dr. Sanath Weerasinghe - Pulmonology",
+    clinicUnit: "Pulmonology",
+    searchPatient: "Kavindi Jayawardena (ID: P-88219)",
     tokenNumber: "05",
     time: "10:15 AM",
-    fee: "Rs. 2,500 Paid"
+    fee: "Rs. 2,800 Paid"
   });
 
   const handleDoctorTokenChange = (e) => {
