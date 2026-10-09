@@ -32,6 +32,21 @@ function Receptionist() {
     navigate("/login");
   };
 
+  // Sidebar and workflow smooth scrolling
+  const scrollToSection = (id, navName) => {
+    setActiveNav(navName);
+    isManualScroll.current = true;
+    const element = document.getElementById(id);
+    if (element) {
+      const yOffset = -20;
+      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+    setTimeout(() => {
+      isManualScroll.current = false;
+    }, 850);
+  };
+
   // ==========================================
   // SECTION 1: NEW PATIENT REGISTRATION STATE
   // ==========================================
@@ -46,7 +61,19 @@ function Receptionist() {
   });
 
   const handleRegChange = (e) => {
-    setRegForm({ ...regForm, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    const updated = { ...regForm, [name]: value };
+    setRegForm(updated);
+
+    // Keep OPD Token Generation patient name instantly updated in real-time
+    if (name === "fullName" || name === "nicNumber") {
+      const patientName = updated.fullName ? updated.fullName.trim() : "";
+      const patientId = updated.nicNumber ? `NIC: ${updated.nicNumber.trim()}` : "ID: P-88219";
+      setTokenForm((prev) => ({
+        ...prev,
+        searchPatient: patientName ? `${patientName} (${patientId})` : ""
+      }));
+    }
   };
 
   const handleRegisterPatient = async (e) => {
@@ -65,7 +92,23 @@ function Receptionist() {
     } catch {
       // offline fallback works seamlessly
     }
-    showToast(`✓ Patient ${regForm.fullName} (NIC: ${regForm.nicNumber}) registered successfully!`);
+
+    const patientTag = regForm.nicNumber
+      ? `${regForm.fullName} (NIC: ${regForm.nicNumber})`
+      : `${regForm.fullName} (ID: P-88219)`;
+
+    // Immediately pass registered patient to OPD Token Generation form & slip
+    setTokenForm((prev) => ({
+      ...prev,
+      searchPatient: patientTag
+    }));
+
+    showToast(`✓ Patient ${regForm.fullName} registered! Proceeding to OPD Token Generation.`);
+
+    // Instantly scroll receptionist to the OPD Token Generation section
+    setTimeout(() => {
+      scrollToSection("token-generation-card", "TokenGeneration");
+    }, 350);
   };
 
   const handleCancelReg = () => {
@@ -78,6 +121,10 @@ function Receptionist() {
       bloodGroup: "O+",
       allergies: ""
     });
+    setTokenForm((prev) => ({
+      ...prev,
+      searchPatient: ""
+    }));
     showToast("Registration form reset.");
   };
 
@@ -94,7 +141,7 @@ function Receptionist() {
   const [tokenForm, setTokenForm] = useState({
     selectedDoctor: "Dr. Sanath Weerasinghe - Pulmonology",
     clinicUnit: "Pulmonology",
-    searchPatient: "Kavindi Jayawardena (ID: P-88219)",
+    searchPatient: "Kamal Perera (ID: P-88219)",
     tokenNumber: "05",
     time: "10:15 AM",
     fee: "Rs. 2,800 Paid"
