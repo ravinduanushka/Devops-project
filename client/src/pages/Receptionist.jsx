@@ -187,7 +187,7 @@ function Receptionist() {
   // SECTION 3: BED ALLOCATION STATE
   // ==========================================
   const initialBeds = [
-    { id: "Bed-01A", status: "occupied", patient: "Kavindi Jayawardena" },
+    { id: "Bed-01A", status: "occupied", patient: "Kamal Perera" },
     { id: "Bed-01B", status: "occupied", patient: "Kasun Madusanka" },
     { id: "Bed-01C", status: "occupied", patient: "Mohamed Rizwan" },
     { id: "Bed-02A", status: "available", patient: "" },
@@ -212,7 +212,7 @@ function Receptionist() {
   const [bedsList, setBedsList] = useState(initialBeds);
   const [selectedBedToAssign, setSelectedBedToAssign] = useState("Bed-02A");
   const [bedAssignPatient, setBedAssignPatient] = useState({
-    name: "Kavindi Jayawardena",
+    name: "Kamal Perera",
     id: "P-88219",
     doctor: "Dr. Priyantha Senanayake"
   });
@@ -249,7 +249,7 @@ function Receptionist() {
   // SECTION 4: DISCHARGE & BILLING STATE
   // ==========================================
   const [dischargeData, setDischargeData] = useState({
-    patientName: "Kavindi Jayawardena",
+    patientName: "Kamal Perera",
     bedNo: "Bed-01A",
     pid: "P-88219",
     currentStatus: "Awaiting Clearance",
@@ -639,9 +639,10 @@ function Receptionist() {
                           required
                         />
                         <datalist id="receptionist-patient-options">
-                          <option value="Kavindi Jayawardena (ID: P-88219)" />
+                          <option value="Kamal Perera (ID: P-88219)" />
+                          <option value="Kamal Perera (NIC: 198812345678)" />
+                          <option value="Kavindi Jayawardena (ID: P-88210)" />
                           <option value="Kasun Madusanka (ID: P-1033)" />
-                          <option value="Kamal Perera (ID: P-88212)" />
                           <option value="Nalani Wickramasinghe (ID: P-2045)" />
                           <option value="Nuwan Pradeep (ID: P-3089)" />
                           <option value="Dinithi Fernando (ID: P-4012)" />
