@@ -38,105 +38,217 @@ function Nurse() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("All");
 
-  const [inpatientList, setInpatientList] = useState([
-    {
-      bedNo: "Bed-01A",
-      patientName: "Kamal Perera",
-      pid: "P-1042",
-      age: 38,
-      gender: "Male",
-      bloodGroup: "O+",
-      allergy: "None known",
-      admissionDate: "Oct 09, 2026",
-      condition: "Stable",
-      conditionColor: "nurse-cond-stable",
-      attendingPhysician: "Dr. Vance"
-    },
-    {
-      bedNo: "Bed-01B",
-      patientName: "Kavindi Jayawardena",
-      pid: "P-88219",
-      age: 34,
-      gender: "Female",
-      bloodGroup: "B+",
-      allergy: "Penicillin",
-      admissionDate: "Oct 12, 2026",
-      condition: "Stable",
-      conditionColor: "nurse-cond-stable",
-      attendingPhysician: "Dr. Priyantha Senanayake"
-    },
-    {
-      bedNo: "Bed-02B",
-      patientName: "Nuwan Pradeep",
-      pid: "P-30891",
-      age: 58,
-      gender: "Male",
-      bloodGroup: "AB-",
-      allergy: "Aspirin",
-      admissionDate: "Oct 10, 2026",
-      condition: "Under Observation",
-      conditionColor: "nurse-cond-observation",
-      attendingPhysician: "Dr. Senanayake"
-    },
-    {
-      bedNo: "Bed-03A",
-      patientName: "Ruwani Dissanayake",
-      pid: "P-44021",
-      age: 42,
-      gender: "Female",
-      bloodGroup: "O+",
-      allergy: "Sulfa",
-      admissionDate: "Oct 11, 2026",
-      condition: "Guarded",
-      conditionColor: "nurse-cond-guarded",
-      attendingPhysician: "Dr. Kanthi Rajapaksha"
-    },
-    {
-      bedNo: "Bed-04C",
-      patientName: "Surangi Senaratne",
-      pid: "P-55209",
-      age: 27,
-      gender: "Female",
-      bloodGroup: "A+",
-      allergy: "None known",
-      admissionDate: "Oct 13, 2026",
-      condition: "Critical",
-      conditionColor: "nurse-cond-critical",
-      attendingPhysician: "Dr. Priyantha Senanayake"
-    }
-  ]);
+  const [inpatientList, setInpatientList] = useState(() => {
+    try {
+      const stored = localStorage.getItem("nexus_allocated_bed");
+      if (stored) {
+        const allocated = JSON.parse(stored);
+        if (allocated && allocated.patientName) {
+          return [
+            {
+              bedNo: allocated.bedNo || "Bed-02A",
+              patientName: allocated.patientName,
+              pid: allocated.pid || "P-1042",
+              age: allocated.age || 38,
+              gender: allocated.gender || "Male",
+              bloodGroup: allocated.bloodGroup || "O+",
+              allergy: allocated.allergy || "Penicillin",
+              admissionDate: allocated.admissionDate || "Oct 09, 2026",
+              condition: allocated.condition || "Stable",
+              conditionColor: allocated.conditionColor || "nurse-cond-stable",
+              attendingPhysician: allocated.attendingPhysician || "Dr. Vance"
+            },
+            {
+              bedNo: "Bed-01B",
+              patientName: "Kavindi Jayawardena",
+              pid: "P-88219",
+              age: 34,
+              gender: "Female",
+              bloodGroup: "B+",
+              allergy: "Penicillin",
+              admissionDate: "Oct 12, 2026",
+              condition: "Stable",
+              conditionColor: "nurse-cond-stable",
+              attendingPhysician: "Dr. Priyantha Senanayake"
+            },
+            {
+              bedNo: "Bed-02B",
+              patientName: "Nuwan Pradeep",
+              pid: "P-30891",
+              age: 58,
+              gender: "Male",
+              bloodGroup: "AB-",
+              allergy: "Aspirin",
+              admissionDate: "Oct 10, 2026",
+              condition: "Under Observation",
+              conditionColor: "nurse-cond-observation",
+              attendingPhysician: "Dr. Senanayake"
+            },
+            {
+              bedNo: "Bed-03A",
+              patientName: "Ruwani Dissanayake",
+              pid: "P-44021",
+              age: 42,
+              gender: "Female",
+              bloodGroup: "O+",
+              allergy: "Sulfa",
+              admissionDate: "Oct 11, 2026",
+              condition: "Guarded",
+              conditionColor: "nurse-cond-guarded",
+              attendingPhysician: "Dr. Kanthi Rajapaksha"
+            },
+            {
+              bedNo: "Bed-04C",
+              patientName: "Surangi Senaratne",
+              pid: "P-55209",
+              age: 27,
+              gender: "Female",
+              bloodGroup: "A+",
+              allergy: "None known",
+              admissionDate: "Oct 13, 2026",
+              condition: "Critical",
+              conditionColor: "nurse-cond-critical",
+              attendingPhysician: "Dr. Priyantha Senanayake"
+            }
+          ];
+        }
+      }
+    } catch {}
+
+    return [
+      {
+        bedNo: "Bed-02A",
+        patientName: "Kamal Perera",
+        pid: "P-1042",
+        age: 38,
+        gender: "Male",
+        bloodGroup: "O+",
+        allergy: "Penicillin",
+        admissionDate: "Oct 09, 2026",
+        condition: "Stable",
+        conditionColor: "nurse-cond-stable",
+        attendingPhysician: "Dr. Vance"
+      },
+      {
+        bedNo: "Bed-01B",
+        patientName: "Kavindi Jayawardena",
+        pid: "P-88219",
+        age: 34,
+        gender: "Female",
+        bloodGroup: "B+",
+        allergy: "Penicillin",
+        admissionDate: "Oct 12, 2026",
+        condition: "Stable",
+        conditionColor: "nurse-cond-stable",
+        attendingPhysician: "Dr. Priyantha Senanayake"
+      },
+      {
+        bedNo: "Bed-02B",
+        patientName: "Nuwan Pradeep",
+        pid: "P-30891",
+        age: 58,
+        gender: "Male",
+        bloodGroup: "AB-",
+        allergy: "Aspirin",
+        admissionDate: "Oct 10, 2026",
+        condition: "Under Observation",
+        conditionColor: "nurse-cond-observation",
+        attendingPhysician: "Dr. Senanayake"
+      },
+      {
+        bedNo: "Bed-03A",
+        patientName: "Ruwani Dissanayake",
+        pid: "P-44021",
+        age: 42,
+        gender: "Female",
+        bloodGroup: "O+",
+        allergy: "Sulfa",
+        admissionDate: "Oct 11, 2026",
+        condition: "Guarded",
+        conditionColor: "nurse-cond-guarded",
+        attendingPhysician: "Dr. Kanthi Rajapaksha"
+      },
+      {
+        bedNo: "Bed-04C",
+        patientName: "Surangi Senaratne",
+        pid: "P-55209",
+        age: 27,
+        gender: "Female",
+        bloodGroup: "A+",
+        allergy: "None known",
+        admissionDate: "Oct 13, 2026",
+        condition: "Critical",
+        conditionColor: "nurse-cond-critical",
+        attendingPhysician: "Dr. Priyantha Senanayake"
+      }
+    ];
+  });
 
   // Active Patient Context for Vital Recording & Medication Administration
   const [activePatient, setActivePatient] = useState({
-    bedNo: "Bed-01A",
+    bedNo: "Bed-02A",
     patientName: "Kamal Perera",
     pid: "P-1042",
     age: 38,
     gender: "Male",
     bloodGroup: "O+",
-    allergy: "None known",
+    allergy: "Penicillin",
     admissionDate: "Oct 09, 2026",
     condition: "Stable",
     conditionColor: "nurse-cond-stable",
     attendingPhysician: "Dr. Vance"
   });
 
-  // Load database patients if available
+  // Load database patients and sync confirmed bed allocations from Receptionist Portal
   useEffect(() => {
-    const fetchDbPatients = async () => {
+    const syncInpatients = async () => {
+      // 1. Check local storage for confirmed bed allocation
+      try {
+        const stored = localStorage.getItem("nexus_allocated_bed");
+        if (stored) {
+          const allocated = JSON.parse(stored);
+          if (allocated && allocated.patientName) {
+            setInpatientList((prev) => {
+              const entry = {
+                bedNo: allocated.bedNo || "Bed-02A",
+                patientName: allocated.patientName,
+                pid: allocated.pid || "P-1042",
+                age: allocated.age || 38,
+                gender: allocated.gender || "Male",
+                bloodGroup: allocated.bloodGroup || "O+",
+                allergy: allocated.allergy || "Penicillin",
+                admissionDate: allocated.admissionDate || "Oct 09, 2026",
+                condition: allocated.condition || "Stable",
+                conditionColor: allocated.conditionColor || "nurse-cond-stable",
+                attendingPhysician: allocated.attendingPhysician || "Dr. Vance"
+              };
+              const filtered = prev.filter((p) => p.bedNo !== entry.bedNo && p.patientName !== entry.patientName);
+              return [entry, ...filtered];
+            });
+
+            setActivePatient((prev) =>
+              prev.patientName === allocated.patientName
+                ? { ...prev, bedNo: allocated.bedNo || "Bed-02A", attendingPhysician: allocated.attendingPhysician || "Dr. Vance" }
+                : prev
+            );
+          }
+        }
+      } catch {}
+
+      // 2. Fetch from backend API
       try {
         const res = await getPatients();
         if (Array.isArray(res.data) && res.data.length > 0) {
           const dbInpatients = res.data
             .filter((p) => p.status === "Admitted")
             .map((p, idx) => ({
-              bedNo: p.wardNumber || `Bed-0${idx + 5}A`,
+              bedNo: p.wardNumber ? (p.wardNumber.includes("/") ? p.wardNumber.split("/")[1].trim() : p.wardNumber) : `Bed-0${idx + 5}A`,
               patientName: p.name,
-              pid: p._id ? `P-${p._id.slice(-5)}` : `P-${1040 + idx}`,
-              age: p.age || 40,
-              gender: p.gender || "Female",
+              pid: p.patientId || (p._id ? `P-${p._id.slice(-5)}` : `P-${1040 + idx}`),
+              age: p.age || 38,
+              gender: p.gender || "Male",
               bloodGroup: p.bloodGroup || "O+",
-              allergy: p.allergies || "None",
+              allergy: p.allergies || "Penicillin",
               admissionDate: new Date(p.admittedAt || Date.now()).toLocaleDateString("en-US", {
                 month: "short",
                 day: "numeric",
@@ -144,19 +256,46 @@ function Nurse() {
               }),
               condition: "Stable",
               conditionColor: "nurse-cond-stable",
-              attendingPhysician: p.doctorAssigned || "Dr. Priyantha Senanayake"
+              attendingPhysician: p.assignedDoctor || "Dr. Vance"
             }));
 
           if (dbInpatients.length > 0) {
-            setInpatientList((prev) => [...prev, ...dbInpatients]);
+            setInpatientList((prev) => {
+              const combined = [...prev];
+              dbInpatients.forEach((dbo) => {
+                const existingIdx = combined.findIndex((c) => c.patientName === dbo.patientName);
+                if (existingIdx >= 0) {
+                  combined[existingIdx] = { ...combined[existingIdx], ...dbo };
+                } else {
+                  combined.push(dbo);
+                }
+              });
+              return combined;
+            });
           }
         }
-      } catch {
-        // offline fallback catalog operates seamlessly
-      }
+      } catch {}
     };
 
-    fetchDbPatients();
+    syncInpatients();
+
+    const handleBedAllocated = (e) => {
+      const allocated = e?.detail;
+      if (allocated) {
+        showToast(`⚡ Inpatient Enrolled: ${allocated.patientName} assigned to ${allocated.bedNo || "Bed-02A"} in Ward 3B! Ready for bedside care.`);
+      }
+      syncInpatients();
+    };
+
+    window.addEventListener("nexus_bed_allocated", handleBedAllocated);
+    window.addEventListener("storage", syncInpatients);
+    const interval = setInterval(syncInpatients, 4000);
+
+    return () => {
+      window.removeEventListener("nexus_bed_allocated", handleBedAllocated);
+      window.removeEventListener("storage", syncInpatients);
+      clearInterval(interval);
+    };
   }, []);
 
   const handleOpenCareSheet = (patient) => {
