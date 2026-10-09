@@ -532,6 +532,53 @@ function Doctor() {
     showToast(`✓ Clinical notes & vitals saved for ${activeMedicalPatient.name}! Moving to Prescriptions.`);
   };
 
+  // WORKFLOW ACTION 2B: Inpatient Admission Order (Doctor -> Receptionist -> Nurse)
+  const [targetWard, setTargetWard] = useState("Ward 3B");
+  const [admissionStatus, setAdmissionStatus] = useState("");
+
+  const handleIssueAdmissionOrder = async () => {
+    const cleanName = activeMedicalPatient.name || "Kamal Perera";
+    const cleanPid = (activeMedicalPatient.pid || "P-1042").replace(/^#/, "");
+
+    const admissionPayload = {
+      orderId: `ADM-${Math.floor(1000 + Math.random() * 9000)}`,
+      patientName: cleanName,
+      patientId: cleanPid,
+      doctorName: "Dr. Vance",
+      ward: targetWard || "Ward 3B",
+      bedNo: "",
+      orderNotes: `Admit to ${targetWard || "Ward 3B"} - Inpatient hospitalization for clinical observation & intravenous respiratory therapy`,
+      diagnosis: diagnosisText || "Acute bronchitis with mild bronchial irritation",
+      status: "Pending Bed Allocation",
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      issuedAt: new Date().toISOString()
+    };
+
+    // 1. Post to backend
+    try {
+      await createAdmission(admissionPayload);
+    } catch {
+      // offline fallback
+    }
+
+    // 2. Save to localStorage for Receptionist BedAllocation view
+    try {
+      const existing = JSON.parse(localStorage.getItem("nexus_pending_admissions") || "[]");
+      const filtered = Array.isArray(existing) ? existing.filter((a) => a.patientName !== cleanName) : [];
+      localStorage.setItem("nexus_pending_admissions", JSON.stringify([admissionPayload, ...filtered]));
+      localStorage.setItem("nexus_latest_admission_order", JSON.stringify(admissionPayload));
+    } catch {
+      localStorage.setItem("nexus_pending_admissions", JSON.stringify([admissionPayload]));
+    }
+
+    // 3. Dispatch real-time events
+    window.dispatchEvent(new Event("storage"));
+    window.dispatchEvent(new CustomEvent("nexus_admission_ordered", { detail: admissionPayload }));
+
+    setAdmissionStatus(`Admit to ${targetWard || "Ward 3B"} (Pending Bed Allocation)`);
+    showToast(`✓ Inpatient Admission Order issued: "Admit to ${targetWard || "Ward 3B"}" for ${cleanName} (PID: ${cleanPid})! Routed to Receptionist Bed Allocation.`);
+  };
+
   // ==========================================
   // STEP 3: PRESCRIPTIONS STATE
   // ==========================================
@@ -1453,6 +1500,63 @@ function Doctor() {
                     >
                       Save Clinical Notes
                     </button>
+                  </div>
+
+                  {/* Physician Admission Order directly from Clinical Encounter Dashboard */}
+                  <div style={{
+                    marginTop: "16px",
+                    padding: "14px 16px",
+                    background: "rgba(59, 171, 153, 0.08)",
+                    border: "1px solid rgba(59, 171, 153, 0.25)",
+                    borderRadius: "8px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "10px"
+                  }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px" }}>
+                      <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "#1b3d45" }}>
+                        🏥 Inpatient Admission Order &bull; Hospitalization Request
+                      </div>
+                      {admissionStatus && (
+                        <span style={{ fontSize: "0.75rem", fontWeight: 600, padding: "3px 8px", borderRadius: "6px", background: "#fef3c7", color: "#92400e" }}>
+                          {admissionStatus}
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                      <label style={{ fontSize: "0.8rem", color: "#4b5563", fontWeight: 600 }}>Target Ward:</label>
+                      <select
+                        className="doc-form-control"
+                        style={{ width: "auto", minWidth: "160px", padding: "6px 10px", fontSize: "0.85rem" }}
+                        value={targetWard}
+                        onChange={(e) => setTargetWard(e.target.value)}
+                      >
+                        <option value="Ward 3B">Ward 3B (Pulmonary &amp; General)</option>
+                        <option value="Ward 2A">Ward 2A (Cardiology)</option>
+                        <option value="Ward 1C">Ward 1C (High Dependency)</option>
+                      </select>
+                      <button
+                        type="button"
+                        onClick={handleIssueAdmissionOrder}
+                        style={{
+                          background: "#e11d48",
+                          color: "#ffffff",
+                          padding: "8px 16px",
+                          borderRadius: "6px",
+                          fontWeight: 600,
+                          fontSize: "0.85rem",
+                          border: "none",
+                          cursor: "pointer",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "6px",
+                          boxShadow: "0 2px 4px rgba(225, 29, 72, 0.2)"
+                        }}
+                      >
+                        <span>🏥 Admit to {targetWard}</span>
+                        <span>&gt;</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
