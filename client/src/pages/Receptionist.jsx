@@ -599,12 +599,21 @@ function Receptionist() {
                       <div className="rec-input-icon-wrap">
                         <input
                           type="text"
+                          list="receptionist-patient-options"
                           className="rec-form-control rounded-input"
                           value={tokenForm.searchPatient}
                           onChange={(e) => setTokenForm({ ...tokenForm, searchPatient: e.target.value })}
                           placeholder="Search patient..."
                           required
                         />
+                        <datalist id="receptionist-patient-options">
+                          <option value="Kavindi Jayawardena (ID: P-88219)" />
+                          <option value="Kasun Madusanka (ID: P-1033)" />
+                          <option value="Kamal Perera (ID: P-88212)" />
+                          <option value="Nalani Wickramasinghe (ID: P-2045)" />
+                          <option value="Nuwan Pradeep (ID: P-3089)" />
+                          <option value="Dinithi Fernando (ID: P-4012)" />
+                        </datalist>
                         <span className="rec-input-icon">🔍</span>
                       </div>
                     </div>
