@@ -110,10 +110,23 @@ const prescriptionSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
+const admissionOrderSchema = new mongoose.Schema({
+  patientName: { type: String, required: true, trim: true },
+  patientId: { type: String, default: '' },
+  doctorName: { type: String, required: true, trim: true },
+  ward: { type: String, default: 'Ward 3B' },
+  bedNo: { type: String, default: '' },
+  diagnosis: { type: String, default: '' },
+  orderNotes: { type: String, default: 'Admit to Ward 3B' },
+  status: { type: String, default: 'Pending Bed Allocation' },
+  createdAt: { type: Date, default: Date.now }
+});
+
 const User = mongoose.model('User', userSchema);
 const Patient = mongoose.model('Patient', patientSchema);
 const Appointment = mongoose.model('Appointment', appointmentSchema);
 const Prescription = mongoose.model('Prescription', prescriptionSchema);
+const AdmissionOrder = mongoose.model('AdmissionOrder', admissionOrderSchema);
 
 // ==================== ROUTES ====================
 
@@ -249,6 +262,8 @@ app.put('/api/patients/:id', async (req, res, next) => {
     if (req.body.status) updateData.status = cleanString(req.body.status);
     if (req.body.diagnosis) updateData.diagnosis = cleanString(req.body.diagnosis);
     if (req.body.wardNumber) updateData.wardNumber = cleanString(req.body.wardNumber);
+    if (req.body.assignedDoctor) updateData.assignedDoctor = req.body.assignedDoctor;
+    if (req.body.admittedAt) updateData.admittedAt = new Date(req.body.admittedAt);
     const updated = await Patient.findByIdAndUpdate(req.params.id, updateData, { new: true });
     return res.status(200).json(updated);
   } catch (err) {
@@ -341,6 +356,70 @@ app.put('/api/prescriptions/:id', async (req, res, next) => {
     const updateData = {};
     if (req.body.status) updateData.status = cleanString(req.body.status);
     const updated = await Prescription.findByIdAndUpdate(req.params.id, updateData, { new: true });
+    return res.status(200).json(updated);
+  } catch (err) {
+    return next(err);
+  }
+});
+
+// Admissions API (Doctor -> Receptionist -> Nurse)
+app.get('/api/admissions', async (_req, res, next) => {
+  try {
+    const orders = await AdmissionOrder.find().sort({ createdAt: -1 });
+    return res.status(200).json(orders);
+  } catch (err) {
+    return next(err);
+  }
+});
+
+app.post('/api/admissions', async (req, res, next) => {
+  try {
+    const order = new AdmissionOrder({
+      patientName: cleanString(req.body.patientName),
+      patientId: cleanString(req.body.patientId || req.body.pid),
+      doctorName: cleanString(req.body.doctorName),
+      ward: cleanString(req.body.ward) || 'Ward 3B',
+      bedNo: cleanString(req.body.bedNo),
+      diagnosis: cleanString(req.body.diagnosis),
+      orderNotes: cleanString(req.body.orderNotes) || 'Admit to Ward 3B',
+      status: cleanString(req.body.status) || 'Pending Bed Allocation'
+    });
+    await order.save();
+
+    // Also update patient status if found
+    if (order.patientName) {
+      await Patient.findOneAndUpdate(
+        { name: order.patientName },
+        { status: 'Admission Requested', wardNumber: order.ward }
+      );
+    }
+
+    return res.status(201).json(order);
+  } catch (err) {
+    return next(err);
+  }
+});
+
+app.put('/api/admissions/:id', async (req, res, next) => {
+  try {
+    const updateData = {};
+    if (req.body.status) updateData.status = cleanString(req.body.status);
+    if (req.body.bedNo) updateData.bedNo = cleanString(req.body.bedNo);
+    if (req.body.ward) updateData.ward = cleanString(req.body.ward);
+    const updated = await AdmissionOrder.findByIdAndUpdate(req.params.id, updateData, { new: true });
+
+    // Also synchronize patient record
+    if (updated && updated.patientName && (updateData.bedNo || updateData.status === 'Bed Allocated' || updateData.status === 'Admitted')) {
+      await Patient.findOneAndUpdate(
+        { name: updated.patientName },
+        {
+          status: 'Admitted',
+          wardNumber: `${updated.ward || 'Ward 3B'} / ${updated.bedNo}`,
+          admittedAt: new Date()
+        }
+      );
+    }
+
     return res.status(200).json(updated);
   } catch (err) {
     return next(err);
