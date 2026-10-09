@@ -44,7 +44,7 @@ function Admin() {
       roomNo: "101"
     },
     nurseDetails: {
-      assignedWard: "General Ward A",
+      assignedWard: "Ward 3B (Pulmonary & General)",
       shiftTime: "Morning"
     },
     receptionistDetails: {
@@ -537,15 +537,17 @@ function Admin() {
                   <div className="form-row-2">
                     <div className="form-group">
                       <label htmlFor="admin-nurse-ward">Assigned Ward</label>
-                      <input
+                      <select
                         id="admin-nurse-ward"
-                        type="text"
                         name="nurseDetails.assignedWard"
-                        placeholder="e.g. Ward C - Post Surgery"
                         value={regForm.nurseDetails.assignedWard}
                         onChange={handleRegChange}
-                        className="form-input"
-                      />
+                        className="form-select"
+                      >
+                        <option value="Ward 3B (Pulmonary & General)">Ward 3B (Pulmonary &amp; General)</option>
+                        <option value="Ward 2A (Cardiology)">Ward 2A (Cardiology)</option>
+                        <option value="Ward 1C (High Dependency)">Ward 1C (High Dependency)</option>
+                      </select>
                     </div>
                     <div className="form-group">
                       <label htmlFor="admin-nurse-shift">Assigned Shift</label>

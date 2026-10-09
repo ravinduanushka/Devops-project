@@ -17,7 +17,7 @@ function Register() {
       roomNo: ""
     },
     nurseDetails: {
-      assignedWard: "",
+      assignedWard: "Ward 3B (Pulmonary & General)",
       shiftTime: "Morning"
     },
     receptionistDetails: {
@@ -347,14 +347,17 @@ function Register() {
                   <div className="form-row-2">
                     <div className="form-group">
                       <label htmlFor="nurse-ward">Assigned Ward</label>
-                      <input
+                      <select
                         id="nurse-ward"
-                        type="text"
                         name="nurseDetails.assignedWard"
                         value={formData.nurseDetails.assignedWard}
                         onChange={handleChange}
-                        className="form-input"
-                      />
+                        className="form-select"
+                      >
+                        <option value="Ward 3B (Pulmonary & General)">Ward 3B (Pulmonary &amp; General)</option>
+                        <option value="Ward 2A (Cardiology)">Ward 2A (Cardiology)</option>
+                        <option value="Ward 1C (High Dependency)">Ward 1C (High Dependency)</option>
+                      </select>
                     </div>
                     <div className="form-group">
                       <label htmlFor="nurse-shift">Shift Time</label>
