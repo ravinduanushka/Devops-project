@@ -474,23 +474,93 @@ function Receptionist() {
   // ==========================================
   // SECTION 4: DISCHARGE & BILLING STATE
   // ==========================================
-  const [dischargeData, setDischargeData] = useState({
-    patientName: "Kamal Perera",
-    bedNo: "Bed-01A",
-    pid: "P-88219",
-    currentStatus: "Awaiting Clearance",
-    doctorClearance: "Cleared by Dr. Priyantha Senanayake",
-    nursingClearance: "Verified by Nurse Chamari Perera",
-    charges: [
-      { id: 1, item: "Room Charges (Bed-01A)", amount: "8500" },
-      { id: 2, item: "Doctor Visit Fees", amount: "4500" },
-      { id: 3, item: "Pharmacy & Medication", amount: "3500" },
-      { id: 4, item: "Lab & Diagnostic Tests", amount: "2000" }
-    ],
-    totalAmount: "Rs. 18,500.00",
-    paymentStatus: "Payment Completed",
-    isCleared: false
+  const [dischargeData, setDischargeData] = useState(() => {
+    try {
+      const storedClearance = localStorage.getItem("nexus_discharge_clearance");
+      if (storedClearance) {
+        const parsed = JSON.parse(storedClearance);
+        if (parsed && parsed.patientName) {
+          return {
+            patientName: parsed.patientName,
+            bedNo: parsed.bedNo || "Bed-02A",
+            pid: parsed.pid || "P-1042",
+            currentStatus: "Doctor Cleared - Financial Settlement Ready",
+            doctorClearance: parsed.doctorClearance || "Cleared by Dr. Robert Vance",
+            nursingClearance: "Verified by Nurse K. Perera",
+            charges: [
+              { id: 1, item: `Room Charges (${parsed.bedNo || "Bed-02A"} in Ward 3B)`, amount: "8500" },
+              { id: 2, item: "Doctor Visit Fees (Dr. Robert Vance)", amount: "4500" },
+              { id: 3, item: "Pharmacy & Medication (Amoxicillin, Ibuprofen)", amount: "3500" },
+              { id: 4, item: "Lab & Diagnostic Tests (ECG, Blood Profile)", amount: "2000" }
+            ],
+            totalAmount: "Rs. 18,500.00",
+            paymentStatus: "Payment Completed",
+            isCleared: false,
+            isDoctorCleared: true
+          };
+        }
+      }
+    } catch {}
+
+    return {
+      patientName: "Kamal Perera",
+      bedNo: "Bed-02A",
+      pid: "P-1042",
+      currentStatus: "Awaiting Clearance",
+      doctorClearance: "Cleared by Dr. Robert Vance",
+      nursingClearance: "Verified by Nurse K. Perera",
+      charges: [
+        { id: 1, item: "Room Charges (Bed-02A in Ward 3B)", amount: "8500" },
+        { id: 2, item: "Doctor Visit Fees (Dr. Robert Vance)", amount: "4500" },
+        { id: 3, item: "Pharmacy & Medication (Amoxicillin, Ibuprofen)", amount: "3500" },
+        { id: 4, item: "Lab & Diagnostic Tests (ECG, Blood Profile)", amount: "2000" }
+      ],
+      totalAmount: "Rs. 18,500.00",
+      paymentStatus: "Payment Completed",
+      isCleared: false,
+      isDoctorCleared: true
+    };
   });
+
+  // Listen for doctor discharge clearance in real-time
+  useEffect(() => {
+    const syncClearance = () => {
+      try {
+        const storedClearance = localStorage.getItem("nexus_discharge_clearance");
+        if (storedClearance) {
+          const parsed = JSON.parse(storedClearance);
+          if (parsed && parsed.patientName) {
+            setDischargeData((prev) => ({
+              ...prev,
+              patientName: parsed.patientName,
+              bedNo: parsed.bedNo || "Bed-02A",
+              pid: parsed.pid || "P-1042",
+              doctorClearance: parsed.doctorClearance || "Cleared by Dr. Robert Vance",
+              isDoctorCleared: true,
+              currentStatus: "Doctor Cleared - Financial Settlement Ready"
+            }));
+          }
+        }
+      } catch {}
+    };
+
+    syncClearance();
+
+    const handleClearanceApproved = (e) => {
+      const data = e?.detail;
+      if (data) {
+        showToast(`⚡ Doctor clearance received for ${data.patientName} (${data.bedNo}): "${data.doctorClearance}"!`);
+      }
+      syncClearance();
+    };
+
+    window.addEventListener("nexus_discharge_approved", handleClearanceApproved);
+    window.addEventListener("storage", syncClearance);
+    return () => {
+      window.removeEventListener("nexus_discharge_approved", handleClearanceApproved);
+      window.removeEventListener("storage", syncClearance);
+    };
+  }, []);
 
   const calculateTotalBill = () => {
     const sum = dischargeData.charges.reduce((acc, c) => {
@@ -542,21 +612,65 @@ function Receptionist() {
     });
   };
 
-  const handleGenerateDischarge = (e) => {
+  const handleGenerateDischarge = async (e) => {
     e.preventDefault();
     const finalTotal = calculateTotalBill();
+    const freedBedNo = dischargeData.bedNo || "Bed-02A";
+
     setDischargeData((prev) => ({
       ...prev,
       totalAmount: finalTotal,
-      currentStatus: "Discharged & Cleared",
+      currentStatus: "Discharged & Settled",
       isCleared: true
     }));
-    // Free Bed-01A
+
+    // 1. Reset assigned bed status from Occupied (Red) back to Available (Green)
     setBedsList((prev) =>
-      prev.map((b) => (b.id === dischargeData.bedNo ? { ...b, status: "available", patient: "" } : b))
+      prev.map((b) => (b.id === freedBedNo ? { ...b, status: "available", patient: "" } : b))
     );
+
+    // 2. Publish finalized digital discharge summary to patient portal
+    const dischargeSummary = {
+      summaryId: `DS-${Math.floor(1000 + Math.random() * 9000)}`,
+      patientName: dischargeData.patientName || "Kamal Perera",
+      pid: dischargeData.pid || "P-1042",
+      admissionDate: "Oct 09, 2026",
+      dischargeDate: "Oct 10, 2026",
+      wardBed: `Ward 3B / ${freedBedNo}`,
+      attendingPhysician: "Dr. Robert Vance",
+      diagnosis: "Acute bronchitis with mild bronchial irritation - Clinically Recovered",
+      dischargeNotes: "Patient has successfully completed inpatient clinical therapy and is hemodynamically stable. Advised to continue oral medication regimens and schedule follow-up in 1 week.",
+      totalBill: finalTotal,
+      paymentStatus: "Paid & Cleared",
+      clearedAt: new Date().toLocaleString()
+    };
+    localStorage.setItem("nexus_patient_discharge_summary", JSON.stringify(dischargeSummary));
+
+    // Clear active allocated bed
+    localStorage.removeItem("nexus_allocated_bed");
+    localStorage.removeItem("nexus_discharge_clearance");
+
+    // 3. Update database
+    try {
+      const allPatients = await getPatients();
+      if (Array.isArray(allPatients.data)) {
+        const match = allPatients.data.find((p) => p.name === dischargeData.patientName);
+        if (match && match._id) {
+          await updatePatient(match._id, {
+            status: "Discharged",
+            wardNumber: ""
+          });
+        }
+      }
+    } catch {}
+
+    // 4. Dispatch events to Nurse Portal, Doctor Portal, and Patient Portal
+    window.dispatchEvent(new Event("storage"));
+    window.dispatchEvent(new CustomEvent("nexus_bed_freed", { detail: { bedNo: freedBedNo, patientName: dischargeData.patientName } }));
+    window.dispatchEvent(new CustomEvent("nexus_discharge_finalized", { detail: dischargeSummary }));
+
     showToast(
-      `✓ Discharge slip generated for ${dischargeData.patientName} (${finalTotal})! ${dischargeData.bedNo} is now free and available.`
+      `✓ Discharge slip generated & ${freedBedNo} freed! Digital discharge summary published to Patient Portal.`
     );
   };
 
