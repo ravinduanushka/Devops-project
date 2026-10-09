@@ -223,21 +223,91 @@ function Patient() {
       }
     };
 
+    const handleDischargeFinalized = (e) => {
+      const summary = e?.detail;
+      if (summary) {
+        setDischargeSummary(summary);
+        showToast("📄 Digital Discharge Summary & Clearance Certificate received! Ready for download.");
+      }
+    };
+
+    const syncDischargeFromStorage = () => {
+      try {
+        const storedDischarge = localStorage.getItem("nexus_patient_discharge_summary");
+        if (storedDischarge) {
+          setDischargeSummary(JSON.parse(storedDischarge));
+        }
+      } catch {}
+    };
+
     window.addEventListener("nexus_queue_updated", handleStorageUpdate);
     window.addEventListener("nexus_prescription_issued", handleRxDispatched);
+    window.addEventListener("nexus_discharge_finalized", handleDischargeFinalized);
     window.addEventListener("storage", handleStorageUpdate);
+    window.addEventListener("storage", syncDischargeFromStorage);
     const interval = setInterval(() => {
       syncTokenFromDb();
       syncRxFromDb();
+      syncDischargeFromStorage();
     }, 4000);
 
     return () => {
       window.removeEventListener("nexus_queue_updated", handleStorageUpdate);
       window.removeEventListener("nexus_prescription_issued", handleRxDispatched);
+      window.removeEventListener("nexus_discharge_finalized", handleDischargeFinalized);
       window.removeEventListener("storage", handleStorageUpdate);
+      window.removeEventListener("storage", syncDischargeFromStorage);
       clearInterval(interval);
     };
   }, []);
+
+  // Finalized digital discharge summary published by Receptionist
+  const [dischargeSummary, setDischargeSummary] = useState(() => {
+    try {
+      const stored = localStorage.getItem("nexus_patient_discharge_summary");
+      if (stored) return JSON.parse(stored);
+    } catch {}
+    return {
+      summaryId: "DS-1042",
+      patientName: "Kamal Perera",
+      pid: "P-1042",
+      admissionDate: "Oct 09, 2026",
+      dischargeDate: "Oct 10, 2026",
+      wardBed: "Ward 3B / Bed-02A",
+      attendingPhysician: "Dr. Robert Vance",
+      diagnosis: "Acute bronchitis with mild bronchial irritation - Clinically Recovered",
+      dischargeNotes: "Patient has completed inpatient clinical therapy and is hemodynamically stable. Advised to continue oral medication regimens and schedule follow-up in 1 week.",
+      totalBill: "Rs. 18,500.00",
+      paymentStatus: "Paid & Cleared",
+      clearedAt: "Oct 10, 2026, 11:30 AM"
+    };
+  });
+
+  const handleDownloadDischarge = () => {
+    showToast("✓ Downloading official Hospital Discharge Summary (PDF) for Kamal Perera...");
+    const content = `=====================================================
+NEXUSHEALTH HOSPITAL - DIGITAL DISCHARGE SUMMARY
+=====================================================
+Discharge Summary ID: ${dischargeSummary?.summaryId || "DS-1042"}
+Patient Name: ${dischargeSummary?.patientName || "Kamal Perera"} (PID: ${dischargeSummary?.pid || "P-1042"})
+Attending Physician: ${dischargeSummary?.attendingPhysician || "Dr. Robert Vance"}
+Ward & Bed: ${dischargeSummary?.wardBed || "Ward 3B / Bed-02A"}
+Admission Date: ${dischargeSummary?.admissionDate || "Oct 09, 2026"}
+Discharge Date: ${dischargeSummary?.dischargeDate || "Oct 10, 2026"}
+Clinical Diagnosis: ${dischargeSummary?.diagnosis || "Acute bronchitis with mild bronchial irritation - Clinically Recovered"}
+Discharge Notes: ${dischargeSummary?.dischargeNotes || "Patient has completed inpatient clinical therapy and is hemodynamically stable."}
+Financial Clearance: Total Paid: ${dischargeSummary?.totalBill || "Rs. 18,500.00"} (${dischargeSummary?.paymentStatus || "Paid & Cleared"})
+Doctor Clinical Clearance: Cleared by Dr. Robert Vance
+Cleared At: ${dischargeSummary?.clearedAt || new Date().toLocaleString()}
+=====================================================`;
+    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `Discharge_Summary_${(dischargeSummary?.patientName || "Kamal_Perera").replace(/\s+/g, "_")}.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   // ==========================================
   // STEP 2: MY RECORDS STATE (Diagnosis & Vitals)
@@ -690,6 +760,96 @@ function Patient() {
                   ⚠️ Allergy: {medicalRecord.allergy}
                 </div>
               </div>
+
+              {/* Finalized Digital Discharge Summary & Clearance Certificate */}
+              {dischargeSummary && (
+                <div style={{
+                  margin: "16px 0 20px 0",
+                  padding: "16px 20px",
+                  borderRadius: "10px",
+                  background: "#f0fdf4",
+                  border: "1px solid #86efac",
+                  boxShadow: "0 2px 6px rgba(22, 163, 74, 0.08)"
+                }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px", marginBottom: "12px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <span style={{ fontSize: "1.2rem" }}>🏥</span>
+                      <div>
+                        <h4 style={{ margin: 0, fontSize: "1rem", color: "#166534", fontWeight: 700 }}>
+                          Digital Discharge Summary &amp; Clearance Certificate
+                        </h4>
+                        <span style={{ fontSize: "0.75rem", color: "#15803d" }}>
+                          Order ID: {dischargeSummary.summaryId || "DS-1042"} &bull; {dischargeSummary.clearedAt || "Today, Oct 10, 2026"}
+                        </span>
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <span style={{
+                        fontSize: "0.75rem",
+                        fontWeight: 700,
+                        padding: "4px 10px",
+                        borderRadius: "6px",
+                        background: "#16a34a",
+                        color: "#fff"
+                      }}>
+                        ✓ Doctor &amp; Financial Clearance Complete
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleDownloadDischarge}
+                        style={{
+                          background: "#0f766e",
+                          color: "#fff",
+                          border: "none",
+                          padding: "6px 14px",
+                          borderRadius: "6px",
+                          fontSize: "0.8rem",
+                          fontWeight: 600,
+                          cursor: "pointer",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "6px"
+                        }}
+                      >
+                        📥 Download Discharge Summary (PDF)
+                      </button>
+                    </div>
+                  </div>
+
+                  <div style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                    gap: "12px",
+                    background: "#ffffff",
+                    padding: "12px 14px",
+                    borderRadius: "8px",
+                    fontSize: "0.82rem",
+                    color: "#374151",
+                    border: "1px solid #dcfce7"
+                  }}>
+                    <div>
+                      <strong>Attending Physician:</strong><br />
+                      <span style={{ color: "#166534", fontWeight: 600 }}>{dischargeSummary.attendingPhysician || "Dr. Robert Vance"}</span>
+                    </div>
+                    <div>
+                      <strong>Hospital Ward &amp; Bed:</strong><br />
+                      <span>{dischargeSummary.wardBed || "Ward 3B / Bed-02A"}</span>
+                    </div>
+                    <div>
+                      <strong>Stay Duration:</strong><br />
+                      <span>{dischargeSummary.admissionDate || "Oct 09, 2026"} &rarr; {dischargeSummary.dischargeDate || "Oct 10, 2026"}</span>
+                    </div>
+                    <div>
+                      <strong>Total Settled Bill:</strong><br />
+                      <span style={{ color: "#166534", fontWeight: 700 }}>{dischargeSummary.totalBill || "Rs. 18,500.00"} ({dischargeSummary.paymentStatus || "Paid & Cleared"})</span>
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: "10px", fontSize: "0.8rem", color: "#166534", background: "rgba(22, 163, 74, 0.05)", padding: "8px 12px", borderRadius: "6px" }}>
+                    <strong>Clinical Diagnosis &amp; Discharge Advice:</strong> {dischargeSummary.diagnosis || "Acute bronchitis with mild bronchial irritation - Clinically Recovered"}. {dischargeSummary.dischargeNotes || "Patient hemodynamically stable. Advised to continue oral medication regimens and follow up in 1 week."}
+                  </div>
+                </div>
+              )}
 
               {/* Two Column Layout: Diagnosis History & Latest Vitals */}
               <div className="patient-records-split-grid">
