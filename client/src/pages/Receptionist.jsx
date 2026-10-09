@@ -50,6 +50,24 @@ function Receptionist() {
   // ==========================================
   // SECTION 1: NEW PATIENT REGISTRATION STATE
   // ==========================================
+  const [currentPatientId, setCurrentPatientId] = useState("P-88219");
+
+  // Auto-generate fresh 5-digit Hospital Patient ID
+  const generateNewPatientId = () => {
+    const randomDigits = Math.floor(10000 + Math.random() * 90000);
+    return `P-${randomDigits}`;
+  };
+
+  const [patientOptions, setPatientOptions] = useState([
+    "Kamal Perera (ID: P-88219)",
+    "Kamal Perera (NIC: 198812345678)",
+    "Kavindi Jayawardena (ID: P-88210)",
+    "Kasun Madusanka (ID: P-1033)",
+    "Nalani Wickramasinghe (ID: P-2045)",
+    "Nuwan Pradeep (ID: P-3089)",
+    "Dinithi Fernando (ID: P-4012)"
+  ]);
+
   const [regForm, setRegForm] = useState({
     fullName: "Kamal Perera",
     nicNumber: "198812345678",
@@ -65,22 +83,27 @@ function Receptionist() {
     const updated = { ...regForm, [name]: value };
     setRegForm(updated);
 
-    // Keep OPD Token Generation patient name instantly updated in real-time
-    if (name === "fullName" || name === "nicNumber") {
+    // Keep OPD Token Generation patient name synced while receptionist is typing
+    if (name === "fullName") {
       const patientName = updated.fullName ? updated.fullName.trim() : "";
-      const patientId = updated.nicNumber ? `NIC: ${updated.nicNumber.trim()}` : "ID: P-88219";
       setTokenForm((prev) => ({
         ...prev,
-        searchPatient: patientName ? `${patientName} (${patientId})` : ""
+        searchPatient: patientName ? `${patientName} (ID: ${currentPatientId})` : ""
       }));
     }
   };
 
   const handleRegisterPatient = async (e) => {
     e.preventDefault();
+
+    // 1. Auto-generate fresh new Patient ID upon clicking Register Patient
+    const newPatientId = generateNewPatientId();
+    setCurrentPatientId(newPatientId);
+
     try {
       await createPatient({
         name: regForm.fullName,
+        patientId: newPatientId,
         age: parseInt(regForm.age) || 38,
         gender: regForm.gender,
         contact: regForm.contactNumber,
@@ -93,19 +116,33 @@ function Receptionist() {
       // offline fallback works seamlessly
     }
 
-    const patientTag = regForm.nicNumber
-      ? `${regForm.fullName} (NIC: ${regForm.nicNumber})`
-      : `${regForm.fullName} (ID: P-88219)`;
+    const patientTag = `${regForm.fullName} (ID: ${newPatientId})`;
 
-    // Immediately pass registered patient to OPD Token Generation form & slip
+    // 2. Automatically transfer registered patient & new auto-generated ID to OPD Token Generation
     setTokenForm((prev) => ({
       ...prev,
       searchPatient: patientTag
     }));
 
-    showToast(`✓ Patient ${regForm.fullName} registered! Proceeding to OPD Token Generation.`);
+    // 3. Add to patient search options
+    setPatientOptions((prev) => [patientTag, ...prev.filter((p) => p !== patientTag)]);
 
-    // Instantly scroll receptionist to the OPD Token Generation section
+    // 4. Update Bed Allocation & Discharge records with newly generated ID
+    setBedAssignPatient((prev) => ({
+      ...prev,
+      name: regForm.fullName,
+      id: newPatientId
+    }));
+
+    setDischargeData((prev) => ({
+      ...prev,
+      patientName: regForm.fullName,
+      pid: newPatientId
+    }));
+
+    showToast(`✓ Patient ${regForm.fullName} registered with Auto-Generated ID ${newPatientId}! Proceeding to OPD Token Generation.`);
+
+    // 5. Instantly scroll receptionist to the OPD Token Generation section
     setTimeout(() => {
       scrollToSection("token-generation-card", "TokenGeneration");
     }, 350);
@@ -480,7 +517,12 @@ function Receptionist() {
               <form onSubmit={handleRegisterPatient} className="rec-form-wrapper">
                 {/* Personal Info Box */}
                 <div className="rec-sub-section">
-                  <h3 className="rec-sub-title">Personal Info</h3>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                    <h3 className="rec-sub-title" style={{ margin: 0 }}>Personal Info</h3>
+                    <span style={{ fontSize: "12px", background: "#e0f2fe", color: "#0369a1", padding: "3px 10px", borderRadius: "12px", fontWeight: "600" }}>
+                      Auto-Generated ID: {currentPatientId}
+                    </span>
+                  </div>
                   <div className="rec-grid-2col">
                     <div className="rec-form-group">
                       <label>Full Name</label>
