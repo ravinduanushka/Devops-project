@@ -50,16 +50,16 @@ function Receptionist() {
   // ==========================================
   // SECTION 1: NEW PATIENT REGISTRATION STATE
   // ==========================================
-  const [currentPatientId, setCurrentPatientId] = useState("P-88219");
+  const [currentPatientId, setCurrentPatientId] = useState("P-1042");
 
   // Auto-generate fresh 5-digit Hospital Patient ID
   const generateNewPatientId = () => {
-    const randomDigits = Math.floor(10000 + Math.random() * 90000);
+    const randomDigits = Math.floor(1000 + Math.random() * 9000);
     return `P-${randomDigits}`;
   };
 
   const [patientOptions, setPatientOptions] = useState([
-    "Kamal Perera (ID: P-88219)",
+    "Kamal Perera (PID: P-1042)",
     "Kamal Perera (NIC: 198812345678)",
     "Kavindi Jayawardena (ID: P-88210)",
     "Kasun Madusanka (ID: P-1033)",
@@ -88,7 +88,7 @@ function Receptionist() {
       const patientName = updated.fullName ? updated.fullName.trim() : "";
       setTokenForm((prev) => ({
         ...prev,
-        searchPatient: patientName ? `${patientName} (ID: ${currentPatientId})` : ""
+        searchPatient: patientName ? `${patientName} (PID: ${currentPatientId})` : ""
       }));
     }
   };
@@ -100,23 +100,25 @@ function Receptionist() {
     const newPatientId = generateNewPatientId();
     setCurrentPatientId(newPatientId);
 
+    const patientPayload = {
+      name: regForm.fullName,
+      patientId: newPatientId,
+      age: parseInt(regForm.age) || 38,
+      gender: regForm.gender,
+      contact: regForm.contactNumber,
+      bloodGroup: regForm.bloodGroup,
+      allergies: regForm.allergies,
+      nic: regForm.nicNumber,
+      status: "Registered"
+    };
+
     try {
-      await createPatient({
-        name: regForm.fullName,
-        patientId: newPatientId,
-        age: parseInt(regForm.age) || 38,
-        gender: regForm.gender,
-        contact: regForm.contactNumber,
-        bloodGroup: regForm.bloodGroup,
-        allergies: regForm.allergies,
-        nic: regForm.nicNumber,
-        status: "Registered"
-      });
+      await createPatient(patientPayload);
     } catch {
       // offline fallback works seamlessly
     }
 
-    const patientTag = `${regForm.fullName} (ID: ${newPatientId})`;
+    const patientTag = `${regForm.fullName} (PID: ${newPatientId})`;
 
     // 2. Automatically transfer registered patient & new auto-generated ID to OPD Token Generation
     setTokenForm((prev) => ({
@@ -140,7 +142,11 @@ function Receptionist() {
       pid: newPatientId
     }));
 
-    showToast(`✓ Patient ${regForm.fullName} registered with Auto-Generated ID ${newPatientId}! Proceeding to OPD Token Generation.`);
+    // Save to shared localStorage for immediate portal-wide sync
+    localStorage.setItem("nexus_registered_patient", JSON.stringify(patientPayload));
+    window.dispatchEvent(new Event("storage"));
+
+    showToast(`✓ Patient ${regForm.fullName} (PID: ${newPatientId}) registered into hospital system! Proceeding to OPD Token Generation.`);
 
     // 5. Instantly scroll receptionist to the OPD Token Generation section
     setTimeout(() => {
@@ -169,6 +175,7 @@ function Receptionist() {
   // SECTION 2: OPD TOKEN GENERATION STATE
   // ==========================================
   const [doctorsList] = useState([
+    { name: "Dr. Vance", specialty: "Cardiology", fee: "Rs. 2,500 Paid" },
     { name: "Dr. Sanath Weerasinghe", specialty: "Pulmonology", fee: "Rs. 2,800 Paid" },
     { name: "Dr. Priyantha Senanayake", specialty: "Cardiology", fee: "Rs. 2,500 Paid" },
     { name: "Dr. Champa Gunasekara", specialty: "General Medicine", fee: "Rs. 2,000 Paid" },
@@ -176,12 +183,12 @@ function Receptionist() {
   ]);
 
   const [tokenForm, setTokenForm] = useState({
-    selectedDoctor: "Dr. Sanath Weerasinghe - Pulmonology",
-    clinicUnit: "Pulmonology",
-    searchPatient: "Kamal Perera (ID: P-88219)",
+    selectedDoctor: "Dr. Vance - Cardiology",
+    clinicUnit: "Cardiology",
+    searchPatient: "Kamal Perera (PID: P-1042)",
     tokenNumber: "05",
     time: "10:15 AM",
-    fee: "Rs. 2,800 Paid"
+    fee: "Rs. 2,500 Paid"
   });
 
   const handleDoctorTokenChange = (e) => {
@@ -197,26 +204,65 @@ function Receptionist() {
 
   const handleIssueToken = async (e) => {
     e.preventDefault();
-    const nextTokenNum = parseInt(tokenForm.tokenNumber) + 1;
-    const tokenStr = nextTokenNum < 10 ? `0${nextTokenNum}` : `${nextTokenNum}`;
-    
+    const currentTokenNum = tokenForm.tokenNumber || "05";
+    const nextTokenNum = parseInt(currentTokenNum, 10) + 1;
+    const nextTokenStr = nextTokenNum < 10 ? `0${nextTokenNum}` : `${nextTokenNum}`;
+    const cleanPatientName = tokenForm.searchPatient.split(" (")[0].trim() || "Kamal Perera";
+    const extractedPidMatch = tokenForm.searchPatient.match(/(?:ID|PID):\s*([^)]+)/i);
+    const extractedPid = extractedPidMatch ? extractedPidMatch[1].trim() : currentPatientId;
+    const cleanDoctorName = tokenForm.selectedDoctor.split(" - ")[0].trim() || "Dr. Vance";
+
+    const apptPayload = {
+      patientName: cleanPatientName,
+      patientId: extractedPid,
+      doctorName: cleanDoctorName,
+      department: tokenForm.clinicUnit,
+      dateTime: new Date().toISOString(),
+      tokenNumber: parseInt(currentTokenNum, 10) || 5,
+      status: "Waiting",
+      type: "In-Person Consultation",
+      fee: tokenForm.fee
+    };
+
     try {
-      await createAppointment({
-        patientName: tokenForm.searchPatient.split(" (")[0],
-        doctorName: tokenForm.selectedDoctor.split(" - ")[0],
-        department: tokenForm.clinicUnit,
-        dateTime: new Date().toISOString(),
-        tokenNumber: parseInt(tokenForm.tokenNumber),
-        type: "In-Person Consultation"
-      });
+      await createAppointment(apptPayload);
     } catch {
       // offline fallback works seamlessly
     }
 
-    showToast(`✓ OPD Token #${tokenForm.tokenNumber} issued & printed for ${tokenForm.searchPatient}!`);
+    // Live Queue Entry for Doctor Portal
+    const activeQueueEntry = {
+      token: `#${currentTokenNum}`,
+      patientName: cleanPatientName,
+      patientId: extractedPid,
+      age: parseInt(regForm.age) || 38,
+      estimatedTime: tokenForm.time || "10:15 AM",
+      status: "Waiting",
+      statusColor: "status-mint",
+      doctorName: cleanDoctorName,
+      department: tokenForm.clinicUnit,
+      currentlyServing: "04"
+    };
+
+    // Broadcast state for Doctor Portal & Patient Portal via localStorage & events
+    localStorage.setItem("nexus_active_token", JSON.stringify(activeQueueEntry));
+
+    try {
+      const existingQueue = JSON.parse(localStorage.getItem("nexus_queue_list") || "[]");
+      const filtered = Array.isArray(existingQueue) ? existingQueue.filter((q) => q.token !== activeQueueEntry.token) : [];
+      localStorage.setItem("nexus_queue_list", JSON.stringify([activeQueueEntry, ...filtered]));
+    } catch {
+      localStorage.setItem("nexus_queue_list", JSON.stringify([activeQueueEntry]));
+    }
+
+    // Trigger instant real-time sync across open browser tabs & views
+    window.dispatchEvent(new Event("storage"));
+    window.dispatchEvent(new CustomEvent("nexus_queue_updated", { detail: activeQueueEntry }));
+
+    showToast(`✓ OPD Token #${currentTokenNum} issued for ${tokenForm.searchPatient} assigned to ${cleanDoctorName}! Dispatched to Doctor Queue (#${currentTokenNum} Waiting) & Patient Portal.`);
     setTokenForm((prev) => ({
       ...prev,
-      tokenNumber: tokenStr
+      tokenNumber: nextTokenStr
     }));
   };
 
