@@ -159,34 +159,73 @@ function Doctor() {
     room: "02"
   });
 
-  const [queueList, setQueueList] = useState([
-    {
-      token: "#05",
-      patientName: "Kasun Madusanka",
-      age: 46,
-      estimatedTime: "10:15 AM",
-      status: "In Consultation",
-      statusColor: "status-teal"
-    },
-    {
-      token: "#06",
-      patientName: "Nalani Wickramasinghe",
-      age: 29,
-      estimatedTime: "10:30 AM",
-      status: "Waiting",
-      statusColor: "status-mint"
-    },
-    {
-      token: "#07",
-      patientName: "Nuwan Pradeep",
-      age: 58,
-      estimatedTime: "11:00 AM",
-      status: "Scheduled",
-      statusColor: "status-blue"
-    }
-  ]);
+  const [queueList, setQueueList] = useState(() => {
+    try {
+      const stored = localStorage.getItem("nexus_queue_list");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+      const activeTok = localStorage.getItem("nexus_active_token");
+      if (activeTok) {
+        const parsedTok = JSON.parse(activeTok);
+        return [
+          {
+            token: parsedTok.token || "#05",
+            patientName: parsedTok.patientName || "Kamal Perera",
+            age: parsedTok.age || 38,
+            estimatedTime: parsedTok.estimatedTime || "10:15 AM",
+            status: "Waiting",
+            statusColor: "status-mint"
+          },
+          {
+            token: "#06",
+            patientName: "Nalani Wickramasinghe",
+            age: 29,
+            estimatedTime: "10:30 AM",
+            status: "Waiting",
+            statusColor: "status-mint"
+          },
+          {
+            token: "#07",
+            patientName: "Nuwan Pradeep",
+            age: 58,
+            estimatedTime: "11:00 AM",
+            status: "Scheduled",
+            statusColor: "status-blue"
+          }
+        ];
+      }
+    } catch {}
+    return [
+      {
+        token: "#05",
+        patientName: "Kamal Perera",
+        age: 38,
+        estimatedTime: "10:15 AM",
+        status: "Waiting",
+        statusColor: "status-mint"
+      },
+      {
+        token: "#06",
+        patientName: "Nalani Wickramasinghe",
+        age: 29,
+        estimatedTime: "10:30 AM",
+        status: "Waiting",
+        statusColor: "status-mint"
+      },
+      {
+        token: "#07",
+        patientName: "Nuwan Pradeep",
+        age: 58,
+        estimatedTime: "11:00 AM",
+        status: "Scheduled",
+        statusColor: "status-blue"
+      }
+    ];
+  });
 
-  // Load backend database appointments & patients on mount
+  // Load backend database appointments & sync with Receptionist token updates in real-time
   useEffect(() => {
     const fetchDbData = async () => {
       try {
@@ -197,14 +236,23 @@ function Doctor() {
 
         if (apptsRes.status === "fulfilled" && Array.isArray(apptsRes.value.data) && apptsRes.value.data.length > 0) {
           const dbAppts = apptsRes.value.data.map((appt, idx) => ({
-            token: `#${String(appt.tokenNumber || idx + 10).padStart(2, "0")}`,
+            token: `#${String(appt.tokenNumber || idx + 5).padStart(2, "0")}`,
             patientName: appt.patientName,
-            age: 40,
-            estimatedTime: new Date(appt.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            status: "Waiting",
-            statusColor: "status-mint"
+            age: 38,
+            estimatedTime: appt.dateTime ? new Date(appt.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "10:15 AM",
+            status: appt.status || "Waiting",
+            statusColor: appt.status === "In Consultation" ? "status-teal" : appt.status === "Completed" ? "status-blue" : "status-mint"
           }));
-          setQueueList((prev) => [...prev, ...dbAppts]);
+
+          setQueueList((prev) => {
+            const combined = [...dbAppts];
+            prev.forEach((item) => {
+              if (!combined.some((c) => c.token === item.token)) {
+                combined.push(item);
+              }
+            });
+            return combined;
+          });
         }
 
         if (patientsRes.status === "fulfilled" && Array.isArray(patientsRes.value.data) && patientsRes.value.data.length > 0) {
@@ -223,7 +271,15 @@ function Doctor() {
             }));
 
           if (dbInpatients.length > 0) {
-            setWardPatients((prev) => [...prev, ...dbInpatients]);
+            setWardPatients((prev) => {
+              const merged = [...dbInpatients];
+              prev.forEach((p) => {
+                if (!merged.some((m) => m.bedNo === p.bedNo)) {
+                  merged.push(p);
+                }
+              });
+              return merged;
+            });
           }
         }
       } catch (err) {
@@ -232,6 +288,42 @@ function Doctor() {
     };
 
     fetchDbData();
+
+    // Event listener for instant token dispatch from Receptionist Portal
+    const handleQueueUpdate = (event) => {
+      let activeTok = event?.detail;
+      if (!activeTok) {
+        try {
+          activeTok = JSON.parse(localStorage.getItem("nexus_active_token"));
+        } catch {
+          activeTok = null;
+        }
+      }
+
+      if (activeTok && activeTok.token) {
+        setQueueList((prev) => {
+          const newEntry = {
+            token: activeTok.token,
+            patientName: activeTok.patientName || "Kamal Perera",
+            age: activeTok.age || 38,
+            estimatedTime: activeTok.estimatedTime || "10:15 AM",
+            status: activeTok.status || "Waiting",
+            statusColor: "status-mint"
+          };
+          return [newEntry, ...prev.filter((item) => item.token !== newEntry.token)];
+        });
+      }
+    };
+
+    window.addEventListener("nexus_queue_updated", handleQueueUpdate);
+    window.addEventListener("storage", handleQueueUpdate);
+    const interval = setInterval(fetchDbData, 3500);
+
+    return () => {
+      window.removeEventListener("nexus_queue_updated", handleQueueUpdate);
+      window.removeEventListener("storage", handleQueueUpdate);
+      clearInterval(interval);
+    };
   }, []);
 
   // WORKFLOW ACTION 1: Doctor clicks [ Call Next Patient ]
