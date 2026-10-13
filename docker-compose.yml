@@ -10,7 +10,7 @@ services:
   server:
     build: ./server
     image: hospital-server:latest
-    container_name: hospital-server
+    container_name: hospital-server  
     restart: unless-stopped
     ports:
       - "5000:5000"
