@@ -32,10 +32,22 @@ app.use(cors({
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/hospital';
 
-mongoose.connect(MONGO_URI).catch((err) => {
-  process.stderr.write(`Database connection error: ${err.message}\n`);
-  process.exit(1);
-});
+const connectDB = async (retries = 5, delayMs = 2000) => {
+  for (let i = 1; i <= retries; i++) {
+    try {
+      await mongoose.connect(MONGO_URI);
+      console.log('MongoDB connected successfully');
+      return;
+    } catch (err) {
+      process.stderr.write(`Database connection attempt ${i} failed: ${err.message}\n`);
+      if (i === retries) {
+        process.exit(1);
+      }
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+};
+connectDB();
 
 const cleanString = (value) => (typeof value === 'string' ? value.trim() : '');
 
