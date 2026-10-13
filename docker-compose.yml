@@ -8,6 +8,7 @@ services:
       - mongodb_data:/data/db
 
   server:
+    build: ./server
     image: hospital-server:latest
     container_name: hospital-server
     restart: unless-stopped
@@ -21,6 +22,7 @@ services:
       - mongodb
 
   client:
+    build: ./client
     image: hospital-client:latest
     container_name: hospital-client
     restart: unless-stopped
