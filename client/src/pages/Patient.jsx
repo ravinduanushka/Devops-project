@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
-import { getAppointments, createAppointment, getPatients, getPrescriptions } from "../services/api";
+import { getAppointments, createAppointment, getPatients, getPrescriptions, getDoctors } from "../services/api";
 
 function Patient() {
   const navigate = useNavigate();
@@ -54,13 +54,29 @@ function Patient() {
     };
   });
 
-  const [doctorsList] = useState([
+  const [doctorsList, setDoctorsList] = useState([
     { name: "Dr. Vance", specialty: "Cardiology", fee: "Rs. 2,500.00", feeUsd: "$50.00" },
+    { name: "Dr. Sanath Weerasinghe", specialty: "Pulmonology", fee: "Rs. 2,800.00", feeUsd: "$55.00" },
     { name: "Dr. Priyantha Senanayake", specialty: "Cardiology", fee: "Rs. 2,500.00", feeUsd: "$50.00" },
     { name: "Dr. Champa Gunasekara", specialty: "General Medicine", fee: "Rs. 2,000.00", feeUsd: "$40.00" },
-    { name: "Dr. Sanath Weerasinghe", specialty: "Pulmonology", fee: "Rs. 2,800.00", feeUsd: "$55.00" },
-    { name: "Dr. Sanduni Wickramasinghe", specialty: "Neurology", fee: "Rs. 3,000.00", feeUsd: "$60.00" }
+    { name: "Dr. Malani Fernando", specialty: "Pediatrics", fee: "Rs. 2,200.00", feeUsd: "$45.00" }
   ]);
+
+  useEffect(() => {
+    const fetchDoctors = () => {
+      getDoctors()
+        .then((res) => {
+          if (res.data && res.data.length > 0) {
+            setDoctorsList(res.data);
+          }
+        })
+        .catch(() => {});
+    };
+
+    fetchDoctors();
+    window.addEventListener("nexus_doctors_updated", fetchDoctors);
+    return () => window.removeEventListener("nexus_doctors_updated", fetchDoctors);
+  }, []);
 
   const [bookingForm, setBookingForm] = useState({
     doctor: "Dr. Vance - Cardiology",
