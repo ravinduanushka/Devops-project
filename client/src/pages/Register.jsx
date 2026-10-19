@@ -126,6 +126,9 @@ function Register() {
       }
 
       await registerUser(payload);
+      if (selectedRole === "Doctor") {
+        window.dispatchEvent(new Event("nexus_doctors_updated"));
+      }
       setSuccessMessage(`Account created successfully as ${selectedRole}! Redirecting to login to sign in with your email and password...`);
 
       setTimeout(() => {
