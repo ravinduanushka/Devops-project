@@ -314,11 +314,36 @@ app.post('/api/auth/register', async (req, res, next) => {
       return res.status(400).json({ error: 'Passwords do not match' });
     }
 
+    const authorizedRecEmail = (process.env.RECEPTIONIST_EMAIL || 'anusikan0426@gmail.com').toLowerCase().trim();
+    const authorizedRecPassword = process.env.RECEPTIONIST_PASSWORD || 'webreciption56';
+
+    if (role === 'Receptionist') {
+      if (email !== authorizedRecEmail || password !== authorizedRecPassword) {
+        return res.status(400).json({
+          error: `Only the authorized Receptionist credentials (Email: ${authorizedRecEmail}, Password: ${authorizedRecPassword}) are accepted for the Receptionist role.`
+        });
+      }
+
+      const existingRec = await User.findOne({ role: 'Receptionist' });
+      if (existingRec) {
+        const salt = await bcrypt.genSalt(10);
+        existingRec.email = authorizedRecEmail;
+        existingRec.password = await bcrypt.hash(authorizedRecPassword, salt);
+        existingRec.name = name || existingRec.name;
+        existingRec.phone = phone || existingRec.phone;
+        if (req.body.receptionistDetails?.deskNumber) {
+          existingRec.receptionistDetails = { deskNumber: cleanString(req.body.receptionistDetails.deskNumber) };
+        }
+        await existingRec.save();
+        return res.status(200).json({ message: 'Receptionist configured successfully' });
+      }
+    }
+
     const sharedDoctorEmail = (process.env.DOCTOR_SHARED_EMAIL || 'anusikan0426@gmail.com').toLowerCase().trim();
     const existingUser = await User.findOne({
       $or: [
         { email: { $eq: email }, name: { $eq: name } },
-        ...(email !== sharedDoctorEmail ? [{ email: { $eq: email } }] : [])
+        ...(email !== sharedDoctorEmail && email !== authorizedRecEmail ? [{ email: { $eq: email } }] : [])
       ]
     });
     if (existingUser) {
