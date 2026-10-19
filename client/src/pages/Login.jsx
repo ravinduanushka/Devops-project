@@ -13,6 +13,22 @@ function Login() {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
+  const doctorsList = [
+    { name: "Dr. Vance", pass: "vancedoctor", spec: "Cardiology" },
+    { name: "Dr. Sanath", pass: "sanathdoctor", spec: "Pulmonology" },
+    { name: "Dr. Priyantha", pass: "priyanthadoctor", spec: "Cardiology" },
+    { name: "Dr. Champa", pass: "champadoctor", spec: "General Medicine" },
+    { name: "Dr. Malani", pass: "malanidoctor", spec: "Pediatrics" }
+  ];
+
+  const handleQuickDoctorFill = (pass) => {
+    setFormData({
+      email: "anusikan0426@gmail.com",
+      password: pass
+    });
+    setErrorMessage("");
+  };
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
