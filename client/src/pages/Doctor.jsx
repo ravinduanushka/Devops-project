@@ -1201,7 +1201,7 @@ function Doctor() {
                               className="doc-btn-notes"
                               onClick={() => showToast(`Opening round notes for ${p.patientName}`)}
                             >
-                              📋 Ward Round Notes
+                               Ward Round Notes
                             </button>
                           ) : (
                             <button
@@ -1368,7 +1368,7 @@ function Doctor() {
                         title="Remove medication"
                         onClick={() => handleRemoveMedication(m.id)}
                       >
-                        🗑
+                        
                       </button>
                     </div>
                   ))}
@@ -1560,7 +1560,7 @@ function Doctor() {
                   }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px" }}>
                       <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "#1b3d45" }}>
-                        🏥 Inpatient Admission Order &bull; Hospitalization Request
+                         Inpatient Admission Order &bull; Hospitalization Request
                       </div>
                       {admissionStatus && (
                         <span style={{ fontSize: "0.75rem", fontWeight: 600, padding: "3px 8px", borderRadius: "6px", background: "#fef3c7", color: "#92400e" }}>
@@ -1598,7 +1598,7 @@ function Doctor() {
                           boxShadow: "0 2px 4px rgba(225, 29, 72, 0.2)"
                         }}
                       >
-                        <span>🏥 Admit to {targetWard}</span>
+                        <span> Admit to {targetWard}</span>
                         <span>&gt;</span>
                       </button>
                     </div>

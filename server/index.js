@@ -212,9 +212,35 @@ const seedInitialDoctors = async () => {
         console.log(`Updated doctor credentials: ${doc.name}`);
       }
     }
-    console.log('5 default doctors initialized successfully with email anusikan0426@gmail.com');
+    console.log('5 default doctors initialized successfully with email ' + sharedEmail);
+
+    // Seed designated single Receptionist
+    const recEmail = (process.env.RECEPTIONIST_EMAIL || 'anusikan0426@gmail.com').toLowerCase().trim();
+    const recPass = process.env.RECEPTIONIST_PASSWORD || 'webreciption56';
+    const recSalt = await bcrypt.genSalt(10);
+    const hashedRecPass = await bcrypt.hash(recPass, recSalt);
+
+    const existingRec = await User.findOne({ role: 'Receptionist' });
+    if (!existingRec) {
+      const newRec = new User({
+        name: 'Hospital Receptionist',
+        email: recEmail,
+        password: hashedRecPass,
+        role: 'Receptionist',
+        phone: '+94 11 234 5678',
+        receptionistDetails: { deskNumber: 'Desk 01' }
+      });
+      await newRec.save();
+      console.log('Seeded Receptionist with email ' + recEmail);
+    } else {
+      existingRec.email = recEmail;
+      existingRec.password = hashedRecPass;
+      existingRec.name = existingRec.name || 'Hospital Receptionist';
+      await existingRec.save();
+      console.log('Updated Receptionist credentials with email ' + recEmail);
+    }
   } catch (err) {
-    console.error('Error seeding doctors:', err.message);
+    console.error('Error seeding users:', err.message);
   }
 };
 
