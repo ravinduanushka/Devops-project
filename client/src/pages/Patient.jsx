@@ -518,14 +518,6 @@ Cleared At: ${dischargeSummary?.clearedAt || new Date().toLocaleString()}
             </div>
             <div className="patient-modal-footer">
               <button
-                className="patient-btn-print-summary"
-                onClick={() => {
-                  window.print();
-                }}
-              >
-                🖨 Print Summary
-              </button>
-              <button
                 className="patient-btn-close-modal"
                 onClick={() => setShowDischargeModal(false)}
               >
