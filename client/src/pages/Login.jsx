@@ -205,6 +205,35 @@ function Login() {
                 {loading ? "Signing in..." : "Sign In"}
               </button>
             </div>
+
+            <div style={{ marginTop: "18px", textAlign: "center" }}>
+              <p style={{ fontSize: "0.78rem", color: "#6b7280", margin: "0 0 8px 0", fontWeight: 600 }}>
+                Demo Doctor Access (Quick Fill):
+              </p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", justifyContent: "center" }}>
+                {doctorsList.map((doc) => (
+                  <button
+                    key={doc.name}
+                    type="button"
+                    onClick={() => handleQuickDoctorFill(doc.pass)}
+                    style={{
+                      fontSize: "0.72rem",
+                      padding: "4px 8px",
+                      borderRadius: "12px",
+                      border: "1px solid #d1d5db",
+                      background: formData.password === doc.pass ? "#0d9488" : "#f3f4f6",
+                      color: formData.password === doc.pass ? "#ffffff" : "#374151",
+                      cursor: "pointer",
+                      fontWeight: 600,
+                      transition: "all 0.2s ease"
+                    }}
+                    title={`${doc.name} - ${doc.spec} (Password: ${doc.pass})`}
+                  >
+                    {doc.name}
+                  </button>
+                ))}
+              </div>
+            </div>
           </form>
         </div>
       </div>
