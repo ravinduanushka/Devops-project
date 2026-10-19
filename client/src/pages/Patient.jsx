@@ -235,7 +235,7 @@ function Patient() {
             ]
           }));
         }
-        showToast("🔔 New Prescription & Consultation Record received from Dr. Vance!");
+        showToast(" New Prescription & Consultation Record received from Dr. Vance!");
       }
     };
 
@@ -243,7 +243,7 @@ function Patient() {
       const summary = e?.detail;
       if (summary) {
         setDischargeSummary(summary);
-        showToast("📄 Digital Discharge Summary & Clearance Certificate received! Ready for download.");
+        showToast(" Digital Discharge Summary & Clearance Certificate received! Ready for download.");
       }
     };
 
@@ -765,7 +765,7 @@ Cleared At: ${dischargeSummary?.clearedAt || new Date().toLocaleString()}
                   <strong>{medicalRecord.patientName} (PID: {medicalRecord.pid})</strong> &bull; {medicalRecord.age} Yrs / {medicalRecord.gender} &bull; Blood: {medicalRecord.bloodGroup}
                 </div>
                 <div className="patient-allergy-chip">
-                  ⚠️ Allergy: {medicalRecord.allergy}
+                   Allergy: {medicalRecord.allergy}
                 </div>
               </div>
 
@@ -781,7 +781,7 @@ Cleared At: ${dischargeSummary?.clearedAt || new Date().toLocaleString()}
                 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px", marginBottom: "12px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                      <span style={{ fontSize: "1.2rem" }}>🏥</span>
+                      <span style={{ fontSize: "1.2rem" }}></span>
                       <div>
                         <h4 style={{ margin: 0, fontSize: "1rem", color: "#166534", fontWeight: 700 }}>
                           Digital Discharge Summary &amp; Clearance Certificate
@@ -819,7 +819,7 @@ Cleared At: ${dischargeSummary?.clearedAt || new Date().toLocaleString()}
                           gap: "6px"
                         }}
                       >
-                        📥 Download Discharge Summary (PDF)
+                         Download Discharge Summary (PDF)
                       </button>
                     </div>
                   </div>
@@ -917,7 +917,7 @@ Cleared At: ${dischargeSummary?.clearedAt || new Date().toLocaleString()}
                   onClick={handleDownloadRx}
                   title="Download Official Prescription PDF"
                 >
-                  <span role="img" aria-label="Rx Document">📄</span> Download Digital Rx (PDF)
+                  <span role="img" aria-label="Rx Document"></span> Download Digital Rx (PDF)
                 </button>
               </div>
 

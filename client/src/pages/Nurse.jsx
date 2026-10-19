@@ -924,7 +924,7 @@ function Nurse() {
                   gap: "10px"
                 }}>
                   <div style={{ fontSize: "0.875rem", color: "#166534" }}>
-                    <span style={{ fontWeight: 700, marginRight: "6px" }}>⚡ Digital Rx Order #{activeRxRecord.orderId || "RX-1042"}:</span>
+                    <span style={{ fontWeight: 700, marginRight: "6px" }}> Digital Rx Order #{activeRxRecord.orderId || "RX-1042"}:</span>
                     Prescribed by <strong>{activeRxRecord.doctorName || "Dr. Vance"}</strong> for <strong>{activeRxRecord.patientName || "Kamal Perera"}</strong> &bull; <em>Diagnosis: {activeRxRecord.diagnosis || "Acute bronchitis with mild bronchial irritation"}</em>
                   </div>
                   <span style={{
