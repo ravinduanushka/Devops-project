@@ -174,13 +174,29 @@ function Receptionist() {
   // ==========================================
   // SECTION 2: OPD TOKEN GENERATION STATE
   // ==========================================
-  const [doctorsList] = useState([
+  const [doctorsList, setDoctorsList] = useState([
     { name: "Dr. Vance", specialty: "Cardiology", fee: "Rs. 2,500 Paid" },
     { name: "Dr. Sanath Weerasinghe", specialty: "Pulmonology", fee: "Rs. 2,800 Paid" },
     { name: "Dr. Priyantha Senanayake", specialty: "Cardiology", fee: "Rs. 2,500 Paid" },
     { name: "Dr. Champa Gunasekara", specialty: "General Medicine", fee: "Rs. 2,000 Paid" },
     { name: "Dr. Malini Fernando", specialty: "Pediatrics", fee: "Rs. 2,200 Paid" }
   ]);
+
+  useEffect(() => {
+    const fetchDoctors = () => {
+      getDoctors()
+        .then((res) => {
+          if (res.data && res.data.length > 0) {
+            setDoctorsList(res.data);
+          }
+        })
+        .catch(() => {});
+    };
+
+    fetchDoctors();
+    window.addEventListener("nexus_doctors_updated", fetchDoctors);
+    return () => window.removeEventListener("nexus_doctors_updated", fetchDoctors);
+  }, []);
 
   const [tokenForm, setTokenForm] = useState({
     selectedDoctor: "Dr. Vance - Cardiology",
