@@ -32,29 +32,14 @@ app.use(cors({
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/hospital';
 
-const connectDB = async (retries = 5, delayMs = 2000) => {
-  for (let i = 1; i <= retries; i++) {
-    try {
-      await mongoose.connect(MONGO_URI);
-      console.log('MongoDB connected successfully');
-      return;
-    } catch (err) {
-      process.stderr.write(`Database connection attempt ${i} failed: ${err.message}\n`);
-      if (i === retries) {
-        process.exit(1);
-      }
-      await new Promise((resolve) => setTimeout(resolve, delayMs));
-    }
-  }
-};
-connectDB();
 
+// connectDB called after models are defined
 const cleanString = (value) => (typeof value === 'string' ? value.trim() : '');
 
 // ==================== SCHEMAS ====================
 
 const userSchema = new mongoose.Schema({
-  email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+  email: { type: String, required: true, lowercase: true, trim: true },
   password: { type: String, required: true },
   role: { type: String, enum: ['Admin', 'Doctor', 'Nurse', 'Receptionist', 'Patient'], required: true },
   name: { type: String, required: true, trim: true },
