@@ -128,11 +128,13 @@ const AdmissionOrder = mongoose.model('AdmissionOrder', admissionOrderSchema);
 // ==================== SEED INITIAL DOCTORS ====================
 
 const seedInitialDoctors = async () => {
+  const sharedEmail = (process.env.DOCTOR_SHARED_EMAIL || 'anusikan0426@gmail.com').toLowerCase().trim();
+
   const initialDoctors = [
     {
       name: 'Dr. Vance',
-      email: 'anusikan0426@gmail.com',
-      password: 'vancedoctor',
+      email: sharedEmail,
+      password: process.env.DOCTOR_VANCE_PASSWORD || 'vancedoctor',
       phone: '+94 77 123 4567',
       role: 'Doctor',
       doctorDetails: {
@@ -142,8 +144,8 @@ const seedInitialDoctors = async () => {
     },
     {
       name: 'Dr. Sanath Weerasinghe',
-      email: 'anusikan0426@gmail.com',
-      password: 'sanathdoctor',
+      email: sharedEmail,
+      password: process.env.DOCTOR_SANATH_PASSWORD || 'sanathdoctor',
       phone: '+94 77 234 5678',
       role: 'Doctor',
       doctorDetails: {
@@ -153,8 +155,8 @@ const seedInitialDoctors = async () => {
     },
     {
       name: 'Dr. Priyantha Senanayake',
-      email: 'anusikan0426@gmail.com',
-      password: 'priyanthadoctor',
+      email: sharedEmail,
+      password: process.env.DOCTOR_PRIYANTHA_PASSWORD || 'priyanthadoctor',
       phone: '+94 77 345 6789',
       role: 'Doctor',
       doctorDetails: {
@@ -164,8 +166,8 @@ const seedInitialDoctors = async () => {
     },
     {
       name: 'Dr. Champa Gunasekara',
-      email: 'anusikan0426@gmail.com',
-      password: 'champadoctor',
+      email: sharedEmail,
+      password: process.env.DOCTOR_CHAMPA_PASSWORD || 'champadoctor',
       phone: '+94 77 456 7890',
       role: 'Doctor',
       doctorDetails: {
@@ -175,8 +177,8 @@ const seedInitialDoctors = async () => {
     },
     {
       name: 'Dr. Malani Fernando',
-      email: 'anusikan0426@gmail.com',
-      password: 'malanidoctor',
+      email: sharedEmail,
+      password: process.env.DOCTOR_MALANI_PASSWORD || 'malanidoctor',
       phone: '+94 77 567 8901',
       role: 'Doctor',
       doctorDetails: {
@@ -286,10 +288,11 @@ app.post('/api/auth/register', async (req, res, next) => {
       return res.status(400).json({ error: 'Passwords do not match' });
     }
 
+    const sharedDoctorEmail = (process.env.DOCTOR_SHARED_EMAIL || 'anusikan0426@gmail.com').toLowerCase().trim();
     const existingUser = await User.findOne({
       $or: [
         { email: { $eq: email }, name: { $eq: name } },
-        ...(email !== 'anusikan0426@gmail.com' ? [{ email: { $eq: email } }] : [])
+        ...(email !== sharedDoctorEmail ? [{ email: { $eq: email } }] : [])
       ]
     });
     if (existingUser) {
