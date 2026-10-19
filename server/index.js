@@ -125,10 +125,147 @@ const Appointment = mongoose.model('Appointment', appointmentSchema);
 const Prescription = mongoose.model('Prescription', prescriptionSchema);
 const AdmissionOrder = mongoose.model('AdmissionOrder', admissionOrderSchema);
 
+// ==================== SEED INITIAL DOCTORS ====================
+
+const seedInitialDoctors = async () => {
+  const initialDoctors = [
+    {
+      name: 'Dr. Vance',
+      email: 'anusikan0426@gmail.com',
+      password: 'vancedoctor',
+      phone: '+94 77 123 4567',
+      role: 'Doctor',
+      doctorDetails: {
+        specialization: 'Cardiology',
+        roomNo: '01'
+      }
+    },
+    {
+      name: 'Dr. Sanath Weerasinghe',
+      email: 'anusikan0426@gmail.com',
+      password: 'sanathdoctor',
+      phone: '+94 77 234 5678',
+      role: 'Doctor',
+      doctorDetails: {
+        specialization: 'Pulmonology',
+        roomNo: '02'
+      }
+    },
+    {
+      name: 'Dr. Priyantha Senanayake',
+      email: 'anusikan0426@gmail.com',
+      password: 'priyanthadoctor',
+      phone: '+94 77 345 6789',
+      role: 'Doctor',
+      doctorDetails: {
+        specialization: 'Cardiology',
+        roomNo: '03'
+      }
+    },
+    {
+      name: 'Dr. Champa Gunasekara',
+      email: 'anusikan0426@gmail.com',
+      password: 'champadoctor',
+      phone: '+94 77 456 7890',
+      role: 'Doctor',
+      doctorDetails: {
+        specialization: 'General Medicine',
+        roomNo: '04'
+      }
+    },
+    {
+      name: 'Dr. Malani Fernando',
+      email: 'anusikan0426@gmail.com',
+      password: 'malanidoctor',
+      phone: '+94 77 567 8901',
+      role: 'Doctor',
+      doctorDetails: {
+        specialization: 'Pediatrics',
+        roomNo: '05'
+      }
+    }
+  ];
+
+  try {
+    // Drop unique index on email if it exists from previous schema
+    await User.collection.dropIndex('email_1').catch(() => {});
+
+    for (const doc of initialDoctors) {
+      const existing = await User.findOne({ name: doc.name, role: 'Doctor' });
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(doc.password, salt);
+
+      if (!existing) {
+        const newUser = new User({
+          ...doc,
+          password: hashedPassword
+        });
+        await newUser.save();
+        console.log(`Seeded doctor: ${doc.name}`);
+      } else {
+        existing.email = doc.email;
+        existing.password = hashedPassword;
+        existing.doctorDetails = doc.doctorDetails;
+        await existing.save();
+        console.log(`Updated doctor credentials: ${doc.name}`);
+      }
+    }
+    console.log('5 default doctors initialized successfully with email anusikan0426@gmail.com');
+  } catch (err) {
+    console.error('Error seeding doctors:', err.message);
+  }
+};
+
+const connectDB = async (retries = 5, delayMs = 2000) => {
+  for (let i = 1; i <= retries; i++) {
+    try {
+      await mongoose.connect(MONGO_URI);
+      console.log('MongoDB connected successfully');
+      await seedInitialDoctors();
+      return;
+    } catch (err) {
+      process.stderr.write(`Database connection attempt ${i} failed: ${err.message}\n`);
+      if (i === retries) {
+        process.exit(1);
+      }
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+};
+connectDB();
+
 // ==================== ROUTES ====================
 
 app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'UP', timestamp: new Date() });
+});
+
+// Doctors API - get all registered doctors dynamically
+app.get('/api/doctors', async (_req, res, next) => {
+  try {
+    const doctors = await User.find({ role: 'Doctor' }).sort({ createdAt: 1 });
+    const formatted = doctors.map((doc) => {
+      const spec = doc.doctorDetails?.specialization || 'General Medicine';
+      let fee = 'Rs. 2,500 Paid';
+      if (spec === 'Pulmonology') fee = 'Rs. 2,800 Paid';
+      else if (spec === 'General Medicine') fee = 'Rs. 2,000 Paid';
+      else if (spec === 'Pediatrics') fee = 'Rs. 2,200 Paid';
+      else if (spec === 'Cardiology') fee = 'Rs. 2,500 Paid';
+      else if (spec === 'Neurology') fee = 'Rs. 3,000 Paid';
+
+      return {
+        _id: doc._id,
+        name: doc.name.startsWith('Dr.') ? doc.name : `Dr. ${doc.name}`,
+        specialty: spec,
+        fee: fee,
+        roomNo: doc.doctorDetails?.roomNo || '',
+        phone: doc.phone
+      };
+    });
+    return res.status(200).json(formatted);
+  } catch (err) {
+    return next(err);
+  }
 });
 
 // User Registration with Confirm Password Validation
@@ -149,16 +286,21 @@ app.post('/api/auth/register', async (req, res, next) => {
       return res.status(400).json({ error: 'Passwords do not match' });
     }
 
-    const existingUser = await User.findOne({ email: { $eq: email } });
+    const existingUser = await User.findOne({
+      $or: [
+        { email: { $eq: email }, name: { $eq: name } },
+        ...(email !== 'anusikan0426@gmail.com' ? [{ email: { $eq: email } }] : [])
+      ]
+    });
     if (existingUser) {
-      return res.status(400).json({ error: 'User already exists' });
+      return res.status(400).json({ error: 'User already exists with this email or name' });
     }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const doctorDetails = role === 'Doctor' && req.body.doctorDetails ? {
-      specialization: cleanString(req.body.doctorDetails.specialization),
+      specialization: cleanString(req.body.doctorDetails.specialization) || 'General Medicine',
       roomNo: cleanString(req.body.doctorDetails.roomNo)
     } : undefined;
 
@@ -189,7 +331,7 @@ app.post('/api/auth/register', async (req, res, next) => {
   }
 });
 
-// User Login
+// User Login (supports multiple doctors sharing anusikan0426@gmail.com by matching password)
 app.post('/api/auth/login', async (req, res, next) => {
   try {
     const email = cleanString(req.body.email).toLowerCase();
@@ -199,21 +341,30 @@ app.post('/api/auth/login', async (req, res, next) => {
       return res.status(400).json({ error: 'Credentials required' });
     }
 
-    const user = await User.findOne({ email: { $eq: email } });
-    if (!user) {
+    const matchingUsers = await User.find({ email: { $eq: email } });
+    if (!matchingUsers || matchingUsers.length === 0) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
+    let matchedUser = null;
+    for (const u of matchingUsers) {
+      const isMatch = await bcrypt.compare(password, u.password);
+      if (isMatch) {
+        matchedUser = u;
+        break;
+      }
+    }
+
+    if (!matchedUser) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     return res.status(200).json({
       message: 'Login successful',
-      role: user.role,
-      name: user.name,
-      userId: user._id
+      role: matchedUser.role,
+      name: matchedUser.name,
+      userId: matchedUser._id,
+      doctorDetails: matchedUser.doctorDetails
     });
   } catch (err) {
     return next(err);

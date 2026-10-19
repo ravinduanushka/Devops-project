@@ -23,6 +23,7 @@ export const updatePrescription = (id, data) => api.put(`/api/prescriptions/${id
 export const getAdmissions = () => api.get('/api/admissions');
 export const createAdmission = (admissionData) => api.post('/api/admissions', admissionData);
 export const updateAdmission = (id, data) => api.put(`/api/admissions/${id}`, data);
+export const getDoctors = () => api.get('/api/doctors');
 export const checkHealth = () => api.get('/health');
 
 export default api;
