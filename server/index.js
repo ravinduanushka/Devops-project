@@ -424,6 +424,7 @@ app.post('/api/auth/login', async (req, res, next) => {
       $or: [
         { email: { $eq: identifier } },
         { name: { $regex: new RegExp(`^${escaped}$`, 'i') } },
+        { role: { $regex: new RegExp(`^${escaped}$`, 'i') } },
         ...(strippedName ? [{ name: { $regex: new RegExp(strippedName, 'i') } }] : [])
       ]
     });
