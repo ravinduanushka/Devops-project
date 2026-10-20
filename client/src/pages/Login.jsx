@@ -21,10 +21,18 @@ function Login() {
     { name: "Dr. Malani", pass: "malanidoctor", spec: "Pediatrics" }
   ];
 
-  const handleQuickDoctorFill = (pass) => {
+  const handleQuickDoctorFill = (pass, docName) => {
+    setFormData({
+      email: docName || "anusikan0426@gmail.com",
+      password: pass
+    });
+    setErrorMessage("");
+  };
+
+  const handleQuickReceptionistFill = () => {
     setFormData({
       email: "anusikan0426@gmail.com",
-      password: pass
+      password: "webreciption56"
     });
     setErrorMessage("");
   };
