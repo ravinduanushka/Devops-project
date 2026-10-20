@@ -407,17 +407,27 @@ app.post('/api/auth/register', async (req, res, next) => {
   }
 });
 
-// User Login (supports multiple doctors sharing anusikan0426@gmail.com by matching password)
+// User Login (supports email, doctor name/username, and multiple doctors sharing email by matching password)
 app.post('/api/auth/login', async (req, res, next) => {
   try {
-    const email = cleanString(req.body.email).toLowerCase();
+    const identifier = cleanString(req.body.email || req.body.identifier || req.body.username).toLowerCase();
     const password = typeof req.body.password === 'string' ? req.body.password : '';
 
-    if (!email || !password) {
+    if (!identifier || !password) {
       return res.status(400).json({ error: 'Credentials required' });
     }
 
-    const matchingUsers = await User.find({ email: { $eq: email } });
+    const escaped = identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const strippedName = identifier.replace(/^dr\.?\s*/i, '').trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    const matchingUsers = await User.find({
+      $or: [
+        { email: { $eq: identifier } },
+        { name: { $regex: new RegExp(`^${escaped}$`, 'i') } },
+        ...(strippedName ? [{ name: { $regex: new RegExp(strippedName, 'i') } }] : [])
+      ]
+    });
+
     if (!matchingUsers || matchingUsers.length === 0) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
