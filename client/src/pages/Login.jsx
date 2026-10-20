@@ -13,30 +13,6 @@ function Login() {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  const doctorsList = [
-    { name: "Dr. Vance", pass: "vancedoctor", spec: "Cardiology" },
-    { name: "Dr. Sanath", pass: "sanathdoctor", spec: "Pulmonology" },
-    { name: "Dr. Priyantha", pass: "priyanthadoctor", spec: "Cardiology" },
-    { name: "Dr. Champa", pass: "champadoctor", spec: "General Medicine" },
-    { name: "Dr. Malani", pass: "malanidoctor", spec: "Pediatrics" }
-  ];
-
-  const handleQuickDoctorFill = (pass, docName) => {
-    setFormData({
-      email: docName || "anusikan0426@gmail.com",
-      password: pass
-    });
-    setErrorMessage("");
-  };
-
-  const handleQuickReceptionistFill = () => {
-    setFormData({
-      email: "anusikan0426@gmail.com",
-      password: "webreciption56"
-    });
-    setErrorMessage("");
-  };
-
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -166,7 +142,7 @@ function Login() {
               <input
                 type="text"
                 name="email"
-                placeholder="Email or Doctor Name"
+                placeholder="Email"
                 value={formData.email}
                 onChange={handleChange}
                 required
@@ -212,53 +188,6 @@ function Login() {
               >
                 {loading ? "Signing in..." : "Sign In"}
               </button>
-            </div>
-
-            <div style={{ marginTop: "18px", textAlign: "center" }}>
-              <p style={{ fontSize: "0.78rem", color: "#6b7280", margin: "0 0 8px 0", fontWeight: 600 }}>
-                Demo Doctor Access (1-Click Fill):
-              </p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", justifyContent: "center" }}>
-                {doctorsList.map((doc) => (
-                  <button
-                    key={doc.name}
-                    type="button"
-                    onClick={() => handleQuickDoctorFill(doc.pass, doc.name)}
-                    style={{
-                      fontSize: "0.72rem",
-                      padding: "4px 8px",
-                      borderRadius: "12px",
-                      border: "1px solid #d1d5db",
-                      background: formData.password === doc.pass ? "#0d9488" : "#f3f4f6",
-                      color: formData.password === doc.pass ? "#ffffff" : "#374151",
-                      cursor: "pointer",
-                      fontWeight: 600,
-                      transition: "all 0.2s ease"
-                    }}
-                    title={`${doc.name} - ${doc.spec} (Password: ${doc.pass})`}
-                  >
-                    {doc.name}
-                  </button>
-                ))}
-                <button
-                  type="button"
-                  onClick={handleQuickReceptionistFill}
-                  style={{
-                    fontSize: "0.72rem",
-                    padding: "4px 8px",
-                    borderRadius: "12px",
-                    border: "1px solid #d1d5db",
-                    background: formData.password === "webreciption56" ? "#0d9488" : "#f3f4f6",
-                    color: formData.password === "webreciption56" ? "#ffffff" : "#374151",
-                    cursor: "pointer",
-                    fontWeight: 600,
-                    transition: "all 0.2s ease"
-                  }}
-                  title="Receptionist (Password: webreciption56)"
-                >
-                  Receptionist
-                </button>
-              </div>
             </div>
           </form>
         </div>
