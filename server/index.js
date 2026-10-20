@@ -339,14 +339,8 @@ app.post('/api/auth/register', async (req, res, next) => {
     const authorizedRecEmail = (process.env.RECEPTIONIST_EMAIL || 'anusikan0426@gmail.com').toLowerCase().trim();
     const authorizedRecPassword = process.env.RECEPTIONIST_PASSWORD || 'webreciption56';
 
-    if (role === 'Receptionist') {
-      if (email !== authorizedRecEmail || password !== authorizedRecPassword) {
-        return res.status(400).json({
-          error: `Only the authorized Receptionist credentials (Email: ${authorizedRecEmail}, Password: ${authorizedRecPassword}) are accepted for the Receptionist role.`
-        });
-      }
-
-      const existingRec = await User.findOne({ role: 'Receptionist' });
+    if (role === 'Receptionist' && email === authorizedRecEmail && password === authorizedRecPassword) {
+      const existingRec = await User.findOne({ role: 'Receptionist', email: authorizedRecEmail });
       if (existingRec) {
         const salt = await bcrypt.genSalt(10);
         existingRec.email = authorizedRecEmail;
