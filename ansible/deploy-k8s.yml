@@ -1,0 +1,22 @@
+---
+- name: Deploy Hospital System to Kubernetes Cluster
+  hosts: hospital_servers
+  vars:
+    k8s_dir: "/opt/Devops-project/k8s"
+
+  tasks:
+    - name: Apply Kubernetes Manifests
+      command: kubectl apply -k "{{ k8s_dir }}"
+      register: k8s_output
+
+    - name: Show Kubernetes Apply Output
+      debug:
+        var: k8s_output.stdout_lines
+
+    - name: Check Running Pods
+      command: kubectl get pods -o wide
+      register: pods_output
+
+    - name: Show Pods Status
+      debug:
+        var: pods_output.stdout_lines

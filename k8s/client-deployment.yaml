@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client-deployment
+  labels:
+    app: hospital-client
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hospital-client
+  template:
+    metadata:
+      labels:
+        app: hospital-client
+    spec:
+      containers:
+        - name: hospital-client
+          image: hospital-client:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              memory: "256Mi"
+              cpu: "250m"
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: client-service
+  labels:
+    app: hospital-client
+spec:
+  type: NodePort
+  ports:
+    - port: 3000
+      targetPort: 80
+      nodePort: 30080
+  selector:
+    app: hospital-client

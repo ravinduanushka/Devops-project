@@ -1,0 +1,58 @@
+---
+- name: Setup Host Server and Deploy Hospital Management System
+  hosts: hospital_servers
+  become: yes
+  vars:
+    project_repo: "https://github.com/ravinduanushka/Devops-project.git"
+    project_dest: "/opt/Devops-project"
+
+  tasks:
+    - name: Update apt cache (Debian/Ubuntu)
+      apt:
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Install prerequisite packages
+      package:
+        name:
+          - git
+          - curl
+          - ca-certificates
+        state: present
+
+    - name: Install Docker and Docker Compose plugin (Debian/Ubuntu)
+      apt:
+        name:
+          - docker.io
+          - docker-compose-v2
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Ensure Docker service is started and enabled
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Add current user to docker group
+      user:
+        name: "{{ ansible_user | default(ansible_env.USER) }}"
+        groups: docker
+        append: yes
+
+    - name: Clone or update the Hospital Project repository
+      git:
+        repo: "{{ project_repo }}"
+        dest: "{{ project_dest }}"
+        version: main
+        force: yes
+
+    - name: Run docker compose to build and start all containers
+      command: docker compose up -d --build
+      args:
+        chdir: "{{ project_dest }}"
+      register: compose_output
+
+    - name: Display deployment output
+      debug:
+        var: compose_output.stdout_lines
