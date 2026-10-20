@@ -164,9 +164,9 @@ function Login() {
           <form onSubmit={handleSubmit} className="login-actual-form">
             <div className="input-pill-wrapper">
               <input
-                type="email"
+                type="text"
                 name="email"
-                placeholder="Email"
+                placeholder="Email or Doctor Name"
                 value={formData.email}
                 onChange={handleChange}
                 required
@@ -216,14 +216,14 @@ function Login() {
 
             <div style={{ marginTop: "18px", textAlign: "center" }}>
               <p style={{ fontSize: "0.78rem", color: "#6b7280", margin: "0 0 8px 0", fontWeight: 600 }}>
-                Demo Doctor Access (Quick Fill):
+                Demo Doctor Access (1-Click Fill):
               </p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", justifyContent: "center" }}>
                 {doctorsList.map((doc) => (
                   <button
                     key={doc.name}
                     type="button"
-                    onClick={() => handleQuickDoctorFill(doc.pass)}
+                    onClick={() => handleQuickDoctorFill(doc.pass, doc.name)}
                     style={{
                       fontSize: "0.72rem",
                       padding: "4px 8px",
@@ -240,6 +240,24 @@ function Login() {
                     {doc.name}
                   </button>
                 ))}
+                <button
+                  type="button"
+                  onClick={handleQuickReceptionistFill}
+                  style={{
+                    fontSize: "0.72rem",
+                    padding: "4px 8px",
+                    borderRadius: "12px",
+                    border: "1px solid #d1d5db",
+                    background: formData.password === "webreciption56" ? "#0d9488" : "#f3f4f6",
+                    color: formData.password === "webreciption56" ? "#ffffff" : "#374151",
+                    cursor: "pointer",
+                    fontWeight: 600,
+                    transition: "all 0.2s ease"
+                  }}
+                  title="Receptionist (Password: webreciption56)"
+                >
+                  Receptionist
+                </button>
               </div>
             </div>
           </form>
