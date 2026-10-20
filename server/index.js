@@ -189,27 +189,49 @@ const seedInitialDoctors = async () => {
   ];
 
   try {
-    // Drop unique index on email if it exists from previous schema
-    await User.collection.dropIndex('email_1').catch(() => {});
+    // Drop any legacy unique index on email if present from earlier schema versions
+    try {
+      const existingIndexes = await User.collection.indexes().catch(() => []);
+      for (const idx of existingIndexes) {
+        if (idx.name !== '_id_' && idx.unique && idx.key && idx.key.email) {
+          await User.collection.dropIndex(idx.name).catch(() => {});
+          console.log(`Dropped legacy unique email index: ${idx.name}`);
+        }
+      }
+    } catch (_idxErr) {
+      await User.collection.dropIndex('email_1').catch(() => {});
+    }
 
     for (const doc of initialDoctors) {
-      const existing = await User.findOne({ name: doc.name, role: 'Doctor' });
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(doc.password, salt);
-
-      if (!existing) {
-        const newUser = new User({
-          ...doc,
-          password: hashedPassword
+      try {
+        const shortName = doc.name.replace(/\s+(Weerasinghe|Senanayake|Gunasekara|Fernando)$/, '');
+        const existing = await User.findOne({
+          role: 'Doctor',
+          $or: [
+            { name: doc.name },
+            { name: shortName }
+          ]
         });
-        await newUser.save();
-        console.log(`Seeded doctor: ${doc.name}`);
-      } else {
-        existing.email = doc.email;
-        existing.password = hashedPassword;
-        existing.doctorDetails = doc.doctorDetails;
-        await existing.save();
-        console.log(`Updated doctor credentials: ${doc.name}`);
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(doc.password, salt);
+
+        if (!existing) {
+          const newUser = new User({
+            ...doc,
+            password: hashedPassword
+          });
+          await newUser.save();
+          console.log(`Seeded doctor: ${doc.name}`);
+        } else {
+          existing.name = doc.name;
+          existing.email = doc.email;
+          existing.password = hashedPassword;
+          existing.doctorDetails = doc.doctorDetails;
+          await existing.save();
+          console.log(`Updated doctor credentials: ${doc.name}`);
+        }
+      } catch (docErr) {
+        console.error(`Failed to seed/update doctor ${doc.name}:`, docErr.message);
       }
     }
     console.log('5 default doctors initialized successfully with email ' + sharedEmail);
@@ -244,7 +266,7 @@ const seedInitialDoctors = async () => {
   }
 };
 
-const connectDB = async (retries = 5, delayMs = 2000) => {
+const connectDB = async (retries = 30, delayMs = 2000) => {
   for (let i = 1; i <= retries; i++) {
     try {
       await mongoose.connect(MONGO_URI);
@@ -252,7 +274,7 @@ const connectDB = async (retries = 5, delayMs = 2000) => {
       await seedInitialDoctors();
       return;
     } catch (err) {
-      process.stderr.write(`Database connection attempt ${i} failed: ${err.message}\n`);
+      process.stderr.write(`Database connection attempt ${i}/${retries} failed: ${err.message}\n`);
       if (i === retries) {
         process.exit(1);
       }
