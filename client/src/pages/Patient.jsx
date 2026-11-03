@@ -117,7 +117,6 @@ function Patient() {
         doctorName: bookingForm.doctor.split(" - ")[0],
         department: bookingForm.specialty,
         dateTime: selectedDate.toISOString(),
-        tokenNumber: 5,
         type: bookingForm.consultationType
       });
       showToast(`Appointment confirmed with ${bookingForm.doctor}! Token #${String(response.data.tokenNumber).padStart(2, "0")} is active.`);

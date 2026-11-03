@@ -202,7 +202,7 @@ function Receptionist() {
     selectedDoctor: "Dr. Vance - Cardiology",
     clinicUnit: "Cardiology",
     searchPatient: "Kamal Perera (PID: P-1042)",
-    tokenNumber: "05",
+    tokenNumber: "Not issued",
     time: "10:15 AM",
     fee: "Rs. 2,500 Paid"
   });
@@ -220,9 +220,7 @@ function Receptionist() {
 
   const handleIssueToken = async (e) => {
     e.preventDefault();
-    const currentTokenNum = tokenForm.tokenNumber || "05";
-    const nextTokenNum = parseInt(currentTokenNum, 10) + 1;
-    const nextTokenStr = nextTokenNum < 10 ? `0${nextTokenNum}` : `${nextTokenNum}`;
+    let currentTokenNum;
     const cleanPatientName = tokenForm.searchPatient.split(" (")[0].trim() || "Kamal Perera";
     const extractedPidMatch = tokenForm.searchPatient.match(/(?:ID|PID):\s*([^)]+)/i);
     const extractedPid = extractedPidMatch ? extractedPidMatch[1].trim() : currentPatientId;
@@ -234,16 +232,17 @@ function Receptionist() {
       doctorName: cleanDoctorName,
       department: tokenForm.clinicUnit,
       dateTime: new Date().toISOString(),
-      tokenNumber: parseInt(currentTokenNum, 10) || 5,
       status: "Waiting",
       type: "In-Person Consultation",
       fee: tokenForm.fee
     };
 
     try {
-      await createAppointment(apptPayload);
-    } catch {
-      // offline fallback works seamlessly
+      const response = await createAppointment(apptPayload);
+      currentTokenNum = String(response.data.tokenNumber).padStart(2, "0");
+    } catch (error) {
+      showToast(error.response?.data?.error || "Unable to issue a token. Please try again.");
+      return;
     }
 
     // Live Queue Entry for Doctor Portal
@@ -278,7 +277,7 @@ function Receptionist() {
     showToast(`✓ OPD Token #${currentTokenNum} issued for ${tokenForm.searchPatient} assigned to ${cleanDoctorName}! Dispatched to Doctor Queue (#${currentTokenNum} Waiting) & Patient Portal.`);
     setTokenForm((prev) => ({
       ...prev,
-      tokenNumber: nextTokenStr
+      tokenNumber: currentTokenNum
     }));
   };
 

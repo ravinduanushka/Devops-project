@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
+const allocateAppointmentToken = require('./appointment-tokens');
 require('dotenv').config();
 
 const app = express();
@@ -122,6 +123,10 @@ const admissionOrderSchema = new mongoose.Schema({
 const User = mongoose.model('User', userSchema);
 const Patient = mongoose.model('Patient', patientSchema);
 const Appointment = mongoose.model('Appointment', appointmentSchema);
+const AppointmentCounter = mongoose.model('AppointmentCounter', new mongoose.Schema({
+  _id: String,
+  sequence: { type: Number, required: true }
+}));
 const Prescription = mongoose.model('Prescription', prescriptionSchema);
 const AdmissionOrder = mongoose.model('AdmissionOrder', admissionOrderSchema);
 
@@ -518,11 +523,12 @@ app.post('/api/appointments', async (req, res, next) => {
       doctorName: cleanString(req.body.doctorName),
       department: cleanString(req.body.department) || 'General Medicine',
       dateTime: req.body.dateTime ? new Date(req.body.dateTime) : new Date(),
-      tokenNumber: Number(req.body.tokenNumber) || 1,
       status: cleanString(req.body.status) || 'Waiting',
       type: cleanString(req.body.type) || 'In-Person Consultation',
       fee: cleanString(req.body.fee) || 'Rs. 2,500 Paid'
     });
+    await appointment.validate(['patientName', 'doctorName', 'dateTime']);
+    appointment.tokenNumber = await allocateAppointmentToken(Appointment, AppointmentCounter);
     await appointment.save();
     return res.status(201).json(appointment);
   } catch (err) {
