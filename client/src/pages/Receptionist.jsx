@@ -755,7 +755,9 @@ function Receptionist() {
                 alt="NexusHealth Logo"
                 className="rec-hero-logo-img"
                 onError={(e) => {
-                  e.currentTarget.src = "/health logo.png";
+                  if (e.currentTarget.getAttribute("src") !== "/health logo.png") {
+                    e.currentTarget.src = "/health logo.png";
+                  }
                 }}
               />
             </Link>

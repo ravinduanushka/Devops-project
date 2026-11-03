@@ -184,7 +184,9 @@ function Register() {
               alt="NexusHealth Logo"
               className="role-logo-img"
               onError={(e) => {
-                e.currentTarget.src = "/health logo.png";
+                if (e.currentTarget.getAttribute("src") !== "/health logo.png") {
+                  e.currentTarget.src = "/health logo.png";
+                }
               }}
             />
           </Link>
@@ -263,7 +265,9 @@ function Register() {
                   alt="NexusHealth Logo"
                   className="role-modal-logo"
                   onError={(e) => {
-                    e.currentTarget.src = "/health logo.png";
+                    if (e.currentTarget.getAttribute("src") !== "/health logo.png") {
+                      e.currentTarget.src = "/health logo.png";
+                    }
                   }}
                 />
                 <h2 id="modal-role-title" className="role-modal-title">

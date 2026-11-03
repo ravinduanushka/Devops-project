@@ -42,7 +42,9 @@ function Navbar() {
             alt="NexusHealth Logo"
             className="navbar-logo"
             onError={(e) => {
-              e.currentTarget.src = "/health logo.png";
+              if (e.currentTarget.getAttribute("src") !== "/health logo.png") {
+                e.currentTarget.src = "/health logo.png";
+              }
             }}
           />
           <span className="navbar-brand-name">Nexus<span className="brand-accent">Health</span></span>

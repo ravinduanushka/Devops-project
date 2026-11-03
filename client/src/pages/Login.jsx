@@ -74,7 +74,9 @@ function Login() {
             alt="NexusHealth Logo"
             className="login-top-logo"
             onError={(e) => {
-              e.currentTarget.src = "/health logo.png";
+              if (e.currentTarget.getAttribute("src") !== "/health logo.png") {
+                e.currentTarget.src = "/health logo.png";
+              }
             }}
           />
         </Link>
