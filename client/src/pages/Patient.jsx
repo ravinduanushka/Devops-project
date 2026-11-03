@@ -84,7 +84,7 @@ function Patient() {
     doctor: "Dr. Vance - Cardiology",
     specialty: "Cardiology",
     consultationType: "In-Person Visit",
-    dateTime: "Today, Oct 9, 2026 - 10:15 AM",
+    dateTime: "",
     patientName: currentUser?.name ? `${currentUser.name} (PID: P-1042)` : "Kamal Perera (PID: P-1042)",
     patientAge: 38
   });
@@ -107,11 +107,16 @@ function Patient() {
     setBookingError("");
     setToastMessage("");
     try {
+      const selectedDate = new Date(bookingForm.dateTime);
+      if (!bookingForm.dateTime || !Number.isFinite(selectedDate.getTime()) || selectedDate.getTime() <= Date.now()) {
+        setBookingError("Please choose a future appointment date and time.");
+        return;
+      }
       const response = await createAppointment({
         patientName: currentUser?.name || "Kamal Perera",
         doctorName: bookingForm.doctor.split(" - ")[0],
         department: bookingForm.specialty,
-        dateTime: new Date().toISOString(),
+        dateTime: selectedDate.toISOString(),
         tokenNumber: 5,
         type: bookingForm.consultationType
       });
@@ -128,7 +133,7 @@ function Patient() {
       doctor: "Dr. Vance - Cardiology",
       specialty: "Cardiology",
       consultationType: "In-Person Visit",
-      dateTime: "Today, Oct 9, 2026 - 10:15 AM",
+      dateTime: "",
       patientName: currentUser?.name ? `${currentUser.name} (PID: P-1042)` : "Kamal Perera (PID: P-1042)",
       patientAge: 38
     });
@@ -719,9 +724,11 @@ Cleared At: ${dischargeSummary?.clearedAt || new Date().toLocaleString()}
                     </div>
 
                     <div className="patient-form-group">
-                      <label>Date &amp; Time</label>
+                      <label htmlFor="appointment-date-time">Date &amp; Time</label>
                       <input
-                        type="text"
+                        id="appointment-date-time"
+                        type="datetime-local"
+                        required
                         className="patient-form-control"
                         value={bookingForm.dateTime}
                         onChange={(e) =>
