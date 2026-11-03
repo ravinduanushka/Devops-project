@@ -18,6 +18,8 @@ function Patient() {
 
   const [activeNav, setActiveNav] = useState("Appointments");
   const [toastMessage, setToastMessage] = useState("");
+  const [isBooking, setIsBooking] = useState(false);
+  const [bookingError, setBookingError] = useState("");
   const isManualScroll = useRef(false);
 
   const showToast = (msg) => {
@@ -100,8 +102,12 @@ function Patient() {
 
   const handleScheduleAppointment = async (e) => {
     e.preventDefault();
+    if (isBooking) return;
+    setIsBooking(true);
+    setBookingError("");
+    setToastMessage("");
     try {
-      await createAppointment({
+      const response = await createAppointment({
         patientName: currentUser?.name || "Kamal Perera",
         doctorName: bookingForm.doctor.split(" - ")[0],
         department: bookingForm.specialty,
@@ -109,10 +115,12 @@ function Patient() {
         tokenNumber: 5,
         type: bookingForm.consultationType
       });
-    } catch {
-      // offline fallback works seamlessly
+      showToast(`Appointment confirmed with ${bookingForm.doctor}! Token #${String(response.data.tokenNumber).padStart(2, "0")} is active.`);
+    } catch (error) {
+      setBookingError(error.response?.data?.error || "Unable to confirm your appointment. Please try again.");
+    } finally {
+      setIsBooking(false);
     }
-    showToast(`✓ Appointment confirmed with ${bookingForm.doctor}! Token #05 is active.`);
   };
 
   const handleCancelBooking = () => {
@@ -664,6 +672,7 @@ Cleared At: ${dischargeSummary?.clearedAt || new Date().toLocaleString()}
               {/* Book Appointment Card */}
               <div className="patient-booking-subcard">
                 <h3 className="patient-subcard-title">Book Appointment</h3>
+                {bookingError && <p className="alert-box alert-error" role="alert">{bookingError}</p>}
 
                 <form onSubmit={handleScheduleAppointment} className="patient-booking-grid">
                   {/* Left Column: Consultation Details */}
@@ -737,8 +746,8 @@ Cleared At: ${dischargeSummary?.clearedAt || new Date().toLocaleString()}
                     </div>
 
                     <div className="patient-booking-actions">
-                      <button type="submit" className="patient-btn-schedule">
-                        Schedule Appointment
+                      <button type="submit" className="patient-btn-schedule" disabled={isBooking}>
+                        {isBooking ? "Booking..." : "Schedule Appointment"}
                       </button>
                       <button
                         type="button"
