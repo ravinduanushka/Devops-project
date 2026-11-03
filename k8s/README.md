@@ -5,7 +5,7 @@ This directory contains the Kubernetes manifests to deploy the entire applicatio
 ## Architecture
 
 - **`mongodb-deployment.yaml`**: PersistentVolumeClaim (1Gi), MongoDB Deployment, and `mongodb-service` (ClusterIP).
-- **`server-deployment.yaml`**: Server ConfigMap (with credentials & environment variables), Server Deployment (2 replicas for High Availability), and `server-service` (ClusterIP).
+- **`server-deployment.yaml`**: Server ConfigMap (with credentials & environment variables), Server Deployment (2 replicas for High Availability), and `server` (ClusterIP). The service name matches the `http://server:5000` upstream in the frontend's Nginx configuration, as it does in Docker Compose.
 - **`client-deployment.yaml`**: Client Deployment (2 replicas), and `client-service` (NodePort on port `30080` / `3000`).
 
 ## How to Deploy
@@ -29,6 +29,23 @@ kubectl apply -f k8s/
 ```bash
 kubectl get pods
 kubectl get services
+```
+
+Check that the `server` service has backend endpoints and that the frontend can reach it:
+
+```bash
+kubectl get endpointslices -l kubernetes.io/service-name=server
+kubectl exec deployment/client-deployment -- wget -qO- http://localhost/health
+```
+
+The health request should return JSON containing `"status":"UP"`.
+If upgrading an older deployment, applying these manifests creates the `server` service.
+The previous `server-service` may remain; remove it after verifying that no other clients use it.
+If frontend pods previously failed to start because the upstream could not be resolved, restart them after applying:
+
+```bash
+kubectl rollout restart deployment/client-deployment
+kubectl rollout status deployment/client-deployment
 ```
 
 ### 4. Access the Application
