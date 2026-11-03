@@ -69,8 +69,7 @@ function Admin() {
   const [newAppt, setNewAppt] = useState({
     patientName: "",
     doctorName: "",
-    dateTime: "",
-    tokenNumber: 1
+    dateTime: ""
   });
   const [apptLoading, setApptLoading] = useState(false);
 
@@ -251,7 +250,7 @@ function Admin() {
     try {
       await createAppointment(newAppt);
       setNotification({ type: "success", message: `Appointment created for ${newAppt.patientName}!` });
-      setNewAppt({ patientName: "", doctorName: "", dateTime: "", tokenNumber: appointments.length + 1 });
+      setNewAppt({ patientName: "", doctorName: "", dateTime: "" });
       loadDashboardData();
     } catch (err) {
       setNotification({
@@ -733,15 +732,7 @@ function Admin() {
                   required
                   className="form-input"
                 />
-                <input
-                  type="number"
-                  placeholder="Token #"
-                  value={newAppt.tokenNumber}
-                  onChange={(e) => setNewAppt({ ...newAppt, tokenNumber: e.target.value })}
-                  required
-                  className="form-input"
-                  style={{ maxWidth: "100px" }}
-                />
+                <span>Token assigned when saved</span>
                 <button type="submit" disabled={apptLoading} className="btn btn-primary">
                   {apptLoading ? "Scheduling..." : "+ Create Appointment"}
                 </button>
