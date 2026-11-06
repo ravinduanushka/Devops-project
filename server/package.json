@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node index.js",
     "test": "jest --detectOpenHandles --forceExit",
-    "test:tokens": "node --test appointment-tokens.integration.cjs"
+    "test:tokens": "node --test appointment-tokens.integration.cjs",
+    "test:cors": "node --test cors.integration.cjs"
   },
   "keywords": [],
   "author": "",

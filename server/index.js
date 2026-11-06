@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const createCorsOptions = require('./cors-options');
 const bcrypt = require('bcryptjs');
 const allocateAppointmentToken = require('./appointment-tokens');
 require('dotenv').config();
@@ -10,25 +11,7 @@ app.disable('x-powered-by');
 
 app.use(express.json());
 
-const allowedOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:3000';
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    const allowed = [
-      allowedOrigin,
-      'http://localhost:3000',
-      'http://localhost:5173',
-      'http://127.0.0.1:3000',
-      'http://127.0.0.1:5173'
-    ];
-    if (allowed.includes(origin) || origin.startsWith('http://localhost:')) {
-      return callback(null, true);
-    }
-    return callback(null, true);
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true
-}));
+app.use(cors(createCorsOptions(process.env.CLIENT_ORIGIN)));
 
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/hospital';

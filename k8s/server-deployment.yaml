@@ -7,7 +7,7 @@ metadata:
 data:
   PORT: "5000"
   MONGO_URI: "mongodb://mongodb-service:27017/hospital"
-  CLIENT_ORIGIN: "*"
+  CLIENT_ORIGIN: "http://localhost:30080"
   DOCTOR_SHARED_EMAIL: "anusikan0426@gmail.com"
   DOCTOR_VANCE_PASSWORD: "vancedoctor"
   DOCTOR_SANATH_PASSWORD: "sanathdoctor"
