@@ -19,6 +19,14 @@ docker build -t hospital-client:latest ./client
 *(If using Minikube, run `eval $(minikube docker-env)` before building so Minikube can see your local images, or run `minikube image load hospital-server:latest && minikube image load hospital-client:latest`)*.
 
 ### 2. Apply all Kubernetes manifests
+Before applying, set `CLIENT_ORIGIN` in `server-deployment.yaml` to the exact browser
+origin used to access the frontend, for example `http://192.168.1.10:30080`.
+For Minikube, use the origin returned by `minikube service client-service --url`.
+Multiple origins can be separated by commas. Include the scheme and port, with no
+path or trailing slash. `*` does not grant access. The default allows only
+`http://localhost:30080`. After changing an existing ConfigMap, restart the backend
+with `kubectl rollout restart deployment/server-deployment` so it loads the new value.
+
 ```bash
 kubectl apply -k k8s/
 # OR
