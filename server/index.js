@@ -112,6 +112,13 @@ const AppointmentCounter = mongoose.model('AppointmentCounter', new mongoose.Sch
 }));
 const Prescription = mongoose.model('Prescription', prescriptionSchema);
 const AdmissionOrder = mongoose.model('AdmissionOrder', admissionOrderSchema);
+const Session = mongoose.model('Session', new mongoose.Schema({
+  tokenHash: { type: String, required: true, unique: true },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  expiresAt: { type: Date, required: true, expires: 0 }
+}));
+const sessions = require('./sessions')(Session, User);
+const publicUser = (user) => ({ role: user.role, name: user.name, userId: user._id, doctorDetails: user.doctorDetails });
 
 // ==================== SEED INITIAL DOCTORS ====================
 
@@ -270,7 +277,6 @@ const connectDB = async (retries = 30, delayMs = 2000) => {
     }
   }
 };
-connectDB();
 
 // ==================== ROUTES ====================
 
@@ -428,6 +434,8 @@ app.post('/api/auth/login', async (req, res, next) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
+    await sessions.issue(req, res, matchedUser);
+    res.set('Cache-Control', 'no-store');
     return res.status(200).json({
       message: 'Login successful',
       role: matchedUser.role,
@@ -439,6 +447,15 @@ app.post('/api/auth/login', async (req, res, next) => {
     return next(err);
   }
 });
+
+app.get('/api/auth/me', sessions.requireUser, (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  return res.json(publicUser(req.user));
+});
+app.post('/api/auth/logout', sessions.logout);
+
+// Clinical APIs require a verified, unexpired server-side session.
+app.use('/api', sessions.requireUser);
 
 // Patients API
 app.get('/api/patients', async (_req, res, next) => {
@@ -650,4 +667,7 @@ app.use((err, _req, res, _next) => {
   res.status(statusCode).json({ error: err.message || 'Internal server error' });
 });
 
-app.listen(PORT);
+if (require.main === module) {
+  connectDB().then(() => app.listen(PORT));
+}
+module.exports = app;

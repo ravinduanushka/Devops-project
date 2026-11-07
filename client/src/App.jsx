@@ -1,3 +1,4 @@
+import RequireSession from "./components/RequireSession";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -15,11 +16,11 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/doctor" element={<Doctor />} />
-        <Route path="/patient" element={<Patient />} />
-        <Route path="/nurse" element={<Nurse />} />
-        <Route path="/receptionist" element={<Receptionist />} />
+        <Route path="/admin" element={<RequireSession role="Admin"><Admin /></RequireSession>} />
+        <Route path="/doctor" element={<RequireSession role="Doctor"><Doctor /></RequireSession>} />
+        <Route path="/patient" element={<RequireSession role="Patient"><Patient /></RequireSession>} />
+        <Route path="/nurse" element={<RequireSession role="Nurse"><Nurse /></RequireSession>} />
+        <Route path="/receptionist" element={<RequireSession role="Receptionist"><Receptionist /></RequireSession>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
