@@ -9,7 +9,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test:doctor": "node --test src/features/doctor/doctorWorkflows.test.mjs",
-    "lint:doctor": "eslint src/pages/Doctor.jsx src/components/doctor src/features/doctor"
+    "lint:doctor": "eslint src/pages/Doctor.jsx src/components/doctor src/features/doctor",
+    "test:admin": "node --test src/features/admin/adminWorkflows.test.mjs",
+    "lint:admin": "eslint src/pages/Admin.jsx src/features/admin"
   },
   "dependencies": {
     "axios": "^1.20.0",
