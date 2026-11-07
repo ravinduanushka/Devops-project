@@ -15,7 +15,8 @@ configured. Set `CLIENT_ORIGIN` for your browser origins.
 
 Health, doctor listings, patient registration and login remain public. Creating
 staff or admin accounts requires an admin session. The public registration page
-offers only Patient; administrators create staff through the admin dashboard.
+shows the original role choices; staff signup submissions still require an admin
+session. Administrators can also create staff through the admin dashboard.
 Registration never resets another account's password.
 
 Clinical reads require login. Patient sessions receive only rows whose
