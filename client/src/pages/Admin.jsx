@@ -1,266 +1,35 @@
-import { useState, useEffect, useCallback } from "react";
-import {
-  registerUser,
-  getPatients,
-  createPatient,
-  getAppointments,
-  createAppointment,
-  checkHealth
-} from "../services/api";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+import useAdminDashboard from '../features/admin/useAdminDashboard';
 
 function Admin() {
-  const [currentUser] = useState(() => {
-    try {
-      const stored = localStorage.getItem("nexus_user");
-      return stored ? JSON.parse(stored) : null;
-    } catch {
-      return null;
-    }
-  });
-
-  const [activeTab, setActiveTab] = useState("register"); // 'register' | 'patients' | 'appointments' | 'overview'
-
-  // Server health state
-  const [serverStatus, setServerStatus] = useState("Checking...");
-  const [serverTimestamp, setServerTimestamp] = useState("");
-
-  // Data states
-  const [patients, setPatients] = useState([]);
-  const [appointments, setAppointments] = useState([]);
-  const [loadingData, setLoadingData] = useState(false);
-
-  // Admin user registration form
-  const [regForm, setRegForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    password: "",
-    confirmPassword: "",
-    role: "Doctor",
-    doctorDetails: {
-      specialization: "General Medicine",
-      roomNo: "101"
-    },
-    nurseDetails: {
-      assignedWard: "Ward 3B (Pulmonary & General)",
-      shiftTime: "Morning"
-    },
-    receptionistDetails: {
-      deskNumber: "Main Counter"
-    }
-  });
-  const [regLoading, setRegLoading] = useState(false);
-  const [regSuccess, setRegSuccess] = useState("");
-  const [regError, setRegError] = useState("");
-
-  // New patient form
-  const [newPatient, setNewPatient] = useState({
-    name: "",
-    age: "",
-    diagnosis: "",
-    assignedDoctor: "",
-    wardNumber: "Ward A"
-  });
-  const [patientLoading, setPatientLoading] = useState(false);
-
-  // New appointment form
-  const [newAppt, setNewAppt] = useState({
-    patientName: "",
-    doctorName: "",
-    dateTime: ""
-  });
-  const [apptLoading, setApptLoading] = useState(false);
-
-  // Notifications
-  const [notification, setNotification] = useState({ type: "", message: "" });
-
-  const loadDashboardData = useCallback(async () => {
-    setLoadingData(true);
-    try {
-      const [patientsRes, apptsRes] = await Promise.allSettled([
-        getPatients(),
-        getAppointments()
-      ]);
-
-      if (patientsRes.status === "fulfilled") {
-        setPatients(Array.isArray(patientsRes.value.data) ? patientsRes.value.data : []);
-      }
-      if (apptsRes.status === "fulfilled") {
-        setAppointments(Array.isArray(apptsRes.value.data) ? apptsRes.value.data : []);
-      }
-    } catch (err) {
-      console.error("Failed to load dashboard data:", err);
-    } finally {
-      setLoadingData(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    let active = true;
-
-    async function fetchData() {
-      try {
-        const res = await checkHealth();
-        if (active) {
-          if (res.data?.status === "UP") {
-            setServerStatus("ONLINE (UP)");
-            setServerTimestamp(new Date(res.data.timestamp || Date.now()).toLocaleTimeString());
-          } else {
-            setServerStatus("UNKNOWN");
-          }
-        }
-      } catch {
-        if (active) {
-          setServerStatus("OFFLINE / DISCONNECTED");
-        }
-      }
-
-      try {
-        const [patientsRes, apptsRes] = await Promise.allSettled([
-          getPatients(),
-          getAppointments()
-        ]);
-        if (active) {
-          if (patientsRes.status === "fulfilled") {
-            setPatients(Array.isArray(patientsRes.value.data) ? patientsRes.value.data : []);
-          }
-          if (apptsRes.status === "fulfilled") {
-            setAppointments(Array.isArray(apptsRes.value.data) ? apptsRes.value.data : []);
-          }
-        }
-      } catch (err) {
-        console.error("Failed to load dashboard data:", err);
-      }
-    }
-
-    fetchData();
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const handleRegChange = (e) => {
-    const { name, value } = e.target;
-    if (name.includes(".")) {
-      const [parent, child] = name.split(".");
-      setRegForm((prev) => ({
-        ...prev,
-        [parent]: {
-          ...prev[parent],
-          [child]: value
-        }
-      }));
-    } else {
-      setRegForm((prev) => ({
-        ...prev,
-        [name]: value
-      }));
-    }
-    if (regError) setRegError("");
-  };
-
-  const handleRegisterSubmit = async (e) => {
-    e.preventDefault();
-    setRegLoading(true);
-    setRegError("");
-    setRegSuccess("");
-
-    if (regForm.password.length < 6) {
-      setRegError("Password must be at least 6 characters.");
-      setRegLoading(false);
-      return;
-    }
-    if (regForm.password !== regForm.confirmPassword) {
-      setRegError("Passwords do not match.");
-      setRegLoading(false);
-      return;
-    }
-
-    try {
-      const payload = {
-        name: regForm.name.trim(),
-        email: regForm.email.trim(),
-        phone: regForm.phone.trim(),
-        password: regForm.password,
-        confirmPassword: regForm.confirmPassword,
-        role: regForm.role
-      };
-
-      if (regForm.role === "Doctor") {
-        payload.doctorDetails = regForm.doctorDetails;
-      } else if (regForm.role === "Nurse") {
-        payload.nurseDetails = regForm.nurseDetails;
-      } else if (regForm.role === "Receptionist") {
-        payload.receptionistDetails = regForm.receptionistDetails;
-      }
-
-      await registerUser(payload);
-      setRegSuccess(`Successfully registered ${regForm.role}: ${regForm.name} (${regForm.email})`);
-
-      // Reset form
-      setRegForm({
-        name: "",
-        email: "",
-        phone: "",
-        password: "",
-        confirmPassword: "",
-        role: regForm.role,
-        doctorDetails: { specialization: "", roomNo: "" },
-        nurseDetails: { assignedWard: "", shiftTime: "Morning" },
-        receptionistDetails: { deskNumber: "" }
-      });
-
-      // Reload patients
-      loadDashboardData();
-    } catch (err) {
-      setRegError(
-        err.response?.data?.error ||
-        err.response?.data?.message ||
-        "Registration failed. Verify server is running and email is not already taken."
-      );
-    } finally {
-      setRegLoading(false);
-    }
-  };
-
-  const handleCreatePatientSubmit = async (e) => {
-    e.preventDefault();
-    setPatientLoading(true);
-    try {
-      await createPatient(newPatient);
-      setNotification({ type: "success", message: `Patient ${newPatient.name} added successfully!` });
-      setNewPatient({ name: "", age: "", diagnosis: "", assignedDoctor: "", wardNumber: "Ward A" });
-      loadDashboardData();
-    } catch (err) {
-      setNotification({
-        type: "error",
-        message: err.response?.data?.error || "Failed to add patient. Check fields and assigned doctor ID."
-      });
-    } finally {
-      setPatientLoading(false);
-    }
-  };
-
-  const handleCreateAppointmentSubmit = async (e) => {
-    e.preventDefault();
-    setApptLoading(true);
-    try {
-      await createAppointment(newAppt);
-      setNotification({ type: "success", message: `Appointment created for ${newAppt.patientName}!` });
-      setNewAppt({ patientName: "", doctorName: "", dateTime: "" });
-      loadDashboardData();
-    } catch (err) {
-      setNotification({
-        type: "error",
-        message: err.response?.data?.error || "Failed to create appointment."
-      });
-    } finally {
-      setApptLoading(false);
-    }
-  };
+  const {
+    currentUser,
+    activeTab,
+    setActiveTab,
+    serverStatus,
+    serverTimestamp,
+    patients,
+    appointments,
+    loadingData,
+    regForm,
+    regLoading,
+    regSuccess,
+    regError,
+    newPatient,
+    setNewPatient,
+    patientLoading,
+    newAppt,
+    setNewAppt,
+    apptLoading,
+    notification,
+    setNotification,
+    loadDashboardData,
+    handleRegChange,
+    handleRegisterSubmit,
+    handleCreatePatientSubmit,
+    handleCreateAppointmentSubmit,
+  } = useAdminDashboard();
 
   return (
     <div className="page-wrapper">
