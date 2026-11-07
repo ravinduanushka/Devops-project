@@ -84,7 +84,10 @@ const prescriptionSchema = new mongoose.Schema({
       dosage: { type: String, default: '' },
       frequency: { type: String, default: '' },
       duration: { type: String, default: '' },
-      instructions: { type: String, default: '' }
+      instructions: { type: String, default: '' },
+      administeredAt: { type: Date, default: null },
+      administeredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      administeredByName: { type: String, default: '' }
     }
   ],
   followUpAdvice: { type: String, default: '' },
@@ -557,7 +560,11 @@ app.post('/api/prescriptions', requireRoles('Admin', 'Doctor'), async (req, res,
       doctorName: cleanString(req.body.doctorName),
       diagnosis: cleanString(req.body.diagnosis),
       symptoms: cleanString(req.body.symptoms),
-      medications: Array.isArray(req.body.medications) ? req.body.medications : [],
+      medications: Array.isArray(req.body.medications) ? req.body.medications.map((medication) => ({
+        name: cleanString(medication.name), dosage: cleanString(medication.dosage),
+        frequency: cleanString(medication.frequency), duration: cleanString(medication.duration),
+        instructions: cleanString(medication.instructions)
+      })) : [],
       followUpAdvice: cleanString(req.body.followUpAdvice),
       status: cleanString(req.body.status) || 'Pending Dispensing'
     });
@@ -575,6 +582,33 @@ app.post('/api/prescriptions', requireRoles('Admin', 'Doctor'), async (req, res,
   } catch (err) {
     return next(err);
   }
+});
+
+app.put('/api/prescriptions/:id/medications/:medicationId', requireRoles('Admin', 'Nurse'), async (req, res, next) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id) || !mongoose.isValidObjectId(req.params.medicationId)) {
+      return res.status(400).json({ error: 'Invalid prescription or medication ID' });
+    }
+    const prescription = await Prescription.findById(req.params.id);
+    if (!prescription || !prescription.medications.id(req.params.medicationId)) {
+      return res.status(404).json({ error: 'Prescription or medication not found' });
+    }
+    if (!prescription.patientId || cleanString(req.body.patientId) !== prescription.patientId) {
+      return res.status(400).json({ error: 'Prescription does not match the selected patient' });
+    }
+    // Compare-and-set makes repeat clicks idempotent and preserves the first nurse's audit fields.
+    const updated = await Prescription.findOneAndUpdate({
+      _id: prescription._id, patientId: prescription.patientId,
+      medications: { $elemMatch: { _id: req.params.medicationId, administeredAt: null } }
+    }, { $set: {
+      'medications.$.administeredAt': new Date(),
+      'medications.$.administeredBy': req.user._id,
+      'medications.$.administeredByName': req.user.name
+    } }, { returnDocument: 'after' });
+    const result = updated || await Prescription.findById(prescription._id);
+    if (!result) return res.status(404).json({ error: 'Prescription not found' });
+    return res.json(result);
+  } catch (error) { return next(error); }
 });
 
 app.put('/api/prescriptions/:id', requireRoles('Admin', 'Doctor', 'Nurse'), async (req, res, next) => {
