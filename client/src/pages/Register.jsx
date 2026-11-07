@@ -33,19 +33,6 @@ function Register() {
     setSelectedRole(role);
     setErrorMessage("");
     setSuccessMessage("");
-    if (role === "Receptionist") {
-      setFormData((prev) => ({
-        ...prev,
-        name: prev.name || "Hospital Receptionist",
-        email: "anusikan0426@gmail.com",
-        password: "webreciption56",
-        confirmPassword: "webreciption56",
-        phone: prev.phone || "+94 11 234 5678",
-        receptionistDetails: {
-          deskNumber: prev.receptionistDetails?.deskNumber || "Desk 01"
-        }
-      }));
-    }
   };
 
   const handleCloseModal = () => {
@@ -110,14 +97,6 @@ function Register() {
       setErrorMessage("Passwords do not match.");
       setLoading(false);
       return;
-    }
-
-    if (selectedRole === "Receptionist") {
-      if (formData.email.trim().toLowerCase() !== "anusikan0426@gmail.com" || formData.password !== "webreciption56") {
-        setErrorMessage("Only the authorized receptionist email (anusikan0426@gmail.com) and password (webreciption56) are accepted for the Receptionist role.");
-        setLoading(false);
-        return;
-      }
     }
 
     try {
@@ -199,19 +178,10 @@ function Register() {
         {/* Center Role Selection View */}
         <main className="role-selection-center">
           <h1 className="role-title">Create your Account</h1>
-          <p className="role-subtitle">Choose your role</p>
+          <p className="role-subtitle">Register as a patient. Staff accounts are created by an administrator.</p>
 
-          {/* 4 Role Buttons in 2x2 Grid matching Figma specification */}
+          {/* Public registration is limited to patients. */}
           <div className="role-buttons-grid">
-            <button
-              type="button"
-              className="role-pill-btn"
-              onClick={() => handleSelectRole("Doctor")}
-              aria-label="Register as Doctor"
-            >
-              Doctor
-            </button>
-
             <button
               type="button"
               className="role-pill-btn"
@@ -220,26 +190,7 @@ function Register() {
             >
               Patient
             </button>
-
-            <button
-              type="button"
-              className="role-pill-btn"
-              onClick={() => handleSelectRole("Nurse")}
-              aria-label="Register as Nurse"
-            >
-              Nurse
-            </button>
-
-            <button
-              type="button"
-              className="role-pill-btn"
-              onClick={() => handleSelectRole("Receptionist")}
-              aria-label="Register as Receptionist"
-            >
-              Receptionist
-            </button>
           </div>
-
           <div className="role-signin-hint">
             Already have an account?{" "}
             <Link to="/login" className="role-signin-link">

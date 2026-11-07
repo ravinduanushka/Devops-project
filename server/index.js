@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const createCorsOptions = require('./cors-options');
 const bcrypt = require('bcryptjs');
+const { requireRoles, registrationPermission } = require('./permissions');
 const allocateAppointmentToken = require('./appointment-tokens');
 require('dotenv').config();
 
@@ -313,7 +314,7 @@ app.get('/api/doctors', async (_req, res, next) => {
 });
 
 // User Registration with Confirm Password Validation
-app.post('/api/auth/register', async (req, res, next) => {
+app.post('/api/auth/register', registrationPermission(sessions), async (req, res, next) => {
   try {
     const email = cleanString(req.body.email).toLowerCase();
     const password = typeof req.body.password === 'string' ? req.body.password : '';
@@ -331,24 +332,6 @@ app.post('/api/auth/register', async (req, res, next) => {
     }
 
     const authorizedRecEmail = (process.env.RECEPTIONIST_EMAIL || 'anusikan0426@gmail.com').toLowerCase().trim();
-    const authorizedRecPassword = process.env.RECEPTIONIST_PASSWORD || 'webreciption56';
-
-    if (role === 'Receptionist' && email === authorizedRecEmail && password === authorizedRecPassword) {
-      const existingRec = await User.findOne({ role: 'Receptionist', email: authorizedRecEmail });
-      if (existingRec) {
-        const salt = await bcrypt.genSalt(10);
-        existingRec.email = authorizedRecEmail;
-        existingRec.password = await bcrypt.hash(authorizedRecPassword, salt);
-        existingRec.name = name || existingRec.name;
-        existingRec.phone = phone || existingRec.phone;
-        if (req.body.receptionistDetails?.deskNumber) {
-          existingRec.receptionistDetails = { deskNumber: cleanString(req.body.receptionistDetails.deskNumber) };
-        }
-        await existingRec.save();
-        return res.status(200).json({ message: 'Receptionist configured successfully' });
-      }
-    }
-
     const sharedDoctorEmail = (process.env.DOCTOR_SHARED_EMAIL || 'anusikan0426@gmail.com').toLowerCase().trim();
     const existingUser = await User.findOne({
       $or: [
@@ -467,7 +450,7 @@ app.get('/api/patients', async (_req, res, next) => {
   }
 });
 
-app.post('/api/patients', async (req, res, next) => {
+app.post('/api/patients', requireRoles('Admin', 'Receptionist'), async (req, res, next) => {
   try {
     const patient = new Patient({
       name: cleanString(req.body.name),
@@ -490,7 +473,7 @@ app.post('/api/patients', async (req, res, next) => {
   }
 });
 
-app.put('/api/patients/:id', async (req, res, next) => {
+app.put('/api/patients/:id', requireRoles('Admin', 'Doctor', 'Nurse', 'Receptionist'), async (req, res, next) => {
   try {
     const updateData = {};
     if (req.body.status) updateData.status = cleanString(req.body.status);
@@ -515,7 +498,7 @@ app.get('/api/appointments', async (_req, res, next) => {
   }
 });
 
-app.post('/api/appointments', async (req, res, next) => {
+app.post('/api/appointments', requireRoles('Admin', 'Receptionist', 'Patient'), async (req, res, next) => {
   try {
     const appointment = new Appointment({
       patientName: cleanString(req.body.patientName),
@@ -536,7 +519,7 @@ app.post('/api/appointments', async (req, res, next) => {
   }
 });
 
-app.put('/api/appointments/:id', async (req, res, next) => {
+app.put('/api/appointments/:id', requireRoles('Admin', 'Doctor', 'Receptionist'), async (req, res, next) => {
   try {
     const updateData = {};
     if (req.body.status) updateData.status = cleanString(req.body.status);
@@ -558,7 +541,7 @@ app.get('/api/prescriptions', async (_req, res, next) => {
   }
 });
 
-app.post('/api/prescriptions', async (req, res, next) => {
+app.post('/api/prescriptions', requireRoles('Admin', 'Doctor'), async (req, res, next) => {
   try {
     const prescription = new Prescription({
       patientName: cleanString(req.body.patientName),
@@ -586,7 +569,7 @@ app.post('/api/prescriptions', async (req, res, next) => {
   }
 });
 
-app.put('/api/prescriptions/:id', async (req, res, next) => {
+app.put('/api/prescriptions/:id', requireRoles('Admin', 'Doctor', 'Nurse'), async (req, res, next) => {
   try {
     const updateData = {};
     if (req.body.status) updateData.status = cleanString(req.body.status);
@@ -607,7 +590,7 @@ app.get('/api/admissions', async (_req, res, next) => {
   }
 });
 
-app.post('/api/admissions', async (req, res, next) => {
+app.post('/api/admissions', requireRoles('Admin', 'Doctor'), async (req, res, next) => {
   try {
     const order = new AdmissionOrder({
       patientName: cleanString(req.body.patientName),
@@ -635,7 +618,7 @@ app.post('/api/admissions', async (req, res, next) => {
   }
 });
 
-app.put('/api/admissions/:id', async (req, res, next) => {
+app.put('/api/admissions/:id', requireRoles('Admin', 'Doctor', 'Receptionist', 'Nurse'), async (req, res, next) => {
   try {
     const updateData = {};
     if (req.body.status) updateData.status = cleanString(req.body.status);

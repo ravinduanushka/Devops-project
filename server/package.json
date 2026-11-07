@@ -8,7 +8,9 @@
     "test": "jest --detectOpenHandles --forceExit",
     "test:tokens": "node --test appointment-tokens.integration.cjs",
     "test:cors": "node --test cors.integration.cjs",
-    "test:auth": "node --test auth.integration.cjs"
+    "test:auth": "node --test auth.integration.cjs",
+    "test:permissions": "node --test permissions.integration.cjs",
+    "create-admin": "node create-admin.js"
   },
   "keywords": [],
   "author": "",
