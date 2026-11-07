@@ -18,7 +18,22 @@ staff or admin accounts requires an admin session. The public registration page
 offers only Patient; administrators create staff through the admin dashboard.
 Registration never resets another account's password.
 
-Clinical reads require login. Patient ownership checks remain separate work.
+Clinical reads require login. Patient sessions receive only rows whose
+`patientId` equals their immutable account ID, regardless of query parameters.
+The backend sets this ID and the account name on patient-created appointments;
+clients cannot override ownership. Staff retain clinical list access.
+New patient signup creates a patient profile using that same ID. Staff should
+use the ID displayed in the patient's portal for new clinical records.
+
+Legacy IDs such as `P-1042` are not automatically linked by name or email.
+Historical records require an operator-reviewed migration after verifying the
+account and patient identity; they remain hidden from patient sessions until
+then. Existing accounts without a canonical profile can still book their own
+appointments. Clinical updates match patient IDs rather than names.
+
+The patient portal displays server records and empty states. Shared localStorage
+clinical snapshots, demo records, and the unverified discharge download have
+been removed. Logout display data cannot reveal another patient's clinical data.
 Mutation permissions are enforced by the backend:
 
 | Action | Roles |

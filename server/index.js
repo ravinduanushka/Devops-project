@@ -119,7 +119,8 @@ const Session = mongoose.model('Session', new mongoose.Schema({
   expiresAt: { type: Date, required: true, expires: 0 }
 }));
 const sessions = require('./sessions')(Session, User);
-const publicUser = (user) => ({ role: user.role, name: user.name, userId: user._id, doctorDetails: user.doctorDetails });
+const publicUser = (user) => ({ role: user.role, name: user.name, userId: user._id, patientId: user.role === 'Patient' ? String(user._id) : undefined, doctorDetails: user.doctorDetails });
+const patientScope = (req) => req.user.role === 'Patient' ? { patientId: String(req.user._id) } : {};
 
 // ==================== SEED INITIAL DOCTORS ====================
 
@@ -372,6 +373,9 @@ app.post('/api/auth/register', registrationPermission(sessions), async (req, res
     });
 
     await newUser.save();
+    if (role === 'Patient') {
+      await Patient.create({ name, patientId: String(newUser._id), contact: phone, diagnosis: '' });
+    }
     return res.status(201).json({ message: 'Registration successful' });
   } catch (err) {
     return next(err);
@@ -439,11 +443,15 @@ app.post('/api/auth/logout', sessions.logout);
 
 // Clinical APIs require a verified, unexpired server-side session.
 app.use('/api', sessions.requireUser);
+app.use('/api', (_req, res, next) => {
+  res.set('Cache-Control', 'no-store');
+  next();
+});
 
 // Patients API
-app.get('/api/patients', async (_req, res, next) => {
+app.get('/api/patients', async (req, res, next) => {
   try {
-    const patients = await Patient.find().populate('assignedDoctor', 'name doctorDetails phone');
+    const patients = await Patient.find(patientScope(req)).populate('assignedDoctor', 'name doctorDetails phone');
     return res.status(200).json(patients);
   } catch (err) {
     return next(err);
@@ -489,9 +497,9 @@ app.put('/api/patients/:id', requireRoles('Admin', 'Doctor', 'Nurse', 'Reception
 });
 
 // Appointments API
-app.get('/api/appointments', async (_req, res, next) => {
+app.get('/api/appointments', async (req, res, next) => {
   try {
-    const appointments = await Appointment.find().sort({ createdAt: -1, tokenNumber: 1 });
+    const appointments = await Appointment.find(patientScope(req)).sort({ createdAt: -1, tokenNumber: 1 });
     return res.status(200).json(appointments);
   } catch (err) {
     return next(err);
@@ -501,12 +509,12 @@ app.get('/api/appointments', async (_req, res, next) => {
 app.post('/api/appointments', requireRoles('Admin', 'Receptionist', 'Patient'), async (req, res, next) => {
   try {
     const appointment = new Appointment({
-      patientName: cleanString(req.body.patientName),
-      patientId: cleanString(req.body.patientId || req.body.pid),
+      patientName: req.user.role === 'Patient' ? req.user.name : cleanString(req.body.patientName),
+      patientId: req.user.role === 'Patient' ? String(req.user._id) : cleanString(req.body.patientId || req.body.pid),
       doctorName: cleanString(req.body.doctorName),
       department: cleanString(req.body.department) || 'General Medicine',
       dateTime: req.body.dateTime ? new Date(req.body.dateTime) : new Date(),
-      status: cleanString(req.body.status) || 'Waiting',
+      status: req.user.role === 'Patient' ? 'Waiting' : cleanString(req.body.status) || 'Waiting',
       type: cleanString(req.body.type) || 'In-Person Consultation',
       fee: cleanString(req.body.fee) || 'Rs. 2,500 Paid'
     });
@@ -532,9 +540,9 @@ app.put('/api/appointments/:id', requireRoles('Admin', 'Doctor', 'Receptionist')
 });
 
 // Prescriptions API (Doctor -> Patient & Pharmacy)
-app.get('/api/prescriptions', async (_req, res, next) => {
+app.get('/api/prescriptions', async (req, res, next) => {
   try {
-    const prescriptions = await Prescription.find().sort({ createdAt: -1 });
+    const prescriptions = await Prescription.find(patientScope(req)).sort({ createdAt: -1 });
     return res.status(200).json(prescriptions);
   } catch (err) {
     return next(err);
@@ -556,9 +564,9 @@ app.post('/api/prescriptions', requireRoles('Admin', 'Doctor'), async (req, res,
     await prescription.save();
 
     // Also update patient record diagnosis if patient exists
-    if (prescription.patientName && prescription.diagnosis) {
+    if (prescription.patientId && prescription.diagnosis) {
       await Patient.findOneAndUpdate(
-        { name: prescription.patientName },
+        { patientId: prescription.patientId },
         { diagnosis: prescription.diagnosis }
       );
     }
@@ -581,9 +589,9 @@ app.put('/api/prescriptions/:id', requireRoles('Admin', 'Doctor', 'Nurse'), asyn
 });
 
 // Admissions API (Doctor -> Receptionist -> Nurse)
-app.get('/api/admissions', async (_req, res, next) => {
+app.get('/api/admissions', async (req, res, next) => {
   try {
-    const orders = await AdmissionOrder.find().sort({ createdAt: -1 });
+    const orders = await AdmissionOrder.find(patientScope(req)).sort({ createdAt: -1 });
     return res.status(200).json(orders);
   } catch (err) {
     return next(err);
@@ -605,9 +613,9 @@ app.post('/api/admissions', requireRoles('Admin', 'Doctor'), async (req, res, ne
     await order.save();
 
     // Also update patient status if found
-    if (order.patientName) {
+    if (order.patientId) {
       await Patient.findOneAndUpdate(
-        { name: order.patientName },
+        { patientId: order.patientId },
         { status: 'Admission Requested', wardNumber: order.ward }
       );
     }
@@ -627,9 +635,9 @@ app.put('/api/admissions/:id', requireRoles('Admin', 'Doctor', 'Receptionist', '
     const updated = await AdmissionOrder.findByIdAndUpdate(req.params.id, updateData, { new: true });
 
     // Also synchronize patient record
-    if (updated && updated.patientName && (updateData.bedNo || updateData.status === 'Bed Allocated' || updateData.status === 'Admitted')) {
+    if (updated && updated.patientId && (updateData.bedNo || updateData.status === 'Bed Allocated' || updateData.status === 'Admitted')) {
       await Patient.findOneAndUpdate(
-        { name: updated.patientName },
+        { patientId: updated.patientId },
         {
           status: 'Admitted',
           wardNumber: `${updated.ward || 'Ward 3B'} / ${updated.bedNo}`,

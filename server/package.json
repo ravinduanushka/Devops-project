@@ -10,7 +10,8 @@
     "test:cors": "node --test cors.integration.cjs",
     "test:auth": "node --test auth.integration.cjs",
     "test:permissions": "node --test permissions.integration.cjs",
-    "create-admin": "node create-admin.js"
+    "create-admin": "node create-admin.js",
+    "test:privacy": "node --test privacy.integration.cjs"
   },
   "keywords": [],
   "author": "",
