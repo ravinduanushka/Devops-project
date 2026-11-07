@@ -33,6 +33,8 @@ export const updateAppointment = (id, data) => api.put(`/api/appointments/${id}`
 export const getPrescriptions = () => api.get('/api/prescriptions');
 export const createPrescription = (prescriptionData) => api.post('/api/prescriptions', prescriptionData);
 export const updatePrescription = (id, data) => api.put(`/api/prescriptions/${id}`, data);
+export const administerMedication = (prescriptionId, medicationId, patientId) =>
+  api.put(`/api/prescriptions/${prescriptionId}/medications/${medicationId}`, { patientId });
 export const getAdmissions = () => api.get('/api/admissions');
 export const createAdmission = (admissionData) => api.post('/api/admissions', admissionData);
 export const updateAdmission = (id, data) => api.put(`/api/admissions/${id}`, data);

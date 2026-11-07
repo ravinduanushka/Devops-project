@@ -45,7 +45,14 @@ Mutation permissions are enforced by the backend:
 | Update appointment | Admin, Doctor, Receptionist |
 | Create prescription or admission | Admin, Doctor |
 | Update prescription status | Admin, Doctor, Nurse |
+| Record individual medication administration | Admin, Nurse |
 | Update admission | Admin, Doctor, Receptionist, Nurse |
+
+`PUT /api/prescriptions/:id/medications/:medicationId` requires the selected
+`patientId`. It stores per-medication administration time and the authenticated
+user, and preserves that first audit on repeated requests. Creating a
+prescription accepts medication instructions but ignores submitted administration
+audit fields. Dispensing status alone does not establish administration.
 
 If no admin exists, an operator can run `npm run create-admin` from `server` with
 `ADMIN_EMAIL`, `ADMIN_NAME`, `ADMIN_PHONE`, and `ADMIN_PASSWORD` supplied through
