@@ -178,10 +178,19 @@ function Register() {
         {/* Center Role Selection View */}
         <main className="role-selection-center">
           <h1 className="role-title">Create your Account</h1>
-          <p className="role-subtitle">Register as a patient. Staff accounts are created by an administrator.</p>
+          <p className="role-subtitle">Choose your role</p>
 
-          {/* Public registration is limited to patients. */}
+          {/* 4 Role Buttons in 2x2 Grid matching Figma specification */}
           <div className="role-buttons-grid">
+            <button
+              type="button"
+              className="role-pill-btn"
+              onClick={() => handleSelectRole("Doctor")}
+              aria-label="Register as Doctor"
+            >
+              Doctor
+            </button>
+
             <button
               type="button"
               className="role-pill-btn"
@@ -190,7 +199,26 @@ function Register() {
             >
               Patient
             </button>
+
+            <button
+              type="button"
+              className="role-pill-btn"
+              onClick={() => handleSelectRole("Nurse")}
+              aria-label="Register as Nurse"
+            >
+              Nurse
+            </button>
+
+            <button
+              type="button"
+              className="role-pill-btn"
+              onClick={() => handleSelectRole("Receptionist")}
+              aria-label="Register as Receptionist"
+            >
+              Receptionist
+            </button>
           </div>
+
           <div className="role-signin-hint">
             Already have an account?{" "}
             <Link to="/login" className="role-signin-link">
