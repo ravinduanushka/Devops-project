@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:doctor": "node --test src/features/doctor/doctorWorkflows.test.mjs",
+    "lint:doctor": "eslint src/pages/Doctor.jsx src/components/doctor src/features/doctor"
   },
   "dependencies": {
     "axios": "^1.20.0",
