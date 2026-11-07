@@ -1,3 +1,4 @@
+import { logoutUser } from "../services/api";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
@@ -13,8 +14,8 @@ function Navbar() {
   });
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const handleLogout = () => {
-    localStorage.removeItem("nexus_user");
+  const handleLogout = async () => {
+    if (!(await logoutUser())) return;
     setUser(null);
     navigate("/");
   };

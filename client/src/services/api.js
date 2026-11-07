@@ -5,12 +5,24 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json'
   }
 });
 
 export const loginUser = (credentials) => api.post('/api/auth/login', credentials);
+export const getCurrentUser = () => api.get('/api/auth/me');
+export const logoutUser = async () => {
+  try {
+    await api.post('/api/auth/logout');
+    localStorage.removeItem('nexus_user');
+    return true;
+  } catch {
+    window.alert('Unable to sign out. Please try again.');
+    return false;
+  }
+};
 export const registerUser = (userData) => api.post('/api/auth/register', userData);
 export const getPatients = () => api.get('/api/patients');
 export const createPatient = (patientData) => api.post('/api/patients', patientData);

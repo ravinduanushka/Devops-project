@@ -1,3 +1,4 @@
+import { logoutUser } from "../services/api";
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
@@ -571,8 +572,8 @@ function Nurse() {
     }, 850);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("nexus_user");
+  const handleLogout = async () => {
+    if (!(await logoutUser())) return;
     navigate("/login");
   };
 
