@@ -486,7 +486,7 @@ app.put('/api/patients/:id', requireRoles('Admin', 'Doctor', 'Nurse', 'Reception
     const updateData = {};
     if (req.body.status) updateData.status = cleanString(req.body.status);
     if (req.body.diagnosis) updateData.diagnosis = cleanString(req.body.diagnosis);
-    if (req.body.wardNumber) updateData.wardNumber = cleanString(req.body.wardNumber);
+    if (typeof req.body.wardNumber === 'string') updateData.wardNumber = cleanString(req.body.wardNumber);
     if (req.body.assignedDoctor) updateData.assignedDoctor = req.body.assignedDoctor;
     if (req.body.admittedAt) updateData.admittedAt = new Date(req.body.admittedAt);
     const updated = await Patient.findByIdAndUpdate(req.params.id, updateData, { new: true });
