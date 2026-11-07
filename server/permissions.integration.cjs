@@ -45,6 +45,14 @@ test('real API enforces clinical role matrix and admin-only staff registration',
         assert.equal(response.status, allowed.includes(role) ? (method === 'POST' ? 201 : 200) : 403, `${role} ${method} ${path}`);
       }
     }
+    const Patient = mongoose.model('Patient');
+    const admitted = await Patient.create({ name: 'Ward Clearing Test', patientId: 'ward-test', wardNumber: 'Ward A', status: 'Discharge Approved' });
+    const cleared = await fetch(`${base}/api/patients/${admitted._id}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json', Cookie: cookies.Receptionist },
+      body: JSON.stringify({ status: 'Discharged', wardNumber: '' })
+    });
+    assert.equal(cleared.status, 200);
+    assert.equal((await Patient.findById(admitted._id)).wardNumber, '');
     let count = 0;
     const registration = (role) => ({ role, name: `New User ${count}`, email: `new${count++}@permissions.test`, phone: '123', password: 'test-password' });
     for (const role of roles.filter((r) => r !== 'Patient')) {
