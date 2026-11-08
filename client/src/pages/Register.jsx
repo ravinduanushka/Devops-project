@@ -318,6 +318,11 @@ function Register() {
                     required
                     className="form-input"
                   />
+                  {["Doctor", "Nurse", "Patient"].includes(selectedRole) && (
+                    <small style={{ display: "block", marginTop: "4px", color: "#4b5563", fontSize: "0.78rem" }}>
+                      Doctors, Nurses, and Patients can use any email (including a shared email) with different passwords.
+                    </small>
+                  )}
                 </div>
               </div>
 

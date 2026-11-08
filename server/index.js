@@ -355,15 +355,38 @@ app.post('/api/auth/register', async (req, res, next) => {
       }
     }
 
-    const sharedDoctorEmail = (process.env.DOCTOR_SHARED_EMAIL || 'anusikan0426@gmail.com').toLowerCase().trim();
-    const existingUser = await User.findOne({
-      $or: [
-        { email: { $eq: email }, name: { $eq: name } },
-        ...(email !== sharedDoctorEmail && email !== authorizedRecEmail ? [{ email: { $eq: email } }] : [])
-      ]
-    });
-    if (existingUser) {
-      return res.status(400).json({ error: 'User already exists with this email or name' });
+    const multiEmailRoles = ['Doctor', 'Nurse', 'Patient'];
+    const isMultiEmailRole = multiEmailRoles.includes(role);
+
+    if (isMultiEmailRole) {
+      // 1. Prevent duplicate registration with identical name, email, and role
+      const existingSameUser = await User.findOne({ email, name, role });
+      if (existingSameUser) {
+        return res.status(400).json({ error: `A ${role} with this name and email already exists.` });
+      }
+
+      // 2. Doctor, Nurse, and Patient roles can use any email (including shared emails),
+      // but each account sharing an email must have a different password
+      const usersWithSameEmail = await User.find({ email });
+      for (const existing of usersWithSameEmail) {
+        const isPasswordTaken = await bcrypt.compare(password, existing.password);
+        if (isPasswordTaken) {
+          return res.status(400).json({
+            error: 'An account with this email already uses this password. Please choose a different password.'
+          });
+        }
+      }
+    } else {
+      const sharedDoctorEmail = (process.env.DOCTOR_SHARED_EMAIL || 'anusikan0426@gmail.com').toLowerCase().trim();
+      const existingUser = await User.findOne({
+        $or: [
+          { email: { $eq: email }, name: { $eq: name } },
+          ...(email !== sharedDoctorEmail && email !== authorizedRecEmail ? [{ email: { $eq: email } }] : [])
+        ]
+      });
+      if (existingUser) {
+        return res.status(400).json({ error: 'User already exists with this email or name' });
+      }
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -395,17 +418,35 @@ app.post('/api/auth/register', async (req, res, next) => {
     });
 
     await newUser.save();
+
+    // If role is Patient, also ensure a corresponding Patient record exists in the system
+    if (role === 'Patient') {
+      const existingPatient = await Patient.findOne({ name });
+      if (!existingPatient) {
+        const pCount = await Patient.countDocuments();
+        const newPatient = new Patient({
+          name,
+          contact: phone,
+          patientId: `P-${1000 + pCount + 1}`,
+          status: 'Registered',
+          diagnosis: 'OPD Consultation'
+        });
+        await newPatient.save();
+      }
+    }
+
     return res.status(201).json({ message: 'Registration successful' });
   } catch (err) {
     return next(err);
   }
 });
 
-// User Login (supports email, doctor name/username, and multiple doctors sharing email by matching password)
+// User Login (supports email, doctor name/username, and multiple doctors/nurses/patients sharing email by matching password)
 app.post('/api/auth/login', async (req, res, next) => {
   try {
     const identifier = cleanString(req.body.email || req.body.identifier || req.body.username).toLowerCase();
     const password = typeof req.body.password === 'string' ? req.body.password : '';
+    const requestedRole = cleanString(req.body.role);
 
     if (!identifier || !password) {
       return res.status(400).json({ error: 'Credentials required' });
@@ -428,11 +469,28 @@ app.post('/api/auth/login', async (req, res, next) => {
     }
 
     let matchedUser = null;
-    for (const u of matchingUsers) {
-      const isMatch = await bcrypt.compare(password, u.password);
-      if (isMatch) {
-        matchedUser = u;
-        break;
+
+    // If a specific role was requested, check matching candidates for that role first
+    if (requestedRole) {
+      for (const u of matchingUsers) {
+        if (u.role.toLowerCase() === requestedRole.toLowerCase()) {
+          const isMatch = await bcrypt.compare(password, u.password);
+          if (isMatch) {
+            matchedUser = u;
+            break;
+          }
+        }
+      }
+    }
+
+    // Check all matching candidates by password
+    if (!matchedUser) {
+      for (const u of matchingUsers) {
+        const isMatch = await bcrypt.compare(password, u.password);
+        if (isMatch) {
+          matchedUser = u;
+          break;
+        }
       }
     }
 
@@ -445,7 +503,11 @@ app.post('/api/auth/login', async (req, res, next) => {
       role: matchedUser.role,
       name: matchedUser.name,
       userId: matchedUser._id,
-      doctorDetails: matchedUser.doctorDetails
+      email: matchedUser.email,
+      phone: matchedUser.phone,
+      doctorDetails: matchedUser.doctorDetails,
+      nurseDetails: matchedUser.nurseDetails,
+      receptionistDetails: matchedUser.receptionistDetails
     });
   } catch (err) {
     return next(err);
