@@ -336,7 +336,7 @@ app.post('/api/auth/register', registrationPermission(sessions), async (req, res
     }
 
     const authorizedRecEmail = (process.env.RECEPTIONIST_EMAIL || 'anusikan0426@gmail.com').toLowerCase().trim();
-<<<<<<< HEAD
+
     const authorizedRecPassword = process.env.RECEPTIONIST_PASSWORD || 'webreciption56';
 
     if (role === 'Receptionist' && email === authorizedRecEmail && password === authorizedRecPassword) {
@@ -387,17 +387,7 @@ app.post('/api/auth/register', registrationPermission(sessions), async (req, res
       if (existingUser) {
         return res.status(400).json({ error: 'User already exists with this email or name' });
       }
-=======
-    const sharedDoctorEmail = (process.env.DOCTOR_SHARED_EMAIL || 'anusikan0426@gmail.com').toLowerCase().trim();
-    const existingUser = await User.findOne({
-      $or: [
-        { email: { $eq: email }, name: { $eq: name } },
-        ...(email !== sharedDoctorEmail && email !== authorizedRecEmail ? [{ email: { $eq: email } }] : [])
-      ]
-    });
-    if (existingUser) {
-      return res.status(400).json({ error: 'User already exists with this email or name' });
->>>>>>> c51460fe4986d502c8bdac87b41671965e1ced66
+
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -429,7 +419,7 @@ app.post('/api/auth/register', registrationPermission(sessions), async (req, res
     });
 
     await newUser.save();
-<<<<<<< HEAD
+
 
     // If role is Patient, also ensure a corresponding Patient record exists in the system
     if (role === 'Patient') {
@@ -447,11 +437,7 @@ app.post('/api/auth/register', registrationPermission(sessions), async (req, res
       }
     }
 
-=======
-    if (role === 'Patient') {
-      await Patient.create({ name, patientId: String(newUser._id), contact: phone, diagnosis: '' });
-    }
->>>>>>> c51460fe4986d502c8bdac87b41671965e1ced66
+
     return res.status(201).json({ message: 'Registration successful' });
   } catch (err) {
     return next(err);
