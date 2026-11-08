@@ -339,19 +339,23 @@ app.post('/api/auth/register', registrationPermission(sessions), async (req, res
 
     const authorizedRecPassword = process.env.RECEPTIONIST_PASSWORD || 'webreciption56';
 
-    if (role === 'Receptionist' && email === authorizedRecEmail && password === authorizedRecPassword) {
-      const existingRec = await User.findOne({ role: 'Receptionist', email: authorizedRecEmail });
-      if (existingRec) {
-        const salt = await bcrypt.genSalt(10);
-        existingRec.email = authorizedRecEmail;
-        existingRec.password = await bcrypt.hash(authorizedRecPassword, salt);
-        existingRec.name = name || existingRec.name;
-        existingRec.phone = phone || existingRec.phone;
-        if (req.body.receptionistDetails?.deskNumber) {
-          existingRec.receptionistDetails = { deskNumber: cleanString(req.body.receptionistDetails.deskNumber) };
+    if (role === 'Receptionist') {
+      if (email === authorizedRecEmail && password === authorizedRecPassword) {
+        const existingRec = await User.findOne({ role: 'Receptionist', email: authorizedRecEmail });
+        if (existingRec) {
+          const salt = await bcrypt.genSalt(10);
+          existingRec.email = authorizedRecEmail;
+          existingRec.password = await bcrypt.hash(authorizedRecPassword, salt);
+          existingRec.name = name || existingRec.name;
+          existingRec.phone = phone || existingRec.phone;
+          if (req.body.receptionistDetails?.deskNumber) {
+            existingRec.receptionistDetails = { deskNumber: cleanString(req.body.receptionistDetails.deskNumber) };
+          }
+          await existingRec.save();
+          return res.status(200).json({ message: 'Receptionist configured successfully' });
         }
-        await existingRec.save();
-        return res.status(200).json({ message: 'Receptionist configured successfully' });
+      } else {
+        return res.status(400).json({ error: 'Only the single authorized receptionist configured in .env is permitted in this system.' });
       }
     }
 

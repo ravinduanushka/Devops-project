@@ -8,7 +8,8 @@ const requireRoles = (...allowed) => (req, res, next) => {
 const registrationPermission = (sessions) => (req, res, next) => {
   const role = typeof req.body.role === 'string' ? req.body.role.trim() : '';
   if (!roles.includes(role)) return res.status(400).json({ error: 'Invalid account role' });
-  if (role === 'Patient') return next();
+  // Doctor, Nurse, Patient, and authorized Receptionist can register directly without prior sign in
+  if (['Doctor', 'Nurse', 'Patient', 'Receptionist'].includes(role)) return next();
   return sessions.requireUser(req, res, (error) => error ? next(error) : requireRoles('Admin')(req, res, next));
 };
 
