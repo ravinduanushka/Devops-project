@@ -391,12 +391,6 @@ function Register() {
 
               {selectedRole === "Receptionist" && (
                 <div className="role-specific-box">
-                  <div style={{ background: "#ecfdf5", border: "1px solid #6ee7b7", borderRadius: "8px", padding: "12px 14px", marginBottom: "16px", color: "#065f46" }}>
-                    <p style={{ margin: 0, fontWeight: 700, fontSize: "0.9rem" }}>Authorized Receptionist Account</p>
-                    <p style={{ margin: "4px 0 0 0", fontSize: "0.83rem", lineHeight: "1.4" }}>
-                      This system allows one single Receptionist. The authorized credentials (Email: <strong>anusikan0426@gmail.com</strong> / Password: <strong>webreciption56</strong>) are pre-filled. Other credentials are not accepted.
-                    </p>
-                  </div>
                   <h4 className="role-box-title">Reception Assignment</h4>
                   <div className="form-group">
                     <label htmlFor="rec-desk">Desk / Counter Number</label>
