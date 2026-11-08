@@ -24,3 +24,6 @@ yarn-debug.log*
 Thumbs.db
 .vscode/
 .idea/
+
+# Laptop-only Docker Compose configuration
+/docker-compose.override.yml

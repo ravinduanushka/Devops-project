@@ -33,19 +33,6 @@ function Register() {
     setSelectedRole(role);
     setErrorMessage("");
     setSuccessMessage("");
-    if (role === "Receptionist") {
-      setFormData((prev) => ({
-        ...prev,
-        name: prev.name || "Hospital Receptionist",
-        email: "anusikan0426@gmail.com",
-        password: "webreciption56",
-        confirmPassword: "webreciption56",
-        phone: prev.phone || "+94 11 234 5678",
-        receptionistDetails: {
-          deskNumber: prev.receptionistDetails?.deskNumber || "Desk 01"
-        }
-      }));
-    }
   };
 
   const handleCloseModal = () => {
@@ -112,14 +99,6 @@ function Register() {
       return;
     }
 
-    if (selectedRole === "Receptionist") {
-      if (formData.email.trim().toLowerCase() !== "anusikan0426@gmail.com" || formData.password !== "webreciption56") {
-        setErrorMessage("Only the authorized receptionist email (anusikan0426@gmail.com) and password (webreciption56) are accepted for the Receptionist role.");
-        setLoading(false);
-        return;
-      }
-    }
-
     try {
       const payload = {
         name: formData.name.trim(),
@@ -184,7 +163,9 @@ function Register() {
               alt="NexusHealth Logo"
               className="role-logo-img"
               onError={(e) => {
-                e.currentTarget.src = "/health logo.png";
+                if (e.currentTarget.getAttribute("src") !== "/health logo.png") {
+                  e.currentTarget.src = "/health logo.png";
+                }
               }}
             />
           </Link>
@@ -263,7 +244,9 @@ function Register() {
                   alt="NexusHealth Logo"
                   className="role-modal-logo"
                   onError={(e) => {
-                    e.currentTarget.src = "/health logo.png";
+                    if (e.currentTarget.getAttribute("src") !== "/health logo.png") {
+                      e.currentTarget.src = "/health logo.png";
+                    }
                   }}
                 />
                 <h2 id="modal-role-title" className="role-modal-title">

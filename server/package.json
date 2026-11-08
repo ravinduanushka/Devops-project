@@ -5,7 +5,14 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "jest --detectOpenHandles --forceExit"
+    "test": "jest --detectOpenHandles --forceExit",
+    "test:tokens": "node --test appointment-tokens.integration.cjs",
+    "test:cors": "node --test cors.integration.cjs",
+    "test:auth": "node --test auth.integration.cjs",
+    "test:permissions": "node --test permissions.integration.cjs",
+    "create-admin": "node create-admin.js",
+    "test:privacy": "node --test privacy.integration.cjs",
+    "test:medications": "node --test medications.integration.cjs"
   },
   "keywords": [],
   "author": "",
