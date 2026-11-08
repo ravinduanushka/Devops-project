@@ -128,7 +128,7 @@ const patientScope = (req) => req.user.role === 'Patient' ? { patientId: String(
 // ==================== SEED INITIAL DOCTORS ====================
 
 const seedInitialDoctors = async () => {
-  const sharedEmail = (process.env.DOCTOR_SHARED_EMAIL || 'anusikan0426@gmail.com').toLowerCase().trim();
+  const sharedEmail = (process.env.DOCTOR_SHARED_EMAIL || '').toLowerCase().trim();
 
   const initialDoctors = [
     {
@@ -237,8 +237,8 @@ const seedInitialDoctors = async () => {
     console.log('5 default doctors initialized successfully with email ' + sharedEmail);
 
     // Seed designated single Receptionist
-    const recEmail = (process.env.RECEPTIONIST_EMAIL || 'anusikan0426@gmail.com').toLowerCase().trim();
-    const recPass = process.env.RECEPTIONIST_PASSWORD || 'webreciption56';
+    const recEmail = (process.env.RECEPTIONIST_EMAIL || '').toLowerCase().trim();
+    const recPass = process.env.RECEPTIONIST_PASSWORD || '';
     const recSalt = await bcrypt.genSalt(10);
     const hashedRecPass = await bcrypt.hash(recPass, recSalt);
 
@@ -335,9 +335,9 @@ app.post('/api/auth/register', registrationPermission(sessions), async (req, res
       return res.status(400).json({ error: 'Passwords do not match' });
     }
 
-    const authorizedRecEmail = (process.env.RECEPTIONIST_EMAIL || 'anusikan0426@gmail.com').toLowerCase().trim();
+    const authorizedRecEmail = (process.env.RECEPTIONIST_EMAIL || '').toLowerCase().trim();
 
-    const authorizedRecPassword = process.env.RECEPTIONIST_PASSWORD || 'webreciption56';
+    const authorizedRecPassword = process.env.RECEPTIONIST_PASSWORD || '';
 
     if (role === 'Receptionist') {
       if (email === authorizedRecEmail && password === authorizedRecPassword) {
@@ -381,7 +381,7 @@ app.post('/api/auth/register', registrationPermission(sessions), async (req, res
         }
       }
     } else {
-      const sharedDoctorEmail = (process.env.DOCTOR_SHARED_EMAIL || 'anusikan0426@gmail.com').toLowerCase().trim();
+      const sharedDoctorEmail = (process.env.DOCTOR_SHARED_EMAIL || '').toLowerCase().trim();
       const existingUser = await User.findOne({
         $or: [
           { email: { $eq: email }, name: { $eq: name } },
