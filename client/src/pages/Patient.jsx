@@ -1,8 +1,7 @@
-import { logoutUser } from "../services/api";
+import { logoutUser, getAppointments, createAppointment, getPrescriptions, getAdmissions, getDoctors } from "../services/api";
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
-import { getAppointments, createAppointment, getPatients, getPrescriptions, getDoctors } from "../services/api";
 
 function Patient() {
   const navigate = useNavigate();
@@ -36,7 +35,7 @@ function Patient() {
     : "Mr. Kamal Perera";
 
   // ==========================================
-  // STEP 1: APPOINTMENTS STATE & WORKFLOW
+  // APPOINTMENTS STATE & WORKFLOW
   // ==========================================
   const [tokenStatus, setTokenStatus] = useState(() => {
     try {
@@ -49,7 +48,9 @@ function Patient() {
           scheduledVisit: `${parsed.doctorName || "Dr. Vance"} (${parsed.department || "Cardiology"}) - Today at ${parsed.estimatedTime || "10:15 AM"}`
         };
       }
-    } catch {}
+    } catch {
+      /* ignore storage parse error */
+    }
     return {
       yourToken: "#05",
       currentlyServing: "#04",
@@ -65,6 +66,141 @@ function Patient() {
     { name: "Dr. Malani Fernando", specialty: "Pediatrics", fee: "Rs. 2,200.00", feeUsd: "$45.00" }
   ]);
 
+  const [bookingForm, setBookingForm] = useState({
+    doctor: "Dr. Vance - Cardiology",
+    specialty: "Cardiology",
+    consultationType: "In-Person Visit",
+    dateTime: "",
+    patientName: currentUser?.name ? `${currentUser.name} (PID: ${currentUser.patientId || "P-1042"})` : "Kamal Perera (PID: P-1042)",
+    patientAge: 38
+  });
+
+  // Finalized digital discharge summary published by Receptionist
+  const [dischargeSummary, setDischargeSummary] = useState(() => {
+    try {
+      const stored = localStorage.getItem("nexus_patient_discharge_summary");
+      if (stored) return JSON.parse(stored);
+    } catch {
+      /* ignore storage parse error */
+    }
+    return {
+      summaryId: "DS-1042",
+      patientName: currentUser?.name || "Kamal Perera",
+      pid: currentUser?.patientId || "P-1042",
+      admissionDate: "Oct 09, 2026",
+      dischargeDate: "Oct 10, 2026",
+      wardBed: "Ward 3B / Bed-02A",
+      attendingPhysician: "Dr. Robert Vance",
+      diagnosis: "Acute bronchitis with mild bronchial irritation - Clinically Recovered",
+      dischargeNotes: "Patient has completed inpatient clinical therapy and is hemodynamically stable. Advised to continue oral medication regimens and schedule follow-up in 1 week.",
+      totalBill: "Rs. 18,500.00",
+      paymentStatus: "Paid & Cleared",
+      clearedAt: "Oct 10, 2026, 11:30 AM"
+    };
+  });
+
+  // ==========================================
+  // MY RECORDS STATE (Diagnosis & Vitals)
+  // ==========================================
+  const [medicalRecord, setMedicalRecord] = useState(() => {
+    try {
+      const latestRec = localStorage.getItem("nexus_patient_latest_record");
+      if (latestRec) {
+        const parsedRec = JSON.parse(latestRec);
+        return {
+          patientName: currentUser?.name || "Kamal Perera",
+          pid: currentUser?.patientId || "P-1042",
+          age: 38,
+          gender: "Male",
+          bloodGroup: "O+",
+          allergy: "Penicillin",
+          diagnosisHistory: [
+            parsedRec,
+            {
+              id: 2,
+              date: "Sep 14, 2026 - GP Follow-up",
+              notes: "Routine check-up, vital signs stable, advised dietary improvements."
+            }
+          ],
+          vitals: { bp: "124/80 mmHg", pulse: "74 bpm", temp: "98.6 F" }
+        };
+      }
+    } catch {
+      /* ignore storage parse error */
+    }
+    return {
+      patientName: currentUser?.name || "Kamal Perera",
+      pid: currentUser?.patientId || "P-1042",
+      age: 38,
+      gender: "Male",
+      bloodGroup: "O+",
+      allergy: "Penicillin",
+      diagnosisHistory: [
+        {
+          id: 1,
+          date: "Oct 09, 2026 - Dr. Vance Consultation",
+          notes: "Doctor diagnosis notes: Acute bronchitis with mild bronchial irritation. Prescribed Amoxicillin 500mg, Ibuprofen 400mg."
+        },
+        {
+          id: 2,
+          date: "Sep 14, 2026 - GP Follow-up",
+          notes: "Routine check-up, vital signs stable, advised dietary improvements."
+        }
+      ],
+      vitals: { bp: "124/80 mmHg", pulse: "74 bpm", temp: "98.6 F" }
+    };
+  });
+
+  // ==========================================
+  // PRESCRIPTIONS STATE
+  // ==========================================
+  const [prescriptions, setPrescriptions] = useState(() => {
+    try {
+      const storedRx = localStorage.getItem("nexus_patient_prescriptions");
+      if (storedRx) {
+        const parsed = JSON.parse(storedRx);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {
+      /* ignore storage parse error */
+    }
+    return [
+      {
+        name: "Amoxicillin 500mg",
+        dosage: "500 mg",
+        frequency: "Twice daily",
+        duration: "7 days",
+        instructions: "After meals"
+      },
+      {
+        name: "Ibuprofen 400mg",
+        dosage: "400 mg",
+        frequency: "Twice daily",
+        duration: "5 days",
+        instructions: "With food"
+      }
+    ];
+  });
+
+  // ==========================================
+  // WARD ADMISSION STATE
+  // ==========================================
+  const [admission, setAdmission] = useState({
+    status: "Current Status: Inpatient Admitted - Ward 3B",
+    bed: "Bed-01A",
+    admittedDate: "Oct 12, 2026",
+    doctor: "Dr. Priyantha Senanayake",
+    nurse: "Nurse K. Perera",
+    logs: [
+      "08:00 AM - Breakfast served (Low sodium diet)",
+      "07:30 AM - Vitals taken (BP: 120/80 mmHg, Pulse: 72 bpm, Temp: 98.6 F)",
+      "06:00 AM - Morning medication administered"
+    ]
+  });
+
+  const [showDischargeModal, setShowDischargeModal] = useState(false);
+
+  // Fetch doctors list
   useEffect(() => {
     const fetchDoctors = () => {
       getDoctors()
@@ -73,22 +209,15 @@ function Patient() {
             setDoctorsList(res.data);
           }
         })
-        .catch(() => {});
+        .catch(() => {
+          /* fallback to initial doctor list */
+        });
     };
 
     fetchDoctors();
     window.addEventListener("nexus_doctors_updated", fetchDoctors);
     return () => window.removeEventListener("nexus_doctors_updated", fetchDoctors);
   }, []);
-
-  const [bookingForm, setBookingForm] = useState({
-    doctor: "Dr. Vance - Cardiology",
-    specialty: "Cardiology",
-    consultationType: "In-Person Visit",
-    dateTime: "",
-    patientName: currentUser?.name ? `${currentUser.name} (PID: P-1042)` : "Kamal Perera (PID: P-1042)",
-    patientAge: 38
-  });
 
   // Doctor selection auto-updates specialty and fee
   const handleDoctorChange = (e) => {
@@ -122,6 +251,10 @@ function Patient() {
       });
       showToast(`Appointment confirmed with ${bookingForm.doctor}! Token #${String(response.data.tokenNumber).padStart(2, "0")} is active.`);
     } catch (error) {
+      if (error.response?.status === 401) {
+        navigate("/login", { replace: true });
+        return;
+      }
       setBookingError(error.response?.data?.error || "Unable to confirm your appointment. Please try again.");
     } finally {
       setIsBooking(false);
@@ -134,13 +267,13 @@ function Patient() {
       specialty: "Cardiology",
       consultationType: "In-Person Visit",
       dateTime: "",
-      patientName: currentUser?.name ? `${currentUser.name} (PID: P-1042)` : "Kamal Perera (PID: P-1042)",
+      patientName: currentUser?.name ? `${currentUser.name} (PID: ${currentUser.patientId || "P-1042"})` : "Kamal Perera (PID: P-1042)",
       patientAge: 38
     });
     showToast("Booking form reset.");
   };
 
-  // Sync token status in real-time from Receptionist dispatch and backend database
+  // Sync token status and clinical records in real-time
   useEffect(() => {
     const syncTokenFromDb = async () => {
       try {
@@ -153,8 +286,8 @@ function Patient() {
             scheduledVisit: `${latestAppt.doctorName || "Dr. Vance"} (${latestAppt.department || "Cardiology"}) - Today at 10:15 AM`
           });
         }
-      } catch {
-        // fallback to storage
+      } catch (err) {
+        if (err.response?.status === 401) navigate("/login", { replace: true });
       }
     };
 
@@ -183,12 +316,32 @@ function Patient() {
             }));
           }
         }
-      } catch {
-        // offline fallback operates seamlessly
+      } catch (err) {
+        if (err.response?.status === 401) navigate("/login", { replace: true });
       }
     };
 
     syncRxFromDb();
+
+    // Fetch latest admission from backend if available
+    const syncAdmissionFromDb = async () => {
+      try {
+        const admRes = await getAdmissions();
+        if (admRes?.data && Array.isArray(admRes.data) && admRes.data.length > 0) {
+          const latestAdm = admRes.data[0];
+          setAdmission((prev) => ({
+            ...prev,
+            status: `Current Status: ${latestAdm.status || "Inpatient Admitted"} - ${latestAdm.ward || "Ward 3B"}`,
+            bed: latestAdm.bedNo || prev.bed,
+            doctor: latestAdm.doctorName || prev.doctor
+          }));
+        }
+      } catch (err) {
+        if (err.response?.status === 401) navigate("/login", { replace: true });
+      }
+    };
+
+    syncAdmissionFromDb();
 
     const handleStorageUpdate = (event) => {
       let activeTok = event?.detail;
@@ -228,7 +381,9 @@ function Patient() {
             ]
           }));
         }
-      } catch {}
+      } catch {
+        /* ignore storage error */
+      }
     };
 
     const handleRxDispatched = (event) => {
@@ -248,7 +403,7 @@ function Patient() {
             ]
           }));
         }
-        showToast(" New Prescription & Consultation Record received from Dr. Vance!");
+        showToast("✓ New Prescription & Consultation Record received from Dr. Vance!");
       }
     };
 
@@ -256,7 +411,7 @@ function Patient() {
       const summary = e?.detail;
       if (summary) {
         setDischargeSummary(summary);
-        showToast(" Digital Discharge Summary & Clearance Certificate received! Ready for download.");
+        showToast("✓ Digital Discharge Summary & Clearance Certificate received! Ready for download.");
       }
     };
 
@@ -266,7 +421,9 @@ function Patient() {
         if (storedDischarge) {
           setDischargeSummary(JSON.parse(storedDischarge));
         }
-      } catch {}
+      } catch {
+        /* ignore storage error */
+      }
     };
 
     window.addEventListener("nexus_queue_updated", handleStorageUpdate);
@@ -277,6 +434,7 @@ function Patient() {
     const interval = setInterval(() => {
       syncTokenFromDb();
       syncRxFromDb();
+      syncAdmissionFromDb();
       syncDischargeFromStorage();
     }, 4000);
 
@@ -288,32 +446,10 @@ function Patient() {
       window.removeEventListener("storage", syncDischargeFromStorage);
       clearInterval(interval);
     };
-  }, []);
-
-  // Finalized digital discharge summary published by Receptionist
-  const [dischargeSummary, setDischargeSummary] = useState(() => {
-    try {
-      const stored = localStorage.getItem("nexus_patient_discharge_summary");
-      if (stored) return JSON.parse(stored);
-    } catch {}
-    return {
-      summaryId: "DS-1042",
-      patientName: "Kamal Perera",
-      pid: "P-1042",
-      admissionDate: "Oct 09, 2026",
-      dischargeDate: "Oct 10, 2026",
-      wardBed: "Ward 3B / Bed-02A",
-      attendingPhysician: "Dr. Robert Vance",
-      diagnosis: "Acute bronchitis with mild bronchial irritation - Clinically Recovered",
-      dischargeNotes: "Patient has completed inpatient clinical therapy and is hemodynamically stable. Advised to continue oral medication regimens and schedule follow-up in 1 week.",
-      totalBill: "Rs. 18,500.00",
-      paymentStatus: "Paid & Cleared",
-      clearedAt: "Oct 10, 2026, 11:30 AM"
-    };
-  });
+  }, [navigate]);
 
   const handleDownloadDischarge = () => {
-    showToast("✓ Downloading official Hospital Discharge Summary (PDF) for Kamal Perera...");
+    showToast(`✓ Downloading official Hospital Discharge Summary (PDF) for ${dischargeSummary?.patientName || "Kamal Perera"}...`);
     const content = `=====================================================
 NEXUSHEALTH HOSPITAL - DIGITAL DISCHARGE SUMMARY
 =====================================================
@@ -338,109 +474,12 @@ Cleared At: ${dischargeSummary?.clearedAt || new Date().toLocaleString()}
     URL.revokeObjectURL(url);
   };
 
-  // ==========================================
-  // STEP 2: MY RECORDS STATE (Diagnosis & Vitals)
-  // ==========================================
-  const [medicalRecord, setMedicalRecord] = useState(() => {
-    try {
-      const latestRec = localStorage.getItem("nexus_patient_latest_record");
-      if (latestRec) {
-        const parsedRec = JSON.parse(latestRec);
-        return {
-          patientName: "Kamal Perera",
-          pid: "P-1042",
-          age: 38,
-          gender: "Male",
-          bloodGroup: "O+",
-          allergy: "Penicillin",
-          diagnosisHistory: [
-            parsedRec,
-            {
-              id: 2,
-              date: "Sep 14, 2026 - GP Follow-up",
-              notes: "Routine check-up, vital signs stable, advised dietary improvements."
-            }
-          ],
-          vitals: { bp: "124/80 mmHg", pulse: "74 bpm", temp: "98.6 F" }
-        };
-      }
-    } catch {}
-    return {
-      patientName: "Kamal Perera",
-      pid: "P-1042",
-      age: 38,
-      gender: "Male",
-      bloodGroup: "O+",
-      allergy: "Penicillin",
-      diagnosisHistory: [
-        {
-          id: 1,
-          date: "Oct 09, 2026 - Dr. Vance Consultation",
-          notes: "Doctor diagnosis notes: Acute bronchitis with mild bronchial irritation. Prescribed Amoxicillin 500mg, Ibuprofen 400mg."
-        },
-        {
-          id: 2,
-          date: "Sep 14, 2026 - GP Follow-up",
-          notes: "Routine check-up, vital signs stable, advised dietary improvements."
-        }
-      ],
-      vitals: { bp: "124/80 mmHg", pulse: "74 bpm", temp: "98.6 F" }
-    };
-  });
-
-  // ==========================================
-  // STEP 3: PRESCRIPTIONS STATE
-  // ==========================================
-  const [prescriptions, setPrescriptions] = useState(() => {
-    try {
-      const storedRx = localStorage.getItem("nexus_patient_prescriptions");
-      if (storedRx) {
-        const parsed = JSON.parse(storedRx);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch {}
-    return [
-      {
-        name: "Amoxicillin 500mg",
-        dosage: "500 mg",
-        frequency: "Twice daily",
-        duration: "7 days",
-        instructions: "After meals"
-      },
-      {
-        name: "Ibuprofen 400mg",
-        dosage: "400 mg",
-        frequency: "Twice daily",
-        duration: "5 days",
-        instructions: "With food"
-      }
-    ];
-  });
-
   const handleDownloadRx = () => {
     showToast("✓ Generating Digital Prescription (PDF)... Download starting!");
     setTimeout(() => {
       window.print();
     }, 600);
   };
-
-  // ==========================================
-  // STEP 4: WARD ADMISSION STATE
-  // ==========================================
-  const [admission] = useState({
-    status: "Current Status: Inpatient Admitted - Ward 3B",
-    bed: "Bed-01A",
-    admittedDate: "Oct 12, 2026",
-    doctor: "Dr. Priyantha Senanayake",
-    nurse: "Nurse K. Perera",
-    logs: [
-      "08:00 AM - Breakfast served (Low sodium diet)",
-      "07:30 AM - Vitals taken (BP: 120/80 mmHg, Pulse: 72 bpm, Temp: 98.6 F)",
-      "06:00 AM - Morning medication administered"
-    ]
-  });
-
-  const [showDischargeModal, setShowDischargeModal] = useState(false);
 
   // Auto-switch sidebar active category as user scrolls down the page
   useEffect(() => {
@@ -603,7 +642,7 @@ Cleared At: ${dischargeSummary?.clearedAt || new Date().toLocaleString()}
       </section>
 
       {/* ========================================================
-          2-COLOR WORKFLOW LAYOUT (SAME AS PREVIOUS DOCTOR PAGE):
+          2-COLOR WORKFLOW LAYOUT:
           Left Column (Sidebar): #B0E5DD
           Right Column (Cards Stream): #DAEFEC
           ======================================================== */}
@@ -653,7 +692,7 @@ Cleared At: ${dischargeSummary?.clearedAt || new Date().toLocaleString()}
         <main className="patient-main-col">
           <div className="patient-cards-stream">
             {/* ----------------------------------------------------
-                WORKFLOW STEP 1: APPOINTMENTS (Matching Image 1)
+                WORKFLOW STEP 1: APPOINTMENTS
                 - Displays scheduled visit & live token tracker
                 - Book Appointment form with fee breakdown
                 ---------------------------------------------------- */}
@@ -770,7 +809,7 @@ Cleared At: ${dischargeSummary?.clearedAt || new Date().toLocaleString()}
             </div>
 
             {/* ----------------------------------------------------
-                WORKFLOW STEP 2: MY RECORDS (Matching Image 2)
+                WORKFLOW STEP 2: MY RECORDS
                 - Diagnosis History timeline
                 - Nurse-updated vital signs (BP, Pulse, Temp)
                 ---------------------------------------------------- */}
@@ -783,7 +822,7 @@ Cleared At: ${dischargeSummary?.clearedAt || new Date().toLocaleString()}
                   <strong>{medicalRecord.patientName} (PID: {medicalRecord.pid})</strong> &bull; {medicalRecord.age} Yrs / {medicalRecord.gender} &bull; Blood: {medicalRecord.bloodGroup}
                 </div>
                 <div className="patient-allergy-chip">
-                   Allergy: {medicalRecord.allergy}
+                  Allergy: {medicalRecord.allergy}
                 </div>
               </div>
 
@@ -799,7 +838,7 @@ Cleared At: ${dischargeSummary?.clearedAt || new Date().toLocaleString()}
                 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px", marginBottom: "12px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                      <span style={{ fontSize: "1.2rem" }}></span>
+                      <span style={{ fontSize: "1.2rem" }}>📄</span>
                       <div>
                         <h4 style={{ margin: 0, fontSize: "1rem", color: "#166534", fontWeight: 700 }}>
                           Digital Discharge Summary &amp; Clearance Certificate
@@ -837,7 +876,7 @@ Cleared At: ${dischargeSummary?.clearedAt || new Date().toLocaleString()}
                           gap: "6px"
                         }}
                       >
-                         Download Discharge Summary (PDF)
+                        Download Discharge Summary (PDF)
                       </button>
                     </div>
                   </div>
@@ -923,7 +962,7 @@ Cleared At: ${dischargeSummary?.clearedAt || new Date().toLocaleString()}
             </div>
 
             {/* ----------------------------------------------------
-                WORKFLOW STEP 3: PRESCRIPTIONS (Matching Image 2)
+                WORKFLOW STEP 3: PRESCRIPTIONS
                 - Table of medications prescribed by doctor
                 - Diagnostic test orders & follow-up appointment
                 ---------------------------------------------------- */}
@@ -935,7 +974,7 @@ Cleared At: ${dischargeSummary?.clearedAt || new Date().toLocaleString()}
                   onClick={handleDownloadRx}
                   title="Download Official Prescription PDF"
                 >
-                  <span role="img" aria-label="Rx Document"></span> Download Digital Rx (PDF)
+                  <span role="img" aria-label="Rx Document">💊</span> Download Digital Rx (PDF)
                 </button>
               </div>
 
@@ -988,7 +1027,7 @@ Cleared At: ${dischargeSummary?.clearedAt || new Date().toLocaleString()}
             </div>
 
             {/* ----------------------------------------------------
-                WORKFLOW STEP 4: WARD ADMISSION (Matching Image 3)
+                WORKFLOW STEP 4: WARD ADMISSION
                 - Inpatient status, Bed allocation & Care log
                 - View Discharge Summary
                 ---------------------------------------------------- */}
@@ -1047,7 +1086,7 @@ Cleared At: ${dischargeSummary?.clearedAt || new Date().toLocaleString()}
         </main>
       </div>
 
-      {/* FOOTER: Identical to Previous Doctor Page */}
+      {/* FOOTER */}
       <Footer />
     </div>
   );
