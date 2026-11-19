@@ -10,10 +10,7 @@ pipeline {
 
         stage('Test Backend') {
             steps {
-                dir('server') {
-                    sh 'npm ci'
-                    sh 'npm test'
-                }
+                sh 'docker run --rm -v "$PWD/server":/app -w /app node:20-alpine sh -c "npm ci && npm test"'
             }
         }
 
