@@ -20,12 +20,23 @@ pipeline {
             }
         }
 
-        stage('Verify Containers') {
+        stage('CD - Validate Ansible') {
+            steps {
+                sh 'docker run --rm -v "$PWD/ansible":/ansible -w /ansible alpine/ansible ansible-playbook -i inventory.ini playbook.yml deploy-k8s.yml --syntax-check'
+            }
+        }
+
+        stage('CD - Validate Kubernetes') {
+            steps {
+                sh 'docker run --rm -v "$PWD/k8s":/k8s -w /k8s alpine/k8s kubectl kustomize .'
+            }
+        }
+
+        stage('CD - Deploy Application') {
             steps {
                 sh 'docker compose up -d'
                 sh 'sleep 5'
                 sh 'docker compose ps'
-                sh 'docker compose down'
             }
         }
     }

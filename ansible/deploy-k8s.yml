@@ -2,7 +2,7 @@
 - name: Deploy Hospital System to Kubernetes Cluster
   hosts: hospital_servers
   vars:
-    k8s_dir: "/opt/Devops-project/k8s"
+    k8s_dir: "{{ lookup('env', 'WORKSPACE') | default('/opt/Devops-project', true) }}/k8s"
 
   tasks:
     - name: Apply Kubernetes Manifests
