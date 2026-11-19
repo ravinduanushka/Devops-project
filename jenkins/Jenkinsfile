@@ -28,7 +28,7 @@ pipeline {
 
         stage('CD - Validate Kubernetes') {
             steps {
-                sh 'docker run --rm -v "$PWD/k8s":/k8s -w /k8s alpine/k8s kubectl kustomize .'
+                sh 'docker run --rm -v "$PWD/k8s":/k8s -w /k8s alpine/k8s:1.31.1 kubectl kustomize .'
             }
         }
 
